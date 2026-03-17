@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Inbox, Send, FileEdit, Settings, ShieldAlert, Cpu } from 'lucide-react';
+import { Inbox, Send, FileEdit, Settings, ShieldAlert, Cpu, Users } from 'lucide-react';
 import { useMail } from '../context/MailContext';
 
 export default function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
@@ -27,24 +27,23 @@ export default function Sidebar({ onOpenSettings }: { onOpenSettings: () => void
           { icon: Inbox, label: 'Inbox', path: '/inbox', count: unreadCount > 0 ? unreadCount : undefined },
           { icon: Send, label: 'Sent', path: '/sent' },
           { icon: FileEdit, label: 'Drafts', path: '/drafts' },
+          { icon: Users, label: 'Contacts', path: '/contacts' },
         ].map((item) => (
           <Link
             key={item.label}
             to={item.path}
-            className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-colors ${
-              location.pathname === item.path 
-                ? 'bg-blue-50 text-accent-blue font-semibold' 
+            className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-colors ${location.pathname === item.path
+                ? 'bg-blue-50 text-accent-blue font-semibold'
                 : 'text-corporate-600 hover:bg-corporate-50 hover:text-corporate-900'
-            }`}
+              }`}
           >
             <div className="flex items-center space-x-3">
               <item.icon size={18} className={location.pathname === item.path ? 'text-accent-blue' : 'text-corporate-400'} />
               <span>{item.label}</span>
             </div>
             {item.count && (
-              <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                location.pathname === item.path ? 'bg-accent-blue text-white' : 'bg-corporate-100 text-corporate-600'
-              }`}>
+              <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${location.pathname === item.path ? 'bg-accent-blue text-white' : 'bg-corporate-100 text-corporate-600'
+                }`}>
                 {item.count}
               </span>
             )}
@@ -53,11 +52,11 @@ export default function Sidebar({ onOpenSettings }: { onOpenSettings: () => void
       </nav>
 
       <div className="p-4 border-t border-corporate-200 bg-corporate-50/50 mt-auto">
-         <div className="flex items-center space-x-2 text-xs text-corporate-500 mb-4 px-2">
-            <Cpu size={14} className="text-green-500" />
-            <span className="font-medium">Core Online</span>
-         </div>
-        <button 
+        <div className="flex items-center space-x-2 text-xs text-corporate-500 mb-4 px-2">
+          <Cpu size={14} className="text-green-500" />
+          <span className="font-medium">Core Online</span>
+        </div>
+        <button
           onClick={onOpenSettings}
           className="w-full flex items-center justify-between px-3 py-2.5 text-sm text-corporate-600 hover:bg-corporate-100 hover:text-corporate-900 rounded-xl transition-colors font-medium border border-transparent hover:border-corporate-200"
         >

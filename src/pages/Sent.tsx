@@ -1,11 +1,19 @@
 import { Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useMail } from '../context/MailContext';
+import { useContacts } from '../context/ContactContext';
 import { motion } from 'framer-motion';
 
 export default function Sent() {
   const { sentMails } = useMail();
-  
+  const { contacts } = useContacts();
+
+  const resolveAlias = (pubKey: string) => {
+    if (pubKey === 'System Key') return 'System';
+    const contact = contacts.find(c => c.publicKey === pubKey);
+    return contact ? contact.alias : pubKey.substring(0, 24) + '...';
+  };
+
   return (
     <div className="bg-surface rounded-2xl shadow-sm border border-corporate-200 flex flex-col h-full overflow-hidden relative">
       <div className="p-6 border-b border-corporate-100 flex items-center justify-between bg-white shrink-0">
@@ -23,15 +31,15 @@ export default function Sent() {
           </thead>
           <tbody className="divide-y divide-corporate-100">
             {sentMails.map((mail) => (
-              <tr 
-                key={mail.id} 
+              <tr
+                key={mail.id}
                 className="group hover:bg-corporate-50/80 cursor-pointer transition-colors bg-white"
               >
                 <td className="px-6 py-4.5">
                   <div className="flex items-center space-x-3">
                     <div className="text-corporate-400"><Lock size={16} /></div>
                     <span className="text-sm font-medium text-corporate-700">
-                      {mail.recipient}
+                      {resolveAlias(mail.recipientPubKey)}
                     </span>
                   </div>
                 </td>
@@ -47,18 +55,18 @@ export default function Sent() {
             ))}
           </tbody>
         </table>
-        
+
         {sentMails.length === 0 && (
-          <motion.div 
-             initial={{ opacity: 0 }} 
-             animate={{ opacity: 1 }} 
-             className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center pointer-events-none"
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center pointer-events-none"
           >
-             <div className="w-16 h-16 bg-corporate-50 border border-corporate-200 rounded-full flex items-center justify-center mb-4 text-corporate-300">
-                <Lock size={32} />
-             </div>
-             <p className="text-corporate-900 font-medium">No sent messages</p>
-             <p className="text-sm text-corporate-500 mt-1">Messages you send will appear here.</p>
+            <div className="w-16 h-16 bg-corporate-50 border border-corporate-200 rounded-full flex items-center justify-center mb-4 text-corporate-300">
+              <Lock size={32} />
+            </div>
+            <p className="text-corporate-900 font-medium">No sent messages</p>
+            <p className="text-sm text-corporate-500 mt-1">Messages you send will appear here.</p>
           </motion.div>
         )}
       </div>

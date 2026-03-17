@@ -3,30 +3,24 @@ import { Outlet, Navigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { useAuth } from '../context/AuthContext';
-import { X, Key, Fingerprint, ShieldCheck, Edit2, Save, User as UserIcon, Building2, Briefcase } from 'lucide-react';
+import { X, Key, Fingerprint, ShieldCheck, Edit2, Save, User as UserIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function MainLayout() {
-   const { user, updateProfile } = useAuth();
+   const { user, loading, updateProfile } = useAuth();
    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
    const [isEditingProfile, setIsEditingProfile] = useState(false);
    const [copiedPubKey, setCopiedPubKey] = useState(false);
 
    // Profile edit state
    const [editForm, setEditForm] = useState({
-      name: '',
-      age: '',
-      department: '',
-      position: ''
+      name: ''
    });
 
    useEffect(() => {
       if (user) {
          setEditForm({
-            name: user.name || '',
-            age: user.age ? String(user.age) : '',
-            department: user.department || '',
-            position: user.position || ''
+            name: user.name || ''
          });
       }
    }, [user, isEditingProfile]);
@@ -34,12 +28,21 @@ export default function MainLayout() {
    const handleSaveProfile = () => {
       updateProfile({
          name: editForm.name,
-         age: editForm.age ? parseInt(editForm.age) : undefined,
-         department: editForm.department,
-         position: editForm.position
+         alias: editForm.name
       });
       setIsEditingProfile(false);
    };
+
+   if (loading) {
+      return (
+         <div className="flex h-screen items-center justify-center bg-corporate-900">
+            <div className="flex flex-col items-center space-y-4">
+               <div className="w-12 h-12 border-4 border-white/20 border-t-accent-blue rounded-full animate-spin" />
+               <p className="text-corporate-300 tracking-widest text-sm font-medium uppercase animate-pulse">Initializing Identity...</p>
+            </div>
+         </div>
+      );
+   }
 
    if (!user) {
       return <Navigate to="/login" replace />;
@@ -100,55 +103,29 @@ export default function MainLayout() {
                               {!isEditingProfile ? (
                                  <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                       <p className="text-xs text-corporate-400 font-medium mb-1">Full Name</p>
+                                       <p className="text-xs text-corporate-400 font-medium mb-1">Display Name / Alias</p>
                                        <p className="font-semibold text-corporate-900">{user.name}</p>
                                     </div>
                                     <div>
-                                       <p className="text-xs text-corporate-400 font-medium mb-1">System Email (Immutable)</p>
-                                       <p className="text-sm font-medium text-corporate-600">{user.email}</p>
+                                       <p className="text-xs text-corporate-400 font-medium mb-1">Identity ID</p>
+                                       <p className="text-sm font-medium text-corporate-700 flex items-center"><UserIcon size={14} className="mr-1.5 text-corporate-400" /> {user.identityId}</p>
                                     </div>
-                                    <div>
-                                       <p className="text-xs text-corporate-400 font-medium mb-1">Department</p>
-                                       <p className="text-sm font-medium text-corporate-700 flex items-center"><Building2 size={14} className="mr-1.5 text-corporate-400" /> {user.department || 'Not set'}</p>
-                                    </div>
-                                    <div>
-                                       <p className="text-xs text-corporate-400 font-medium mb-1">Position / Title</p>
-                                       <p className="text-sm font-medium text-corporate-700 flex items-center"><Briefcase size={14} className="mr-1.5 text-corporate-400" /> {user.position || 'Not set'}</p>
-                                    </div>
-                                    <div>
-                                       <p className="text-xs text-corporate-400 font-medium mb-1">Age</p>
-                                       <p className="text-sm font-medium text-corporate-700 flex items-center"><UserIcon size={14} className="mr-1.5 text-corporate-400" /> {user.age || 'Not set'}</p>
+                                    <div className="col-span-2">
+                                       <p className="text-xs text-corporate-400 font-medium mb-1">Routing Email (Internal routing only)</p>
+                                       <p className="text-sm font-medium text-corporate-600 font-mono">{user.email}</p>
                                     </div>
                                  </div>
                               ) : (
-                                 <div className="grid grid-cols-2 gap-4">
+                                 <div className="grid grid-cols-1 gap-4">
                                     <div className="space-y-1">
-                                       <label className="text-xs text-corporate-500 font-medium pl-1">Full Name</label>
+                                       <label className="text-xs text-corporate-500 font-medium pl-1">Display Name / Alias</label>
                                        <input type="text" value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} className="w-full bg-white border border-corporate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent-blue transition-all" />
                                     </div>
                                     <div className="space-y-1">
-                                       <label className="text-xs text-corporate-400 font-medium pl-1">System Email (Immutable)</label>
-                                       <input type="text" disabled value={user.email} className="w-full bg-corporate-100 text-corporate-500 border border-corporate-200 rounded-lg px-3 py-2 text-sm cursor-not-allowed" />
-                                    </div>
-                                    <div className="space-y-1">
-                                       <label className="text-xs text-corporate-500 font-medium pl-1">Department</label>
-                                       <div className="relative">
-                                          <Building2 className="absolute left-3 top-2.5 text-corporate-400" size={14} />
-                                          <input type="text" value={editForm.department} onChange={e => setEditForm({ ...editForm, department: e.target.value })} className="w-full bg-white border border-corporate-200 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent-blue transition-all" placeholder="e.g. Engineering" />
-                                       </div>
-                                    </div>
-                                    <div className="space-y-1">
-                                       <label className="text-xs text-corporate-500 font-medium pl-1">Position / Title</label>
-                                       <div className="relative">
-                                          <Briefcase className="absolute left-3 top-2.5 text-corporate-400" size={14} />
-                                          <input type="text" value={editForm.position} onChange={e => setEditForm({ ...editForm, position: e.target.value })} className="w-full bg-white border border-corporate-200 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent-blue transition-all" placeholder="e.g. Senior Dev" />
-                                       </div>
-                                    </div>
-                                    <div className="space-y-1">
-                                       <label className="text-xs text-corporate-500 font-medium pl-1">Age</label>
+                                       <label className="text-xs text-corporate-400 font-medium pl-1">Identity ID (Immutable)</label>
                                        <div className="relative">
                                           <UserIcon className="absolute left-3 top-2.5 text-corporate-400" size={14} />
-                                          <input type="number" min="0" max="120" value={editForm.age} onChange={e => setEditForm({ ...editForm, age: e.target.value })} className="w-full bg-white border border-corporate-200 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent-blue transition-all" placeholder="e.g. 28" />
+                                          <input type="text" disabled value={user.identityId} className="w-full bg-corporate-100 text-corporate-500 border border-corporate-200 rounded-lg pl-9 pr-3 py-2 text-sm cursor-not-allowed" />
                                        </div>
                                     </div>
                                  </div>

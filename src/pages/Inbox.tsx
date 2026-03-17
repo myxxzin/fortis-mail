@@ -1,10 +1,19 @@
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Lock, Filter, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMail } from '../context/MailContext';
+import { useContacts } from '../context/ContactContext';
 
 export default function Inbox() {
-  const { mails, deleteMail } = useMail();
+  const { mails, deleteMail, markAsRead } = useMail();
+  const { contacts } = useContacts();
+  const navigate = useNavigate();
+
+  const resolveAlias = (pubKey: string) => {
+    if (pubKey === 'System Key') return 'System';
+    const contact = contacts.find(c => c.publicKey === pubKey);
+    return contact ? contact.alias : pubKey.substring(0, 24) + '...';
+  };
 
   const handleDelete = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
@@ -17,10 +26,10 @@ export default function Inbox() {
       <div className="p-6 border-b border-corporate-100 flex items-center justify-between bg-white shrink-0">
         <h1 className="text-2xl font-bold text-corporate-900 tracking-tight">Inbox</h1>
         <div className="flex space-x-2">
-           <button className="flex items-center space-x-2 px-3 py-1.5 border border-corporate-200 rounded-lg text-sm font-medium text-corporate-700 hover:bg-corporate-50 transition-colors shadow-sm">
-              <Filter size={16} />
-              <span>Filter</span>
-           </button>
+          <button className="flex items-center space-x-2 px-3 py-1.5 border border-corporate-200 rounded-lg text-sm font-medium text-corporate-700 hover:bg-corporate-50 transition-colors shadow-sm">
+            <Filter size={16} />
+            <span>Filter</span>
+          </button>
         </div>
       </div>
 
@@ -36,36 +45,43 @@ export default function Inbox() {
           <tbody className="divide-y divide-corporate-100 relative">
             <AnimatePresence>
               {mails.map((mail) => (
-                <motion.tr 
+                <motion.tr
                   key={mail.id}
-                  initial={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0, scaleY: 0.9, backgroundColor: '#fef2f2' }}
+                  initial={{ opacity: 1 }}
+                  exit={{ opacity: 0, scaleY: 0.9, backgroundColor: '#fef2f2' }}
                   transition={{ duration: 0.2 }}
-                   className={`group hover:bg-white cursor-pointer transition-colors relative ${mail.isUnread ? 'bg-blue-50/20' : 'bg-transparent'}`}
+                  onClick={() => {
+                     if(mail.isUnread && mail.id !== 'msg-welcome') markAsRead(mail.id);
+                     navigate(`/mail/${mail.id}`);
+                  }}
+                  className={`group cursor-pointer transition-colors border-b border-corporate-100 last:border-0 ${mail.isUnread ? 'bg-blue-50 hover:bg-blue-100/50' : 'bg-white hover:bg-corporate-50/50'}`}
                 >
-                  <td className="px-6 py-4 p-0">
-                    <div className="flex items-center space-x-3 absolute inset-0 pl-6 pointer-events-none">
+                  <td className="px-6 py-3 whitespace-nowrap">
+                    <div className="flex items-center space-x-3">
                       <div className={mail.isUnread ? "text-accent-blue" : "text-corporate-400"}><Lock size={16} /></div>
-                      <span className={`text-sm ${mail.isUnread ? 'font-bold text-corporate-900' : 'font-medium text-corporate-700'}`}>
-                        {mail.sender}
-                      </span>
+                      <div className="flex flex-col min-w-0 max-w-[200px] xl:max-w-xs">
+                        <span className={`text-sm truncate ${mail.isUnread ? 'font-bold text-corporate-900' : 'font-medium text-corporate-700'}`}>
+                            {mail.senderDisplay || 'Unknown'}
+                        </span>
+                        <span className="text-xs text-corporate-400 truncate">({resolveAlias(mail.senderPubKey)})</span>
+                      </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 p-0">
-                    <Link to={`/mail/${mail.id}`} className={`text-sm flex items-center h-14 w-full ${mail.isUnread ? 'font-bold text-corporate-900' : 'text-corporate-600'} group-hover:text-accent-blue transition-colors`}>
+                  <td className="px-6 py-3 min-w-[200px]">
+                    <div className={`text-sm truncate w-full ${mail.isUnread ? 'font-bold text-corporate-900' : 'text-corporate-600'} group-hover:text-accent-blue transition-colors`}>
                       {mail.subject}
-                    </Link>
+                    </div>
                   </td>
-                  <td className="px-6 py-4 p-0 relative h-14">
-                    <div className="absolute inset-y-0 right-6 flex items-center justify-end space-x-4">
-                       <span className={`text-sm ${mail.isUnread ? 'font-bold text-corporate-900' : 'text-corporate-500'}`}>{mail.date}</span>
-                       <button 
-                         onClick={(e) => handleDelete(e, mail.id)}
-                         className="opacity-0 group-hover:opacity-100 p-2 text-corporate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                         title="Delete message"
-                       >
-                         <Trash2 size={16} />
-                       </button>
+                  <td className="px-6 py-3 whitespace-nowrap text-right">
+                    <div className="flex items-center justify-end space-x-3">
+                      <span className={`text-xs ${mail.isUnread ? 'font-bold text-corporate-900' : 'text-corporate-500'}`}>{mail.date}</span>
+                      <button
+                        onClick={(e) => handleDelete(e, mail.id)}
+                        className="opacity-0 group-hover:opacity-100 p-1.5 text-corporate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all focus:opacity-100"
+                        title="Delete message"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </div>
                   </td>
                 </motion.tr>
@@ -73,18 +89,18 @@ export default function Inbox() {
             </AnimatePresence>
           </tbody>
         </table>
-        
+
         {mails.length === 0 && (
-          <motion.div 
-             initial={{ opacity: 0 }} 
-             animate={{ opacity: 1 }} 
-             className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center"
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center"
           >
-             <div className="w-16 h-16 bg-corporate-50 border border-corporate-200 rounded-full flex items-center justify-center mb-4 text-corporate-300">
-                <Lock size={32} />
-             </div>
-             <p className="text-corporate-900 font-medium">Your inbox is empty</p>
-             <p className="text-sm text-corporate-500 mt-1">When you receive a secure message, it will appear here.</p>
+            <div className="w-16 h-16 bg-corporate-50 border border-corporate-200 rounded-full flex items-center justify-center mb-4 text-corporate-300">
+              <Lock size={32} />
+            </div>
+            <p className="text-corporate-900 font-medium">Your inbox is empty</p>
+            <p className="text-sm text-corporate-500 mt-1">When you receive a secure message, it will appear here.</p>
           </motion.div>
         )}
       </div>
