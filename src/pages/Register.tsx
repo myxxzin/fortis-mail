@@ -39,7 +39,7 @@ export default function Register() {
       return;
     }
     if (identityId.length < 4 || !/^[a-zA-Z0-9_]+$/.test(identityId)) {
-        setErrorMsg("Identity ID must be at least 4 characters and contain only letters, numbers, and underscores.");
+        setErrorMsg("Username must be at least 4 characters and contain only letters, numbers, and underscores.");
         return;
     }
 
@@ -131,7 +131,7 @@ export default function Register() {
                       required
                       value={identityId}
                       onChange={(e) => setIdentityId(e.target.value)}
-                      placeholder="Identity ID (e.g. EMP0192)"
+                      placeholder="Username (e.g. john_doe)"
                       className="w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium transition-all"
                     />
                   </div>

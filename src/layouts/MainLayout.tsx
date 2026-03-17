@@ -107,7 +107,7 @@ export default function MainLayout() {
                                        <p className="font-semibold text-corporate-900">{user.name}</p>
                                     </div>
                                     <div>
-                                       <p className="text-xs text-corporate-400 font-medium mb-1">Identity ID</p>
+                                        <p className="text-xs text-corporate-400 font-medium mb-1">Username</p>
                                        <p className="text-sm font-medium text-corporate-700 flex items-center"><UserIcon size={14} className="mr-1.5 text-corporate-400" /> {user.identityId}</p>
                                     </div>
                                     <div className="col-span-2">
@@ -122,7 +122,7 @@ export default function MainLayout() {
                                        <input type="text" value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} className="w-full bg-white border border-corporate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent-blue transition-all" />
                                     </div>
                                     <div className="space-y-1">
-                                       <label className="text-xs text-corporate-400 font-medium pl-1">Identity ID (Immutable)</label>
+                                        <label className="text-xs text-corporate-400 font-medium pl-1">Username (Immutable)</label>
                                        <div className="relative">
                                           <UserIcon className="absolute left-3 top-2.5 text-corporate-400" size={14} />
                                           <input type="text" disabled value={user.identityId} className="w-full bg-corporate-100 text-corporate-500 border border-corporate-200 rounded-lg pl-9 pr-3 py-2 text-sm cursor-not-allowed" />

@@ -146,7 +146,7 @@ export default function Header() {
                            <div className="p-4 border-b border-corporate-100">
                               <div className="space-y-3">
                                  <div className="flex justify-between items-center text-sm">
-                                    <span className="text-corporate-400">Identity ID</span>
+                                    <span className="text-corporate-400">Username</span>
                                     <span className="font-medium text-corporate-700">{user?.identityId || '-'}</span>
                                  </div>
                               </div>
