@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Lock, CheckCircle2, User as UserIcon, Mail, FileText, ClipboardList } from 'lucide-react';
+import { Lock, CheckCircle2, User as UserIcon, Mail, FileText, ClipboardList, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -11,6 +11,8 @@ export default function Compose() {
   const { user } = useAuth();
   
   const [recipientPubKey, setRecipientPubKey] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [pasteError, setPasteError] = useState('');
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +32,7 @@ export default function Compose() {
       <div className="bg-surface rounded-2xl shadow-sm border border-corporate-200 flex-1 flex flex-col min-h-0 relative w-full max-w-4xl mx-auto">
         <div className="px-6 py-5 border-b border-corporate-100 flex items-center justify-between bg-white shrink-0">
           <h1 className="text-2xl font-bold text-corporate-900 tracking-tight flex items-center">
-             <Shield size={24} className="mr-3 text-accent-blue" />
+             <img src="/logo.png" alt="FortisMail" className="h-8 object-contain mr-3" />
              New Secure Mail
           </h1>
           <div className="text-xs font-bold uppercase tracking-widest text-corporate-400 bg-corporate-50 px-3 py-1.5 rounded-lg border border-corporate-100">
@@ -83,16 +85,23 @@ export default function Compose() {
                     <div>
                       <div className="flex justify-between items-center mb-1">
                         <span className="text-[10px] text-corporate-400 font-medium">Recipient's RSA Public Key (Required for encryption)</span>
-                        <button type="button" onClick={async () => {
-                           try {
-                             const text = await navigator.clipboard.readText();
-                             setRecipientPubKey(text);
-                           } catch (err) {}
-                        }} className="text-[10px] bg-blue-50 text-accent-blue hover:bg-blue-100 font-bold px-2 py-1 rounded transition-colors flex items-center">
-                          <ClipboardList size={12} className="mr-1" /> Paste from Clipboard
-                        </button>
+                        <div className="flex items-center space-x-2">
+                          {pasteError && <span className="text-[10px] text-red-500 font-medium">{pasteError}</span>}
+                          <button type="button" onClick={async () => {
+                             try {
+                               const text = await navigator.clipboard.readText();
+                               setRecipientPubKey(text);
+                               setPasteError('');
+                             } catch (err) {
+                               console.error("Paste failed", err);
+                               setPasteError('Browser blocked paste. Please press Ctrl+V directly in the box.');
+                             }
+                          }} className="text-[10px] bg-blue-50 text-accent-blue hover:bg-blue-100 font-bold px-2 py-1 rounded transition-colors flex items-center">
+                            <ClipboardList size={12} className="mr-1" /> Paste
+                          </button>
+                        </div>
                       </div>
-                      <textarea required value={recipientPubKey} onChange={e => setRecipientPubKey(e.target.value)} rows={2} placeholder="-----BEGIN PUBLIC KEY-----..." className="w-full bg-white border border-corporate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-accent-blue transition-all font-mono resize-none"></textarea>
+                      <textarea required value={recipientPubKey} onChange={e => {setRecipientPubKey(e.target.value); setPasteError('');}} rows={2} placeholder="-----BEGIN PUBLIC KEY-----..." className="w-full bg-white border border-corporate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-accent-blue transition-all font-mono resize-none"></textarea>
                     </div>
                   </div>
 
@@ -121,7 +130,20 @@ export default function Compose() {
                       <Lock className="text-accent-blue mt-0.5 shrink-0" size={16} />
                       <div className="flex-1 w-full">
                         <p className="text-xs font-semibold text-corporate-900 mb-1">Decryption Password (Optional)</p>
-                        <input type="password" placeholder="Enter session password..." className="w-full max-w-xs bg-white border border-corporate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-accent-blue transition-all" />
+                        <div className="relative max-w-xs">
+                          <input 
+                            type={showPassword ? "text" : "password"} 
+                            placeholder="Enter session password..." 
+                            className="w-full bg-white border border-corporate-200 rounded-lg pl-3 pr-10 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-accent-blue transition-all" 
+                          />
+                          <button 
+                            type="button" 
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-corporate-400 hover:text-corporate-600 transition-colors"
+                          >
+                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                          </button>
+                        </div>
                       </div>
                     </div>
 
@@ -154,7 +176,7 @@ export default function Compose() {
                    transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
                    className="w-24 h-24 border-4 border-corporate-200 border-t-accent-blue rounded-full"
                  />
-                 <Shield className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-corporate-900" size={32} />
+                 <img src="/logo.png" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-12 object-contain" alt="Encrypting" />
               </div>
               <div className="text-center space-y-2">
                  <h2 className="text-2xl font-bold text-corporate-900 tracking-tight">Encrypting Payload...</h2>

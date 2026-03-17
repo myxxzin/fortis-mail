@@ -58,7 +58,19 @@ export function MailProvider({ children }: { children: ReactNode }) {
         return timeB - timeA;
       });
       
-      setMails(inboxData);
+      const welcomeMail: Mail = {
+        id: 'msg-welcome',
+        sender: 'FortisMail Team',
+        recipient: user.email,
+        subject: 'Chào mừng đến với Cổng giao tiếp bảo mật',
+        content: "Xin chào,\n\nChào mừng bạn đến với Cổng giao tiếp bảo mật FortisMail. Hệ thống của chúng tôi sử dụng mã hóa đầu cuối (E2E) bằng AES-GCM 256 kết hợp RSA-4096 để đảm bảo không ai khác ngoài bạn và người nhận có thể đọc được nội dung thư.\n\n✅ Hướng dẫn cơ bản:\n- Hãy giữ kỹ Master Password của bạn vì nó được dùng để mở khóa nội dung thư (trừ thư hệ thống này).\n- Nếu bạn muốn gửi thư cho người khác, bạn cần email và Public Key của họ.\n- Mọi dữ liệu được mã hóa cục bộ ngay trên trình duyệt của bạn trước khi gửi đi.\n\nChúc bạn có những trải nghiệm an toàn tuyệt đối tại FortisMail.\n\nTrân trọng,\nĐội ngũ Bảo mật",
+        date: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        timestamp: null,
+        isUnread: false,
+        isSystem: true
+      };
+      
+      setMails([welcomeMail, ...inboxData]);
     });
 
     // Listen for Sent messages (where sender is current user email)

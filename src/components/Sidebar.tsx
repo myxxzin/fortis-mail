@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Shield, Inbox, Send, FileEdit, Settings, ShieldAlert, Cpu } from 'lucide-react';
+import { Inbox, Send, FileEdit, Settings, ShieldAlert, Cpu } from 'lucide-react';
 import { useMail } from '../context/MailContext';
 
 export default function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
@@ -10,8 +10,7 @@ export default function Sidebar({ onOpenSettings }: { onOpenSettings: () => void
     <div className="w-full md:w-64 bg-surface border-r border-corporate-200 h-full flex flex-col shrink-0">
       <div className="h-20 flex px-6 border-b border-corporate-100 bg-corporate-50 shrink-0">
         <Link to="/inbox" className="flex items-center w-full group">
-          <Shield size={24} className="text-accent-blue mr-3 group-hover:scale-110 transition-transform" />
-          <span className="text-xl font-bold tracking-tight text-corporate-900 group-hover:text-accent-blue transition-colors">FortisMail</span>
+          <img src="/logo.png" alt="FortisMail" className="h-10 object-contain group-hover:scale-105 transition-transform" />
         </Link>
       </div>
 

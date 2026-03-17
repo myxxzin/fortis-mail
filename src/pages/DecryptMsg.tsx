@@ -36,17 +36,19 @@ function ScrambledText({ text, start }: { text: string, start: boolean }) {
 export default function DecryptMsg() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { markAsRead } = useMail();
+  const { markAsRead, mails, sentMails } = useMail();
   const [decryptionState, setDecryptionState] = useState<'locked' | 'password-entered' | 'decrypting' | 'decrypted'>('locked');
   const [password, setPassword] = useState('');
 
-  // Simulated email database fetch
+  const currentMail = [...mails, ...sentMails].find(m => m.id === id);
+
   const mailDetails = {
-    sender: id === 'msg-welcome' ? 'FortisMail Team' : 'HR Department',
-    subject: id === 'msg-welcome' ? 'Welcome to your Secure Inbox' : '[Confidential] Q3 Bonus Allocation',
-    date: '10:42 AM',
-    recipient: 'user@company.com', // Assuming a default user email
-    isSystem: id === 'msg-welcome'
+    sender: currentMail?.sender || 'Unknown Sender',
+    subject: currentMail?.subject || 'Unknown Subject',
+    date: currentMail?.date || 'Unknown Date',
+    recipient: currentMail?.recipient || 'Unknown Recipient',
+    isSystem: currentMail?.isSystem || false,
+    content: currentMail?.content || TRUE_MSG
   };
 
   // Use a stable random string for the background cipher
@@ -108,9 +110,9 @@ export default function DecryptMsg() {
           <div className="space-y-1">
             <h1 className="text-xl font-bold text-corporate-900 tracking-tight flex items-center space-x-2">
               <Lock size={18} className="text-accent-blue" />
-              <span>Message: {id}</span>
+              <span>Message: {mailDetails.subject}</span>
             </h1>
-            <p className="text-sm text-corporate-500">From: secure-sender@company.com</p>
+            <p className="text-sm text-corporate-500">From: {mailDetails.sender}</p>
           </div>
           <div className="flex items-center space-x-2 text-sm text-corporate-500 bg-corporate-50 px-3 py-1.5 rounded-lg border border-corporate-200">
             <ShieldCheck size={16} className="text-green-600" />
@@ -177,7 +179,7 @@ export default function DecryptMsg() {
                 className="relative z-20 bg-white p-8 rounded-xl shadow-sm border border-corporate-200 min-h-full"
               >
                 <div className="prose prose-corporate max-w-none text-corporate-800 leading-relaxed font-sans">
-                  <ScrambledText text={TRUE_MSG} start={true} />
+                  <ScrambledText text={mailDetails.content} start={true} />
                 </div>
 
                 <motion.div

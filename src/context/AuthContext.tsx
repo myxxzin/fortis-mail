@@ -1,8 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { auth, db, googleProvider } from '../config/firebase';
-import { signInWithPopup, onAuthStateChanged, signOut } from 'firebase/auth';
-import type { User as FirebaseUser } from 'firebase/auth';
+import { signInWithPopup, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
 // Generates a mock "Public Key" format string for UI purposes
@@ -35,6 +34,8 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, pass: string) => Promise<void>;
   register: (email: string, pass: string, name: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
+  registerWithGoogle: () => Promise<boolean>; // Returns true if new user, false if already exists
   logout: () => void;
   updateProfile: (updates: Partial<User>) => void;
 }
@@ -51,23 +52,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (firebaseUser) {
         // User is signed in, fetch or create their profile in Firestore
         const userRef = doc(db, 'users', firebaseUser.uid);
-        const docSnap = await getDoc(userRef);
+        try {
+          const docSnap = await getDoc(userRef);
 
-        if (docSnap.exists()) {
-          setUser({ uid: firebaseUser.uid, ...docSnap.data() } as User);
-        } else {
-          // New user, generate keys and save to Firestore
-          const newUserProfile = {
+          if (docSnap.exists()) {
+            setUser({ uid: firebaseUser.uid, ...docSnap.data() } as User);
+          } else {
+            // No profile, create a temporary one for offline access
+            setUser({
+              uid: firebaseUser.uid,
+              email: firebaseUser.email || '',
+              name: firebaseUser.displayName || 'Vault User',
+              publicKey: generateMockKey('PUB'),
+              privateKey: generateMockKey('PRIV')
+            });
+          }
+        } catch (error) {
+          console.error("Firestore error in onAuthStateChanged, using fallback:", error);
+          setUser({
+            uid: firebaseUser.uid,
             email: firebaseUser.email || '',
-            name: firebaseUser.displayName || 'Vault User',
-            department: 'Engineering',
-            position: 'Software Engineer',
-            age: 25,
+            name: firebaseUser.displayName || 'Vault User (Offline)',
             publicKey: generateMockKey('PUB'),
             privateKey: generateMockKey('PRIV')
-          };
-          await setDoc(userRef, newUserProfile);
-          setUser({ uid: firebaseUser.uid, ...newUserProfile });
+          });
         }
       } else {
         // User is signed out
@@ -79,19 +87,96 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const login = async () => {
+  const login = async (email: string, pass: string) => {
+    await signInWithEmailAndPassword(auth, email, pass);
+  };
+
+  const register = async (email: string, pass: string, name: string) => {
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    const newUserProfile = {
+      email,
+      name,
+      department: 'Engineering',
+      position: 'Software Engineer',
+      age: 25,
+      publicKey: generateMockKey('PUB'),
+      privateKey: generateMockKey('PRIV')
+    };
     try {
-      await signInWithPopup(auth, googleProvider);
+      await setDoc(doc(db, 'users', cred.user.uid), newUserProfile);
     } catch (error) {
-      console.error("Error signing in with Google", error);
-      throw error;
+      console.warn("Could not save to Firestore (offline limit?), continuing registration...", error);
+    }
+    
+    // Auto sign out after registering, forcing them to login
+    await signOut(auth);
+  };
+
+  const loginWithGoogle = async () => {
+    const cred = await signInWithPopup(auth, googleProvider);
+    const userRef = doc(db, 'users', cred.user.uid);
+    
+    try {
+      const docSnap = await getDoc(userRef);
+      if (!docSnap.exists()) {
+        // User doesn't have an account
+        if (auth.currentUser) {
+          await auth.currentUser.delete(); // Remove the erroneously created auth record
+        }
+        await signOut(auth);
+        throw new Error("Tài khoản chưa tồn tại. Vui lòng đăng ký."); // Account doesn't exist
+      } else {
+        setUser({ uid: cred.user.uid, ...docSnap.data() } as User);
+      }
+    } catch (error: any) {
+       if (error.message === "Tài khoản chưa tồn tại. Vui lòng đăng ký.") throw error;
+       
+       console.warn("getDoc failed in loginWithGoogle, falling back to offline mode:", error);
+       setUser({
+         uid: cred.user.uid,
+         email: cred.user.email || '',
+         name: cred.user.displayName || 'Vault User (Offline)',
+         publicKey: generateMockKey('PUB'),
+         privateKey: generateMockKey('PRIV')
+       });
     }
   };
 
-  const register = async () => {
-      // With Google Sign-in, register is essentially the same as login.
-      // Firestore handles the "is new user" creation logic payload.
-      await login();
+  const registerWithGoogle = async (): Promise<boolean> => {
+    const cred = await signInWithPopup(auth, googleProvider);
+    const userRef = doc(db, 'users', cred.user.uid);
+    
+    let exists = false;
+    try {
+      const docSnap = await getDoc(userRef);
+      exists = docSnap.exists();
+    } catch (error) {
+      console.warn("getDoc failed, assuming new user for offline resilience:", error);
+      exists = false; // Assume new user if we can't read DB
+    }
+    
+    if (!exists) {
+      const newUserProfile = {
+        email: cred.user.email || '',
+        name: cred.user.displayName || 'Vault User',
+        department: 'Engineering',
+        position: 'Software Engineer',
+        age: 25,
+        publicKey: generateMockKey('PUB'),
+        privateKey: generateMockKey('PRIV')
+      };
+      
+      try {
+        await setDoc(userRef, newUserProfile);
+      } catch (error) {
+        console.warn("setDoc failed (offline?), ignoring so user can proceed:", error);
+      }
+      
+      return true; // Indicates a successful new registration
+    } else {
+      // User already exists
+      return false; // Indicates account already existed
+    }
   };
 
   const logout = async () => {
@@ -118,7 +203,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, registerWithGoogle, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

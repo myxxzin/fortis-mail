@@ -1,14 +1,13 @@
 import { Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-const mockSentMails = [
-  { id: 'sent-1', recipient: 'External Partner', subject: 'Project Alpha Final Deliverable', date: 'Oct 14' },
-  { id: 'sent-2', recipient: 'HR Manager', subject: 'Re: Q3 Bonus Allocation', date: 'Oct 12' },
-];
+import { useMail } from '../context/MailContext';
+import { motion } from 'framer-motion';
 
 export default function Sent() {
+  const { sentMails } = useMail();
+  
   return (
-    <div className="bg-surface rounded-2xl shadow-sm border border-corporate-200 flex flex-col h-full overflow-hidden">
+    <div className="bg-surface rounded-2xl shadow-sm border border-corporate-200 flex flex-col h-full overflow-hidden relative">
       <div className="p-6 border-b border-corporate-100 flex items-center justify-between bg-white shrink-0">
         <h1 className="text-2xl font-bold text-corporate-900 tracking-tight">Sent Messages</h1>
       </div>
@@ -23,7 +22,7 @@ export default function Sent() {
             </tr>
           </thead>
           <tbody className="divide-y divide-corporate-100">
-            {mockSentMails.map((mail) => (
+            {sentMails.map((mail) => (
               <tr 
                 key={mail.id} 
                 className="group hover:bg-corporate-50/80 cursor-pointer transition-colors bg-white"
@@ -48,6 +47,20 @@ export default function Sent() {
             ))}
           </tbody>
         </table>
+        
+        {sentMails.length === 0 && (
+          <motion.div 
+             initial={{ opacity: 0 }} 
+             animate={{ opacity: 1 }} 
+             className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center pointer-events-none"
+          >
+             <div className="w-16 h-16 bg-corporate-50 border border-corporate-200 rounded-full flex items-center justify-center mb-4 text-corporate-300">
+                <Lock size={32} />
+             </div>
+             <p className="text-corporate-900 font-medium">No sent messages</p>
+             <p className="text-sm text-corporate-500 mt-1">Messages you send will appear here.</p>
+          </motion.div>
+        )}
       </div>
     </div>
   );
