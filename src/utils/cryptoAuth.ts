@@ -135,19 +135,208 @@ export const decryptPrivateKey = async (encryptedData: { ciphertext: string, iv:
   return dec.decode(decryptedBuffer);
 };
 
-/**
- * Generates a mock "Public/Private Key" format string for UI purposes.
- * In a real WebCrypto implementation, this would generate an actual RSA-OAEP key pair.
- */
-export const generateMockRSAKey = (type: 'PUB' | 'PRIV') => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-  let key = `-----BEGIN ${type === 'PUB' ? 'PUBLIC' : 'PRIVATE'} KEY-----\n`;
-  for (let i = 0; i < 4; i++) {
-    for (let j = 0; j < 64; j++) {
-      key += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    key += '\n';
+// --- Real Asymmetric Cryptography (WebCrypto RSA-OAEP & AES-GCM Hybrid) ---
+
+function ab2str(buf: ArrayBuffer): string {
+  return String.fromCharCode.apply(null, new Uint8Array(buf) as any);
+}
+
+function str2ab(str: string): ArrayBuffer {
+  const buf = new ArrayBuffer(str.length);
+  const bufView = new Uint8Array(buf);
+  for (let i = 0, strLen = str.length; i < strLen; i++) {
+    bufView[i] = str.charCodeAt(i);
   }
-  key += `-----END ${type === 'PUB' ? 'PUBLIC' : 'PRIVATE'} KEY-----`;
-  return key;
+  return buf;
+}
+
+export const generateRSAKeyPair = async (): Promise<CryptoKeyPair> => {
+  return window.crypto.subtle.generateKey(
+    {
+      name: "RSA-OAEP",
+      modulusLength: 4096,
+      publicExponent: new Uint8Array([1, 0, 1]),
+      hash: "SHA-256",
+    },
+    true,
+    ["encrypt", "decrypt"]
+  );
+};
+
+export const exportPublicKey = async (key: CryptoKey): Promise<string> => {
+  const exported = await window.crypto.subtle.exportKey("spki", key);
+  const exportedAsString = ab2str(exported);
+  const exportedAsBase64 = window.btoa(exportedAsString);
+  return `-----BEGIN PUBLIC KEY-----\n${exportedAsBase64.match(/.{1,64}/g)?.join('\n')}\n-----END PUBLIC KEY-----`;
+};
+
+export const exportPrivateKey = async (key: CryptoKey): Promise<string> => {
+  const exported = await window.crypto.subtle.exportKey("pkcs8", key);
+  const exportedAsString = ab2str(exported);
+  const exportedAsBase64 = window.btoa(exportedAsString);
+  return `-----BEGIN PRIVATE KEY-----\n${exportedAsBase64.match(/.{1,64}/g)?.join('\n')}\n-----END PRIVATE KEY-----`;
+};
+
+export const importPublicKey = async (pem: string): Promise<CryptoKey> => {
+  const pemHeader = "-----BEGIN PUBLIC KEY-----";
+  const pemFooter = "-----END PUBLIC KEY-----";
+  
+  if (!pem || !pem.includes(pemHeader) || !pem.includes(pemFooter)) {
+    throw new Error("The recipient's Public Key is invalid. It must be a valid RSA PEM format starting with '-----BEGIN PUBLIC KEY-----'.");
+  }
+
+  try {
+    const pemContents = pem.substring(pem.indexOf(pemHeader) + pemHeader.length, pem.indexOf(pemFooter)).replace(/\s/g, '');
+    const binaryDerString = window.atob(pemContents);
+    const binaryDer = str2ab(binaryDerString);
+
+    return await window.crypto.subtle.importKey(
+      "spki",
+      binaryDer,
+      { name: "RSA-OAEP", hash: "SHA-256" },
+      true,
+      ["encrypt"]
+    );
+  } catch (err) {
+    throw new Error("Failed to read the Public Key. It may be corrupted or incorrectly formatted.");
+  }
+};
+
+export const importPrivateKey = async (pem: string): Promise<CryptoKey> => {
+  const pemHeader = "-----BEGIN PRIVATE KEY-----";
+  const pemFooter = "-----END PRIVATE KEY-----";
+  
+  if (!pem || !pem.includes(pemHeader) || !pem.includes(pemFooter)) {
+    throw new Error("Your Private Key is invalid. It must be a valid RSA PEM format starting with '-----BEGIN PRIVATE KEY-----'.");
+  }
+
+  try {
+    const pemContents = pem.substring(pem.indexOf(pemHeader) + pemHeader.length, pem.indexOf(pemFooter)).replace(/\s/g, '');
+    const binaryDerString = window.atob(pemContents);
+    const binaryDer = str2ab(binaryDerString);
+
+    return await window.crypto.subtle.importKey(
+      "pkcs8",
+      binaryDer,
+      { name: "RSA-OAEP", hash: "SHA-256" },
+      true,
+      ["decrypt"]
+    );
+  } catch (err) {
+    throw new Error("Failed to unlock Private Key. It may be corrupted.");
+  }
+};
+
+export interface EncryptedMessagePayload {
+  encryptedSessionKeyBase64: string;
+  ivBase64: string;
+  ciphertextBase64: string;
+}
+
+export const encryptMessageHybrid = async (plaintext: string, recipientPubKeyPem: string): Promise<EncryptedMessagePayload> => {
+  // 1. Import Recipient's RSA Public Key
+  const publicKey = await importPublicKey(recipientPubKeyPem);
+
+  // 2. Generate a random AES-GCM session key
+  const sessionKey = await window.crypto.subtle.generateKey(
+    { name: "AES-GCM", length: 256 },
+    true,
+    ["encrypt", "decrypt"]
+  );
+
+  // 3. Encrypt the plaintext with the AES session key
+  const enc = new TextEncoder();
+  const iv = window.crypto.getRandomValues(new Uint8Array(12));
+  const ciphertextBuffer = await window.crypto.subtle.encrypt(
+    { name: "AES-GCM", iv: iv },
+    sessionKey,
+    enc.encode(plaintext)
+  );
+
+  // 4. Encrypt the AES session key using the Recipient's RSA Public Key
+  const exportedSessionKey = await window.crypto.subtle.exportKey("raw", sessionKey);
+  const encryptedSessionKeyBuffer = await window.crypto.subtle.encrypt(
+    { name: "RSA-OAEP" },
+    publicKey,
+    exportedSessionKey
+  );
+
+  return {
+    encryptedSessionKeyBase64: window.btoa(ab2str(encryptedSessionKeyBuffer)),
+    ivBase64: window.btoa(ab2str(iv.buffer)),
+    ciphertextBase64: window.btoa(ab2str(ciphertextBuffer))
+  };
+};
+
+export const decryptMessageHybrid = async (payload: EncryptedMessagePayload, userPrivKeyPem: string): Promise<string> => {
+  // 1. Import User's RSA Private Key
+  const privateKey = await importPrivateKey(userPrivKeyPem);
+
+  // 2. Decrypt the AES session key using the RSA Private Key
+  const encryptedSessionKeyBuffer = str2ab(window.atob(payload.encryptedSessionKeyBase64));
+  const sessionKeyRaw = await window.crypto.subtle.decrypt(
+    { name: "RSA-OAEP" },
+    privateKey,
+    encryptedSessionKeyBuffer
+  );
+
+  // 3. Import the decrypted AES session key
+  const sessionKey = await window.crypto.subtle.importKey(
+    "raw",
+    sessionKeyRaw,
+    { name: "AES-GCM", length: 256 },
+    true,
+    ["decrypt"]
+  );
+
+  // 4. Decrypt the ciphertext using the AES session key
+  const ivBuffer = str2ab(window.atob(payload.ivBase64));
+  const ciphertextBuffer = str2ab(window.atob(payload.ciphertextBase64));
+
+  const plaintextBuffer = await window.crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: new Uint8Array(ivBuffer) },
+    sessionKey,
+    ciphertextBuffer
+  );
+
+  const dec = new TextDecoder();
+  return dec.decode(plaintextBuffer);
+};
+
+export const packHybridPayload = (payload: EncryptedMessagePayload): string => {
+  const jsonStr = JSON.stringify(payload);
+  const base64Str = window.btoa(jsonStr);
+  
+  return `-----BEGIN FORTISMAIL ENCRYPTED MESSAGE-----
+Version: 1.0 (AES-GCM-256 / RSA-OAEP-4096)
+Comment: https://fortismail.internal
+
+${base64Str.trim()}
+-----END FORTISMAIL ENCRYPTED MESSAGE-----`;
+};
+
+export const unpackHybridPayload = (asciiArmor: string): EncryptedMessagePayload => {
+  const lines = asciiArmor.split('\n');
+  let base64Parts = [];
+  let isParsing = false;
+  
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed === '-----BEGIN FORTISMAIL ENCRYPTED MESSAGE-----') {
+      isParsing = true;
+      continue;
+    }
+    if (trimmed === '-----END FORTISMAIL ENCRYPTED MESSAGE-----') {
+      break;
+    }
+    if (isParsing && !trimmed.startsWith('Version:') && !trimmed.startsWith('Comment:') && trimmed !== '') {
+      base64Parts.push(trimmed);
+    }
+  }
+  
+  const base64Str = base64Parts.join('');
+  if (!base64Str) throw new Error("Invalid ASCII Armor representation.");
+  
+  const jsonStr = window.atob(base64Str);
+  return JSON.parse(jsonStr) as EncryptedMessagePayload;
 };

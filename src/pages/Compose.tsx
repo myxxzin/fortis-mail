@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, CheckCircle2, User as UserIcon, FileText, ClipboardList, Paperclip, X, Trash2, Save } from 'lucide-react';
+import { Lock, CheckCircle2, User as UserIcon, FileText, ClipboardList, Paperclip, X, Trash2, Save, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../config/firebase';
@@ -8,9 +8,12 @@ import { useAuth } from '../context/AuthContext';
 import { useMail } from '../context/MailContext';
 import { useContacts } from '../context/ContactContext';
 
+import { encryptMessageHybrid, packHybridPayload } from '../utils/cryptoAuth';
+
 export default function Compose() {
   const [step, setStep] = useState<'compose' | 'encrypting' | 'success' | 'sent'>('compose');
   const [isEncrypting, setIsEncrypting] = useState(false);
+  const [generatedCiphertext, setGeneratedCiphertext] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -64,14 +67,15 @@ export default function Compose() {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStep('encrypting');
     setIsEncrypting(true);
 
     try {
-      // Simulate encryption delay for the payload
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const payload = await encryptMessageHybrid(body, recipientPubKey.trim());
+      const asciiArmor = packHybridPayload(payload);
+      const encryptedContent = asciiArmor;
       
-      const encryptedContent = `[ENCRYPTED PAYLOAD]\n${body}`;
+      setGeneratedCiphertext(asciiArmor);
+      await new Promise(resolve => setTimeout(resolve, 4000)); // Expose ASCII Armor for 4s
 
       // Upload attachments if any
       const uploadedFiles = [];
@@ -104,9 +108,17 @@ export default function Compose() {
         await deleteDraft(draftId);
       }
 
+      setGeneratedCiphertext(null);
       setStep('success');
       setIsEncrypting(false);
-      setTimeout(() => setStep('sent'), 1500);
+      setTimeout(() => {
+        setSubject('');
+        setBody('');
+        setRecipientPubKey('');
+        setRecipientAlias('');
+        setFiles([]);
+        navigate('/inbox');
+      }, 2000);
     } catch (error) {
       console.error("Failed to send mail:", error);
       setIsEncrypting(false);
@@ -118,6 +130,15 @@ export default function Compose() {
 
   return (
     <div className="flex flex-col p-4 md:p-6 lg:p-8 w-full mb-10">
+      <button
+        type="button"
+        onClick={() => navigate('/inbox')}
+        className="flex items-center space-x-2 text-corporate-500 hover:text-corporate-900 mb-6 transition-colors w-max shrink-0 font-sans"
+      >
+        <ArrowLeft size={16} />
+        <span className="text-sm font-medium">Back to Inbox</span>
+      </button>
+      
       <div className="bg-surface rounded-2xl shadow-sm border border-corporate-200 flex flex-col relative w-full max-w-4xl mx-auto overflow-hidden">
         <div className="px-6 py-5 border-b border-corporate-100 flex items-center justify-between bg-white shrink-0">
           <h1 className="text-2xl font-bold text-corporate-900 tracking-tight flex items-center">
@@ -129,15 +150,30 @@ export default function Compose() {
           </div>
         </div>
 
-        {isEncrypting && (
-          <div className="absolute inset-0 z-50 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-              className="w-16 h-16 border-4 border-corporate-200 border-t-accent-blue rounded-full mb-6"
-            />
-            <h2 className="text-xl font-bold text-corporate-900 font-mono tracking-widest">ENCRYPTING PAYLOAD...</h2>
-            <p className="text-sm text-corporate-500 font-mono mt-2">Applying AES-256-GCM symmetric session keys</p>
+        {(isEncrypting || generatedCiphertext) && (
+          <div className="absolute inset-0 z-[100] bg-corporate-900/95 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-8">
+            {!generatedCiphertext ? (
+              <div className="flex flex-col items-center">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                  className="w-16 h-16 border-4 border-corporate-700 border-t-accent-blue rounded-full mb-6"
+                />
+                <h2 className="text-xl font-bold text-white font-mono tracking-widest leading-relaxed">ENCRYPTING PAYLOAD...</h2>
+                <p className="text-sm text-corporate-400 font-mono mt-2">Applying AES-256-GCM symmetric session keys</p>
+              </div>
+            ) : (
+              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center w-full max-w-4xl">
+                 <ShieldCheck size={56} className="text-green-500 mb-4" />
+                 <h2 className="text-2xl font-bold text-white font-mono tracking-widest text-center mb-4">SUCCESS: CIPHERTEXT GENERATED</h2>
+                 <div className="w-full bg-black/95 rounded-xl p-6 h-[400px] overflow-y-auto border border-green-500/50 mb-6 drop-shadow-[0_0_20px_rgba(34,197,94,0.15)] text-left shadow-xl">
+                   <pre className="text-green-400 font-mono text-[11px] md:text-xs break-all whitespace-pre-wrap leading-relaxed select-all">
+                     {generatedCiphertext}
+                   </pre>
+                 </div>
+                 <p className="text-sm text-green-500/80 font-mono mt-2 uppercase animate-pulse tracking-widest">Transmitting securely to Firebase...</p>
+              </motion.div>
+            )}
           </div>
         )}
 
@@ -262,20 +298,25 @@ export default function Compose() {
                   <div className="pt-2 border-t border-corporate-100">
                     <div className="flex items-center justify-between mb-4">
                       <label className="text-xs font-semibold uppercase text-corporate-500 tracking-wider">Attachments</label>
-                      <label className="cursor-pointer text-xs bg-corporate-100 hover:bg-corporate-200 text-corporate-700 font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center">
-                        <Paperclip size={14} className="mr-1.5" /> Attach Files
+                      <div>
                         <input 
+                          id="file-upload"
                           type="file" 
                           multiple 
                           className="hidden" 
                           onChange={(e) => {
-                            if (e.target.files) {
-                              setFiles(prev => [...prev, ...Array.from(e.target.files as FileList)]);
+                            if (e.target.files && e.target.files.length > 0) {
+                              const selectedFiles = Array.from(e.target.files);
+                              setFiles(prev => [...prev, ...selectedFiles]);
                             }
-                            e.target.value = ''; // Reset input to allow adding the same file again if needed
+                            // Reset to allow selecting the same file again
+                            e.target.value = '';
                           }}
                         />
-                      </label>
+                        <label htmlFor="file-upload" className="cursor-pointer text-xs bg-corporate-100 hover:bg-corporate-200 text-corporate-700 font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center">
+                          <Paperclip size={14} className="mr-1.5" /> Attach Files
+                        </label>
+                      </div>
                     </div>
 
                     {files.length > 0 && (
@@ -360,33 +401,6 @@ export default function Compose() {
                   </div>
                 </div>
               </form>
-            </motion.div>
-          )}
-
-          {step === 'encrypting' && !isEncrypting && (
-            <motion.div
-              key="encrypting"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col items-center justify-center space-y-6 flex-1 min-h-[400px]"
-            >
-              <div className="relative">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                  className="w-24 h-24 border-4 border-corporate-200 border-t-accent-blue rounded-full"
-                />
-                <img src="/logo.png" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-12 object-contain" alt="Encrypting" />
-              </div>
-              <div className="text-center space-y-2">
-                <h2 className="text-2xl font-bold text-corporate-900 tracking-tight">
-                  {files.length > 0 ? "Uploading & Encrypting..." : "Encrypting Payload..."}
-                </h2>
-                <p className="text-corporate-500 font-mono text-sm max-w-sm mx-auto">
-                  {files.length > 0 ? "Transferring secure blobs and applying AES-256 wrapping keys." : "Generating AES-256 wrapping keys and encrypting blocks using Recipient's Public Key."}
-                </p>
-              </div>
             </motion.div>
           )}
 

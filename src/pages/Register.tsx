@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Lock, User as UserIcon, CheckCircle2, KeyRound, AlertTriangle, Copy, ArrowRight, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { generateSeedPhrase, generateMockRSAKey } from '../utils/cryptoAuth';
+import { generateSeedPhrase, generateRSAKeyPair, exportPublicKey, exportPrivateKey } from '../utils/cryptoAuth';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -80,8 +80,9 @@ export default function Register() {
       setStep('generating');
 
       try {
-        const pubKey = generateMockRSAKey('PUB');
-        const privKey = generateMockRSAKey('PRIV');
+        const keyPair = await generateRSAKeyPair();
+        const pubKey = await exportPublicKey(keyPair.publicKey);
+        const privKey = await exportPrivateKey(keyPair.privateKey);
         
         await register(identityId, password, alias, seedPhrase, pubKey, privKey);
         

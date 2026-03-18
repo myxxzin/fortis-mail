@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Lock, ShieldCheck, ArrowLeft, Reply, Download, FileText } from 'lucide-react';
 import { useMail } from '../context/MailContext';
 import { useContacts } from '../context/ContactContext';
 import { useAuth } from '../context/AuthContext';
 import { auth } from '../config/firebase';
 import { EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
+import { decryptMessageHybrid, unpackHybridPayload, type EncryptedMessagePayload } from '../utils/cryptoAuth';
 
 const TRUE_MSG = "Hello team,\n\nThe Q3 financial records are attached and verified. We have successfully secured the new investments without any leakage of company secrets.\n\nPlease keep this information strictly within the leadership circle.\n\nBest Regards,\nHR & Finance";
 
@@ -19,6 +20,8 @@ export default function DecryptMsg() {
   const [decryptionState, setDecryptionState] = useState<'locked' | 'password-entered' | 'decrypting' | 'decrypted'>('locked');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [decryptedContent, setDecryptedContent] = useState<string>('');
+  const [rawCiphertext, setRawCiphertext] = useState<string | null>(null);
 
   const currentMail = [...mails, ...sentMails].find(m => m.id === id);
 
@@ -45,29 +48,22 @@ export default function DecryptMsg() {
     attachments: currentMail?.attachments || []
   };
 
-  // Use a stable random string for the background cipher
-  const [cipherBg] = useState(() => {
-    let block = '';
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-    for (let i = 0; i < 2000; i++) {
-      block += chars.charAt(Math.floor(Math.random() * chars.length));
-      if (i % 80 === 0) block += '\n';
-    }
-    return block;
-  });
-
   useEffect(() => {
-    // Automatically decrypt system messages
-    if (mailDetails.isSystem) {
-      setDecryptionState('password-entered');
-      setTimeout(() => {
-        setDecryptionState('decrypting');
+    if (mailDetails) {
+      if (mailDetails.isSystem) {
+        setDecryptedContent(mailDetails.content);
+        setDecryptionState('password-entered');
         setTimeout(() => {
-          setDecryptionState('decrypted');
-        }, 1500);
-      }, 500);
+          setDecryptionState('decrypting');
+          setTimeout(() => {
+            setDecryptionState('decrypted');
+          }, 1500);
+        }, 500);
+      } else {
+        setRawCiphertext(mailDetails.content);
+      }
     }
-  }, [mailDetails.isSystem]);
+  }, [mailDetails.content, mailDetails.isSystem]);
 
   useEffect(() => {
     if (decryptionState === 'decrypted' && id) {
@@ -77,7 +73,7 @@ export default function DecryptMsg() {
 
   const handleDecrypt = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!password || !user?.email) return;
+    if (!password || !user?.email || !user?.privateKey) return;
 
     setErrorMsg('');
     setDecryptionState('password-entered');
@@ -86,6 +82,24 @@ export default function DecryptMsg() {
       if (!auth.currentUser) throw new Error("No active session");
       const credential = EmailAuthProvider.credential(user.email, password);
       await reauthenticateWithCredential(auth.currentUser, credential);
+      
+      let finalPlaintext = mailDetails.content;
+      try {
+        if (mailDetails.content.includes('BEGIN FORTISMAIL ENCRYPTED MESSAGE')) {
+          const payload = unpackHybridPayload(mailDetails.content);
+          finalPlaintext = await decryptMessageHybrid(payload, user.privateKey);
+        } else {
+          // Fallback parsing for legacy JSON format
+          const payload = JSON.parse(mailDetails.content) as EncryptedMessagePayload;
+          if (payload.ciphertextBase64) {
+            finalPlaintext = await decryptMessageHybrid(payload, user.privateKey);
+          }
+        }
+      } catch (err) {
+        console.warn("Not a hybrid encrypted payload, falling back to raw.", err);
+      }
+      
+      setDecryptedContent(finalPlaintext);
       
       setTimeout(() => {
         setDecryptionState('decrypting');
@@ -128,69 +142,69 @@ export default function DecryptMsg() {
 
         {/* Content Area */}
         <div className="flex-1 relative bg-corporate-50 p-8 overflow-y-auto">
-          {/* Locked State Background */}
-          {decryptionState !== 'decrypted' && (
-            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none opacity-20 flex flex-col items-center justify-center">
-              <p className={`font-mono text-[9px] text-accent-blue/40 leading-none break-all whitespace-pre-wrap px-4 transition-all duration-1000 ${decryptionState === 'decrypting' ? 'blur-sm scale-105' : 'blur-[3px]'}`}>
-                {cipherBg}
-              </p>
-            </div>
-          )}
-
-          <AnimatePresence mode="wait">
-            {decryptionState === 'locked' && (
-              <motion.div
-                key="locked"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
-                className="absolute inset-0 z-10 flex items-center justify-center p-6 bg-white/40 backdrop-blur-md"
-              >
-                <div className="bg-white p-8 rounded-2xl shadow-xl border border-corporate-200 max-w-md w-full">
-                  <div className="w-14 h-14 bg-blue-50 text-accent-blue rounded-full flex items-center justify-center mb-6 mx-auto">
-                    <Lock size={28} />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="relative z-20 bg-white p-8 rounded-xl shadow-sm border border-corporate-200 min-h-full flex flex-col"
+          >
+            {decryptionState !== 'decrypted' ? (
+              <div className="flex flex-col space-y-6 flex-1">
+                <div className="bg-slate-900 rounded-lg p-6 border border-slate-700 shadow-inner overflow-x-auto flex-1 h-[300px] overflow-y-auto">
+                   <pre className="font-mono text-[11px] text-green-400 leading-relaxed select-all">
+                     {rawCiphertext || mailDetails.content}
+                   </pre>
+                </div>
+                
+                {decryptionState === 'decrypting' ? (
+                  <div className="flex flex-col items-center justify-center p-8 bg-corporate-50 rounded-xl border border-corporate-200 shrink-0">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                      className="w-12 h-12 border-4 border-t-accent-blue border-r-accent-blue border-b-transparent border-l-transparent rounded-full mb-4"
+                    />
+                    <h3 className="text-lg font-bold text-corporate-900 tracking-widest uppercase">Decrypting Payload...</h3>
+                    <p className="text-corporate-500 font-mono text-xs mt-2">Applying AES-GCM block transformations</p>
                   </div>
-                  <h2 className="text-xl font-bold text-center text-corporate-900 mb-2">Decrypt Message</h2>
-                  <p className="text-center text-sm text-corporate-500 mb-8 px-4">This message is protected by AES-GCM 256. Enter the decryption key to view.</p>
-
-                  <form onSubmit={handleDecrypt} className="space-y-4">
-                    <div>
-                      <input autoFocus required type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Encryption Password" className="w-full bg-corporate-50 border border-corporate-200 rounded-lg px-4 py-3 text-center tracking-widest focus:outline-none focus:ring-2 focus:ring-accent-blue focus:bg-white transition-all shadow-inner font-mono" />
+                ) : (
+                  <div className="bg-white p-6 rounded-xl border border-corporate-200 shadow-sm shrink-0">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="w-10 h-10 bg-blue-50 text-accent-blue rounded-full flex items-center justify-center shrink-0">
+                        <Lock size={20} />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-corporate-900">Encrypted Payload</h3>
+                        <p className="text-sm text-corporate-500">Provide your Master Password to unlock your Private Key and read this message.</p>
+                      </div>
                     </div>
-                    <button type="submit" className="w-full bg-corporate-900 hover:bg-black text-white py-3 rounded-lg font-medium transition-colors shadow-sm">
-                      Unlock
-                    </button>
+                    
+                    <form onSubmit={handleDecrypt} className="flex flex-col sm:flex-row gap-4">
+                      <div className="flex-1">
+                        <input 
+                          autoFocus 
+                          required 
+                          type="password" 
+                          value={password} 
+                          onChange={(e) => setPassword(e.target.value)} 
+                          placeholder="Encryption Password" 
+                          className="w-full bg-corporate-50 border border-corporate-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue focus:bg-white transition-all font-mono text-sm" 
+                        />
+                      </div>
+                      <button type="submit" disabled={decryptionState === 'password-entered'} className="bg-corporate-900 hover:bg-black disabled:bg-corporate-400 text-white px-8 py-3 rounded-lg font-medium transition-colors shadow-sm whitespace-nowrap">
+                        {decryptionState === 'password-entered' ? 'Verifying Identity...' : 'Decrypt Message'}
+                      </button>
+                    </form>
                     {errorMsg && (
-                      <div className="text-red-500 bg-red-50 text-sm font-semibold text-center italic mt-2 p-2 rounded-lg border border-red-100">
+                      <div className="text-red-500 text-sm font-semibold italic mt-3 px-2">
                         {errorMsg}
                       </div>
                     )}
-                  </form>
-                </div>
-              </motion.div>
-            )}
-
-            {(decryptionState === 'password-entered' || decryptionState === 'decrypting') && (
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-corporate-900/90 backdrop-blur-lg text-white">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                  className="w-24 h-24 border-4 border-t-accent-blue border-r-accent-blue border-b-transparent border-l-transparent rounded-full mb-8"
-                />
-                <h3 className="text-2xl font-bold text-white tracking-widest uppercase mb-2">Decrypting Payload...</h3>
-                <p className="text-corporate-400 font-mono text-sm">Applying AES-GCM block transformations</p>
+                  </div>
+                )}
               </div>
-            )}
-
-            {decryptionState === 'decrypted' && (
-              <motion.div
-                key="unlocked"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="relative z-20 bg-white p-8 rounded-xl shadow-sm border border-corporate-200 min-h-full"
-              >
-                <div className="prose prose-corporate max-w-none text-corporate-800 leading-relaxed font-sans whitespace-pre-wrap">
-                  {mailDetails.content}
+            ) : (
+              <div className="flex flex-col flex-1">
+                <div className="prose prose-corporate max-w-none text-corporate-800 leading-relaxed font-sans whitespace-pre-wrap flex-1">
+                  {decryptedContent}
                 </div>
 
                 {mailDetails.attachments.length > 0 && (
@@ -243,9 +257,9 @@ export default function DecryptMsg() {
                     <span>Reply Securely</span>
                   </button>
                 </motion.div>
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
+          </motion.div>
         </div>
       </div>
     </div>
