@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, UserPlus, Key, Trash2, ShieldCheck, Edit2, Check, X } from 'lucide-react';
 import { useContacts } from '../context/ContactContext';
+import { toast } from 'react-hot-toast';
 
 export default function Contacts() {
   const { contacts, loading, addContact, updateContact, deleteContact } = useContacts();
@@ -20,9 +21,10 @@ export default function Contacts() {
     try {
       await updateContact(id, { alias: editData.alias.trim(), publicKey: editData.publicKey.trim() });
       setEditingId(null);
+      toast.success("Contact updated securely.");
     } catch (err) {
       console.error("Failed to update contact", err);
-      alert("Error updating contact.");
+      toast.error("Error updating contact.");
     }
   };
 
@@ -37,9 +39,10 @@ export default function Contacts() {
       });
       setNewContact({ alias: '', publicKey: '' });
       setIsAdding(false);
+      toast.success("Identity added to vault.");
     } catch (err) {
       console.error("Failed to add contact", err);
-      alert("Lỗi khi thêm liên hệ.");
+      toast.error("Error adding contact.");
     }
   };
 

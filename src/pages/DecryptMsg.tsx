@@ -7,7 +7,8 @@ import { useContacts } from '../context/ContactContext';
 import { useAuth } from '../context/AuthContext';
 import { auth } from '../config/firebase';
 import { EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
-import { decryptMessageHybrid, unpackHybridPayload, type EncryptedMessagePayload } from '../utils/cryptoAuth';
+import { decryptMessageHybrid, unpackHybridPayload, type EncryptedMessagePayload, decryptFile } from '../utils/cryptoAuth';
+import { toast } from 'react-hot-toast';
 
 const TRUE_MSG = "Hello team,\n\nThe Q3 financial records are attached and verified. We have successfully secured the new investments without any leakage of company secrets.\n\nPlease keep this information strictly within the leadership circle.\n\nBest Regards,\nHR & Finance";
 
@@ -22,6 +23,8 @@ export default function DecryptMsg() {
   const [errorMsg, setErrorMsg] = useState('');
   const [decryptedContent, setDecryptedContent] = useState<string>('');
   const [rawCiphertext, setRawCiphertext] = useState<string | null>(null);
+  const [decryptedPayload, setDecryptedPayload] = useState<EncryptedMessagePayload | null>(null);
+  const [downloadingFile, setDownloadingFile] = useState<string | null>(null);
 
   const currentMail = [...mails, ...sentMails].find(m => m.id === id);
 
@@ -44,7 +47,9 @@ export default function DecryptMsg() {
     subject: currentMail?.subject || 'Unknown Subject',
     date: currentMail?.date || 'Unknown Date',
     isSystem: currentMail?.isSystem || false,
-    content: currentMail?.content || TRUE_MSG,
+    content: (currentMail && currentMail.senderPubKey === user?.publicKey && currentMail.recipientPubKey !== user?.publicKey && currentMail.senderContent) 
+             ? currentMail.senderContent 
+             : (currentMail?.content || TRUE_MSG),
     attachments: currentMail?.attachments || []
   };
 
@@ -88,11 +93,13 @@ export default function DecryptMsg() {
         if (mailDetails.content.includes('BEGIN FORTISMAIL ENCRYPTED MESSAGE')) {
           const payload = unpackHybridPayload(mailDetails.content);
           finalPlaintext = await decryptMessageHybrid(payload, user.privateKey);
+          setDecryptedPayload(payload);
         } else {
           // Fallback parsing for legacy JSON format
           const payload = JSON.parse(mailDetails.content) as EncryptedMessagePayload;
           if (payload.ciphertextBase64) {
             finalPlaintext = await decryptMessageHybrid(payload, user.privateKey);
+            setDecryptedPayload(payload);
           }
         }
       } catch (err) {
@@ -110,6 +117,57 @@ export default function DecryptMsg() {
     } catch (err) {
       setDecryptionState('locked');
       setErrorMsg('Invalid Master Password attached to Identity.');
+    }
+  };
+
+  const handleDownloadAttachment = async (e: React.MouseEvent, file: any) => {
+    e.preventDefault();
+    if (decryptionState !== 'decrypted') {
+      toast.error('Please decrypt the message first to unlock attachments.');
+      return;
+    }
+    
+    if (!decryptedPayload || !decryptedPayload.attachmentKeys) {
+      toast.error("Decryption keys for this attachment are missing or corrupted.");
+      return;
+    }
+
+    const fileKeyData = decryptedPayload.attachmentKeys.find(k => k.id === file.url);
+    if (!fileKeyData) {
+      toast.error("Decryption key for this specific file is missing.");
+      return;
+    }
+
+    setDownloadingFile(file.name);
+    const downloadToast = toast.loading(`Decrypting ${file.name}...`);
+
+    try {
+      const response = await fetch(file.url);
+      if (!response.ok) throw new Error("Network response was not ok");
+      const encryptedBlob = await response.blob();
+      
+      const plaintextBlob = await decryptFile(
+        encryptedBlob, 
+        fileKeyData.fileKeyBase64, 
+        fileKeyData.ivBase64, 
+        file.type
+      );
+      
+      const objectUrl = URL.createObjectURL(plaintextBlob);
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = file.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(objectUrl);
+      
+      toast.success(`${file.name} decrypted successfully.`, { id: downloadToast });
+    } catch (err) {
+      console.error("File decryption failed:", err);
+      toast.error("Failed to decrypt secure attachment.", { id: downloadToast });
+    } finally {
+      setDownloadingFile(null);
     }
   };
 
@@ -217,10 +275,9 @@ export default function DecryptMsg() {
                       {mailDetails.attachments.map((file, idx) => (
                         <a
                           key={idx}
-                          href={file.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center justify-between p-4 bg-corporate-50 border border-corporate-200 hover:border-accent-blue rounded-xl transition-all group"
+                          href="#"
+                          onClick={(e) => handleDownloadAttachment(e, file)}
+                          className="flex items-center justify-between p-4 bg-corporate-50 border border-corporate-200 hover:border-accent-blue rounded-xl transition-all group cursor-pointer"
                         >
                           <div className="flex items-center space-x-3 overflow-hidden">
                             <div className="w-10 h-10 rounded-lg bg-white border border-corporate-200 flex items-center justify-center text-accent-blue shrink-0 group-hover:scale-105 transition-transform">
@@ -232,7 +289,11 @@ export default function DecryptMsg() {
                             </div>
                           </div>
                           <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-corporate-400 group-hover:bg-accent-blue group-hover:text-white transition-colors shrink-0 shadow-sm border border-corporate-100">
-                            <Download size={14} />
+                            {downloadingFile === file.name ? (
+                              <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} className="w-4 h-4 border-2 border-t-transparent border-corporate-400 group-hover:border-white rounded-full" />
+                            ) : (
+                              <Download size={14} />
+                            )}
                           </div>
                         </a>
                       ))}

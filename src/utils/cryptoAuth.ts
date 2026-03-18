@@ -231,9 +231,14 @@ export interface EncryptedMessagePayload {
   encryptedSessionKeyBase64: string;
   ivBase64: string;
   ciphertextBase64: string;
+  attachmentKeys?: {
+    id: string; // matches the attachment URL or unique identifier
+    fileKeyBase64: string;
+    ivBase64: string;
+  }[];
 }
 
-export const encryptMessageHybrid = async (plaintext: string, recipientPubKeyPem: string): Promise<EncryptedMessagePayload> => {
+export const encryptMessageHybrid = async (plaintext: string, recipientPubKeyPem: string, attachmentKeys?: { id: string, fileKeyBase64: string, ivBase64: string }[]): Promise<EncryptedMessagePayload> => {
   // 1. Import Recipient's RSA Public Key
   const publicKey = await importPublicKey(recipientPubKeyPem);
 
@@ -264,7 +269,8 @@ export const encryptMessageHybrid = async (plaintext: string, recipientPubKeyPem
   return {
     encryptedSessionKeyBase64: window.btoa(ab2str(encryptedSessionKeyBuffer)),
     ivBase64: window.btoa(ab2str(iv.buffer)),
-    ciphertextBase64: window.btoa(ab2str(ciphertextBuffer))
+    ciphertextBase64: window.btoa(ab2str(ciphertextBuffer)),
+    ...(attachmentKeys ? { attachmentKeys } : {})
   };
 };
 
@@ -339,4 +345,61 @@ export const unpackHybridPayload = (asciiArmor: string): EncryptedMessagePayload
   
   const jsonStr = window.atob(base64Str);
   return JSON.parse(jsonStr) as EncryptedMessagePayload;
+};
+
+// --- E2E Attachment Encryption ---
+
+/**
+ * Encrypts a File blob using a freshly generated AES-GCM 256-bit key.
+ * Returns the encrypted Blob and the base64-encoded key and IV.
+ */
+export const encryptFile = async (file: File): Promise<{ ciphertextBlob: Blob, fileKeyBase64: string, ivBase64: string }> => {
+  const fileKey = await window.crypto.subtle.generateKey(
+    { name: "AES-GCM", length: 256 },
+    true,
+    ["encrypt", "decrypt"]
+  );
+
+  const iv = window.crypto.getRandomValues(new Uint8Array(12));
+  const fileArrayBuffer = await file.arrayBuffer();
+
+  const encryptedBuffer = await window.crypto.subtle.encrypt(
+    { name: "AES-GCM", iv: iv },
+    fileKey,
+    fileArrayBuffer
+  );
+
+  const exportedKey = await window.crypto.subtle.exportKey("raw", fileKey);
+  
+  return {
+    ciphertextBlob: new Blob([encryptedBuffer]),
+    fileKeyBase64: window.btoa(ab2str(exportedKey)),
+    ivBase64: window.btoa(ab2str(iv.buffer))
+  };
+};
+
+/**
+ * Decrypts an encrypted file Blob back into a plaintext Blob.
+ */
+export const decryptFile = async (ciphertextBlob: Blob, fileKeyBase64: string, ivBase64: string, mimeType: string): Promise<Blob> => {
+  const fileKeyRaw = str2ab(window.atob(fileKeyBase64));
+  const ivBuffer = str2ab(window.atob(ivBase64));
+  
+  const fileKey = await window.crypto.subtle.importKey(
+    "raw",
+    fileKeyRaw,
+    { name: "AES-GCM", length: 256 },
+    true,
+    ["decrypt"]
+  );
+
+  const encryptedBuffer = await ciphertextBlob.arrayBuffer();
+
+  const decryptedBuffer = await window.crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: new Uint8Array(ivBuffer) },
+    fileKey,
+    encryptedBuffer
+  );
+
+  return new Blob([decryptedBuffer], { type: mimeType });
 };

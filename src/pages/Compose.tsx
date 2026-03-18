@@ -8,7 +8,8 @@ import { useAuth } from '../context/AuthContext';
 import { useMail } from '../context/MailContext';
 import { useContacts } from '../context/ContactContext';
 
-import { encryptMessageHybrid, packHybridPayload } from '../utils/cryptoAuth';
+import { encryptMessageHybrid, packHybridPayload, encryptFile } from '../utils/cryptoAuth';
+import { toast } from 'react-hot-toast';
 
 export default function Compose() {
   const [step, setStep] = useState<'compose' | 'encrypting' | 'success' | 'sent'>('compose');
@@ -70,21 +71,17 @@ export default function Compose() {
     setIsEncrypting(true);
 
     try {
-      const payload = await encryptMessageHybrid(body, recipientPubKey.trim());
-      const asciiArmor = packHybridPayload(payload);
-      const encryptedContent = asciiArmor;
-      
-      setGeneratedCiphertext(asciiArmor);
-      await new Promise(resolve => setTimeout(resolve, 4000)); // Expose ASCII Armor for 4s
-
       // Upload attachments if any
       const uploadedFiles = [];
+      const attachmentKeys: { id: string, fileKeyBase64: string, ivBase64: string }[] = [];
       if (user && files.length > 0) {
         for (const file of files) {
           const uniqueId = Math.random().toString(36).substring(2, 15);
           const fileRef = ref(storage, `attachments/${user.uid}/${Date.now()}-${uniqueId}-${file.name}`);
           
-          const snapshot = await uploadBytes(fileRef, file);
+          const { ciphertextBlob, fileKeyBase64, ivBase64 } = await encryptFile(file);
+          
+          const snapshot = await uploadBytes(fileRef, ciphertextBlob);
           const downloadUrl = await getDownloadURL(snapshot.ref);
           
           uploadedFiles.push({
@@ -93,13 +90,35 @@ export default function Compose() {
             size: file.size,
             type: file.type
           });
+          
+          attachmentKeys.push({
+            id: downloadUrl,
+            fileKeyBase64,
+            ivBase64
+          });
         }
       }
+
+      const keysParam = attachmentKeys.length > 0 ? attachmentKeys : undefined;
+
+      const payload = await encryptMessageHybrid(body, recipientPubKey.trim(), keysParam);
+      const asciiArmor = packHybridPayload(payload);
+      const encryptedContent = asciiArmor;
+      
+      let senderEncryptedContent;
+      if (user && user.publicKey) {
+        const senderPayload = await encryptMessageHybrid(body, user.publicKey, keysParam);
+        senderEncryptedContent = packHybridPayload(senderPayload);
+      }
+      
+      setGeneratedCiphertext(asciiArmor);
+      await new Promise(resolve => setTimeout(resolve, 4000)); // Expose ASCII Armor for 4s
 
       await sendMail({
         recipientPubKey: recipientPubKey.trim(),
         subject,
         content: encryptedContent,
+        senderContent: senderEncryptedContent,
         senderDisplay: senderDisplay || 'Anonymous',
         attachments: uploadedFiles.length > 0 ? uploadedFiles : undefined
       });
@@ -123,8 +142,7 @@ export default function Compose() {
       console.error("Failed to send mail:", error);
       setIsEncrypting(false);
       setStep('compose');
-      // Ideally show an error toast here
-      alert('Failed to send message: ' + (error as Error).message);
+      toast.error('Failed to send message: ' + (error as Error).message);
     }
   };
 

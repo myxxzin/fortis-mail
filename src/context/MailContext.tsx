@@ -10,7 +10,8 @@ export interface Mail {
   senderDisplay?: string;
   recipientPubKey: string;
   subject: string;
-  content: string; // The encrypted ciphertext
+  content: string; // The encrypted ciphertext for the recipient
+  senderContent?: string; // The encrypted ciphertext for the sender (Sent Items)
   date: string;
   timestamp: any;
   isUnread: boolean;

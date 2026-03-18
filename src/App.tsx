@@ -11,6 +11,7 @@ import Contacts from './pages/Contacts';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import { ContactProvider } from './context/ContactContext';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
@@ -32,6 +33,13 @@ function App() {
               </Route>
             </Routes>
           </BrowserRouter>
+          <Toaster 
+            position="top-right" 
+            toastOptions={{
+              className: 'font-mono text-sm shadow-xl',
+              duration: 4000
+            }} 
+          />
         </ContactProvider>
       </MailProvider>
     </AuthProvider>
