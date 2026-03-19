@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, UserPlus, Key, Trash2, ShieldCheck, Edit2, Check, X } from 'lucide-react';
 import { useContacts } from '../context/ContactContext';
@@ -10,6 +11,7 @@ export default function Contacts() {
   const [newContact, setNewContact] = useState({ alias: '', publicKey: '' });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState({ alias: '', publicKey: '' });
+  const [contactToDelete, setContactToDelete] = useState<string | null>(null);
 
   const handleEditStart = (contact: any) => {
     setEditingId(contact.id);
@@ -47,7 +49,61 @@ export default function Contacts() {
   };
 
   return (
-    <div className="h-full flex flex-col w-full">
+    <div className="h-full flex flex-col w-full relative">
+      {/* Delete Confirmation Modal */}
+      {createPortal(
+        <AnimatePresence>
+          {contactToDelete && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-corporate-900/40 backdrop-blur-sm"
+                onClick={() => setContactToDelete(null)}
+              />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-white rounded-2xl shadow-xl w-full max-w-sm relative z-10 overflow-hidden border border-corporate-100"
+            >
+              <div className="p-6">
+                <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
+                  <Trash2 className="text-red-500" size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-corporate-900 mb-2 tracking-tight">Delete Contact</h3>
+                <p className="text-sm text-corporate-500 mb-6 leading-relaxed">
+                  Are you sure you want to remove this verified identity from your address book? This action cannot be undone.
+                </p>
+                <div className="flex items-center space-x-3">
+                  <button
+                    onClick={() => setContactToDelete(null)}
+                    className="flex-1 py-2.5 px-4 bg-white border border-corporate-200 hover:bg-corporate-50 rounded-xl text-sm font-semibold text-corporate-700 transition-colors shadow-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (contactToDelete) {
+                        deleteContact(contactToDelete);
+                        setContactToDelete(null);
+                        toast.success("Contact removed.");
+                      }
+                    }}
+                    className="flex-1 py-2.5 px-4 bg-red-500 hover:bg-red-600 rounded-xl text-sm font-semibold text-white transition-colors shadow-sm"
+                  >
+                    Yes, Delete
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+        </AnimatePresence>,
+        document.body
+      )}
+
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-corporate-900 tracking-tight flex items-center">
@@ -189,11 +245,7 @@ export default function Contacts() {
                             <Edit2 size={16} />
                           </button>
                           <button 
-                            onClick={() => {
-                              if (window.confirm('Are you sure you want to delete this contact?')) {
-                                deleteContact(contact.id);
-                              }
-                            }}
+                            onClick={() => setContactToDelete(contact.id)}
                             className="text-corporate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-2 rounded-lg hover:bg-red-50"
                             title="Delete Contact"
                           >

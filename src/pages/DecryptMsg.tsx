@@ -269,7 +269,7 @@ export default function DecryptMsg() {
   };
 
   return (
-    <div className="h-full flex flex-col p-4 max-w-4xl mx-auto w-full">
+    <div className="h-full flex flex-col w-full">
       <button
         onClick={() => navigate('/inbox')}
         className="flex items-center space-x-2 text-corporate-500 hover:text-corporate-900 mb-6 transition-colors w-max shrink-0"
@@ -304,20 +304,20 @@ export default function DecryptMsg() {
           >
             {isSenderLookingAtSentItem ? (
               <div className="flex flex-col flex-1 bg-corporate-50 -m-4 md:-m-8 p-4 md:p-8 rounded-xl overflow-y-auto min-h-full">
-                <div className="bg-white/60 text-corporate-600 border border-corporate-200 px-4 py-3 rounded-xl flex items-center mb-4 shadow-sm max-w-3xl mx-auto w-full shrink-0">
+                <div className="bg-white/60 text-corporate-600 border border-corporate-200 px-4 py-3 rounded-xl flex items-center mb-4 shadow-sm w-full shrink-0">
                   <Lock size={16} className="mr-2 shrink-0 text-corporate-500" />
                   <span className="text-sm font-medium">Signed and Encrypted - only {resolveAlias(mailDetails.recipientPubKey)} can decrypt it (even if you can't read it back)</span>
                 </div>
 
                 {ackStatus === 'verified' && (
-                  <div className="bg-green-50 text-green-700 border border-green-500/30 px-4 py-3 rounded-xl flex items-center mb-6 shadow-sm max-w-3xl mx-auto w-full shrink-0">
+                  <div className="bg-green-50 text-green-700 border border-green-500/30 px-4 py-3 rounded-xl flex items-center mb-6 shadow-sm w-full shrink-0">
                     <CheckCircle2 size={16} className="mr-2 text-green-600 shrink-0" />
                     <span className="text-sm font-medium">The recipient has received the letter.</span>
                   </div>
                 )}
 
                 {ackStatus === 'failed' && (
-                  <div className="bg-red-50 text-red-700 border border-red-500/30 px-4 py-3 rounded-xl flex flex-col mb-6 shadow-sm max-w-3xl mx-auto w-full shrink-0">
+                  <div className="bg-red-50 text-red-700 border border-red-500/30 px-4 py-3 rounded-xl flex flex-col mb-6 shadow-sm w-full shrink-0">
                     <div className="flex items-center">
                       <X size={16} className="mr-2 text-red-600 shrink-0" />
                       <span className="text-sm font-medium">The ACK form failed. Decryption/Signature verification failed:
@@ -328,13 +328,13 @@ export default function DecryptMsg() {
                 )}
 
                 {ackStatus === 'pending' && (
-                  <div className="bg-amber-50/50 border border-amber-500/20 text-amber-800 px-4 py-3 rounded-xl flex items-center mb-6 shadow-sm max-w-3xl mx-auto w-full shrink-0">
+                  <div className="bg-amber-50/50 border border-amber-500/20 text-amber-800 px-4 py-3 rounded-xl flex items-center mb-6 shadow-sm w-full shrink-0">
                     <div className="w-2 h-2 rounded-full bg-amber-500 mr-3 animate-pulse shrink-0"></div>
                     <span className="text-sm font-medium">Waiting for <strong>{resolveAlias(mailDetails.recipientPubKey)}</strong> to open the email to generate the ACK confirmation slip...</span>
                   </div>
                 )}
 
-                <div className="bg-white border border-corporate-200 shadow-sm rounded-xl relative mx-auto w-full max-w-3xl text-corporate-900 min-h-[400px] flex flex-col shrink-0">
+                <div className="bg-white border border-corporate-200 shadow-sm rounded-xl relative w-full text-corporate-900 min-h-[520px] flex flex-col shrink-0">
                   <div className="absolute -top-4 right-6 h-8 w-8 bg-blue-50 border border-corporate-100 rounded-full shadow-sm flex items-center justify-center cursor-pointer" title="E2E Encrypted">
                     <Lock size={14} className="text-accent-blue" />
                   </div>
@@ -451,7 +451,7 @@ export default function DecryptMsg() {
             ) : (
               <div className="flex flex-col flex-1 bg-corporate-50 -m-8 p-8 rounded-xl overflow-y-auto min-h-full">
                 {signatureVerified && (
-                  <div className="bg-green-50/50 border border-green-500/20 text-green-700 px-5 py-4 rounded-xl mb-6 shadow-sm max-w-3xl mx-auto w-full shrink-0">
+                  <div className="bg-green-50/50 border border-green-500/20 text-green-700 px-5 py-4 rounded-xl mb-6 shadow-sm w-full shrink-0">
                     <div className="flex items-center mb-3">
                       <ShieldCheck size={20} className="mr-2 shrink-0 text-green-600" />
                       <span className="font-bold text-base">E2E Cryptographic Verification Successful:</span>
@@ -473,7 +473,7 @@ export default function DecryptMsg() {
                   </div>
                 )}
 
-                <div className="bg-white border border-corporate-200 shadow-sm rounded-xl relative mx-auto w-full max-w-3xl text-corporate-900 min-h-[400px] flex flex-col shrink-0">
+                <div className="bg-white border border-corporate-200 shadow-sm rounded-xl relative w-full text-corporate-900 min-h-[520px] flex flex-col shrink-0">
                   {/* Lock icon pinned on top right */}
                   <div className="absolute -top-4 right-6 h-8 w-8 bg-blue-50 border border-corporate-100 rounded-full shadow-sm flex items-center justify-center cursor-pointer" title="E2E Encrypted">
                     <Lock size={14} className="text-accent-blue" />

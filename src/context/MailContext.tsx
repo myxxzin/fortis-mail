@@ -40,7 +40,7 @@ interface MailContextType {
   deleteMail: (id: string) => Promise<void>;
   sendMail: (mailData: Partial<Mail>) => Promise<void>;
   drafts: any[];
-  saveDraft: (draftData: any) => Promise<string>;
+  saveDraft: (draftData: any, existingId?: string) => Promise<string>;
   deleteDraft: (id: string) => Promise<void>;
   deliveryAcks: DeliveryAck[];
   sendDeliveryAck: (mailId: string, encryptedAckPayload: string, senderPubKey: string) => Promise<void>;
@@ -210,8 +210,18 @@ export function MailProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const saveDraft = async (draftData: any) => {
+  const saveDraft = async (draftData: any, existingId?: string) => {
     if (!user) throw new Error("Must be logged in");
+    
+    if (existingId) {
+      const draftRef = doc(db, 'drafts', existingId);
+      await updateDoc(draftRef, {
+        ...draftData,
+        timestamp: serverTimestamp()
+      });
+      return existingId;
+    }
+
     const draftsRef = collection(db, 'drafts');
     const docRef = await addDoc(draftsRef, {
       ...draftData,

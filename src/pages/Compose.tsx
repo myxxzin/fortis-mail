@@ -28,6 +28,14 @@ export default function Compose() {
   const [senderDisplay, setSenderDisplay] = useState(user?.name || '');
   const [files, setFiles] = useState<File[]>([]);
 
+  const currentDraftId = useRef<string | null>(draftId);
+  const isDiscardingOrSending = useRef(false);
+  const latestDraftState = useRef({ subject, body, recipientPubKey, senderDisplay, step });
+
+  useEffect(() => {
+    latestDraftState.current = { subject, body, recipientPubKey, senderDisplay, step };
+  }, [subject, body, recipientPubKey, senderDisplay, step]);
+
   useEffect(() => {
     if (user?.name && !senderDisplay) {
       setSenderDisplay(user.name);
@@ -40,6 +48,7 @@ export default function Compose() {
   const { drafts, sendMail, saveDraft, deleteDraft } = useMail();
   const { contacts } = useContacts();
 
+  // Load draft from URL or recover from local storage
   useEffect(() => {
     if (draftId && drafts && !draftLoaded.current) {
       const draft = drafts.find(d => d.id === draftId);
@@ -48,10 +57,77 @@ export default function Compose() {
         setBody(draft.content || '');
         setRecipientPubKey(draft.recipientPubKey || '');
         setSenderDisplay(draft.senderDisplay || user?.name || '');
+        currentDraftId.current = draftId;
         draftLoaded.current = true;
       }
+    } else if (!draftId && !draftLoaded.current) {
+      const recovered = localStorage.getItem('fortis_composing_draft');
+      if (recovered) {
+        try {
+          const parsed = JSON.parse(recovered);
+          if (parsed.subject || parsed.body || parsed.recipientPubKey) {
+            setSubject(parsed.subject || '');
+            setBody(parsed.body || '');
+            setRecipientPubKey(parsed.recipientPubKey || '');
+            setSenderDisplay(parsed.senderDisplay || user?.name || '');
+            if (parsed.draftId) currentDraftId.current = parsed.draftId;
+          }
+        } catch (e) {}
+        localStorage.removeItem('fortis_composing_draft');
+      }
+      draftLoaded.current = true;
     }
   }, [draftId, drafts, user]);
+
+  // Handle auto-save on beforeunload (refresh/close tab)
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      const { subject, body, recipientPubKey, senderDisplay, step } = latestDraftState.current;
+      if (step === 'compose' && !isDiscardingOrSending.current && (subject || body || recipientPubKey)) {
+        localStorage.setItem('fortis_composing_draft', JSON.stringify({
+          subject, body, recipientPubKey, senderDisplay, draftId: currentDraftId.current
+        }));
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+
+  // Handle SPA unmount (clicking 'Back' button or navigating away)
+  useEffect(() => {
+    return () => {
+      const { subject, body, recipientPubKey, senderDisplay, step } = latestDraftState.current;
+      if (step === 'compose' && !isDiscardingOrSending.current && (subject || body || recipientPubKey)) {
+        // Asynchronously save to Firebase drafts the final state
+        saveDraft({
+          subject, content: body, recipientPubKey, senderDisplay: senderDisplay || 'Anonymous'
+        }, currentDraftId.current || undefined).catch(() => {});
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run ONLY on unmount
+
+  // Debounced auto-save to server while typing
+  useEffect(() => {
+    if (step !== 'compose' || isEncrypting || !draftLoaded.current || isDiscardingOrSending.current) return;
+    if (!subject && !body && !recipientPubKey) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        const id = await saveDraft({
+          subject,
+          content: body,
+          recipientPubKey,
+          senderDisplay: senderDisplay || 'Anonymous'
+        }, currentDraftId.current || undefined);
+        currentDraftId.current = id;
+      } catch (err) {
+        console.error("Auto-save draft failed", err);
+      }
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [subject, body, recipientPubKey, senderDisplay, step, isEncrypting, saveDraft]);
 
   // Handle incoming Reply state
   useEffect(() => {
@@ -67,6 +143,8 @@ export default function Compose() {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
+    isDiscardingOrSending.current = true;
+    localStorage.removeItem('fortis_composing_draft');
     setIsEncrypting(true);
 
     try {
@@ -120,8 +198,9 @@ export default function Compose() {
         attachments: uploadedFiles.length > 0 ? uploadedFiles : undefined
       });
 
-      if (draftId) {
-        await deleteDraft(draftId);
+      if (currentDraftId.current) {
+        await deleteDraft(currentDraftId.current);
+        currentDraftId.current = null;
       }
 
       setStep('success');
@@ -136,6 +215,7 @@ export default function Compose() {
       }, 2000);
     } catch (error) {
       console.error("Failed to send mail:", error);
+      isDiscardingOrSending.current = false;
       setIsEncrypting(false);
       setStep('compose');
       toast.error('Failed to send message: ' + (error as Error).message);
@@ -368,6 +448,12 @@ export default function Compose() {
                       <button
                         type="button"
                         onClick={() => {
+                          isDiscardingOrSending.current = true;
+                          localStorage.removeItem('fortis_composing_draft');
+                          if (currentDraftId.current) {
+                            deleteDraft(currentDraftId.current);
+                            currentDraftId.current = null;
+                          }
                           setStep('compose');
                           setSubject('');
                           setBody('');
@@ -386,12 +472,14 @@ export default function Compose() {
                         type="button"
                         onClick={async () => {
                           if (!subject && !body && !recipientPubKey) return;
+                          isDiscardingOrSending.current = true;
+                          localStorage.removeItem('fortis_composing_draft');
                           await saveDraft({
                             subject,
                             content: body,
                             recipientPubKey,
                             senderDisplay: senderDisplay || 'Anonymous'
-                          });
+                          }, currentDraftId.current || undefined);
                           navigate('/drafts');
                         }}
                         className="px-4 py-2.5 border border-corporate-200 rounded-xl text-sm font-semibold text-corporate-700 hover:bg-blue-50 hover:text-accent-blue hover:border-blue-200 transition-colors shadow-sm flex items-center space-x-2"

@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Filter, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,14 +17,72 @@ export default function Inbox() {
     return contact ? contact.alias : pubKey.substring(0, 24) + '...';
   };
 
-  const handleDelete = (e: React.MouseEvent, id: string) => {
+  const [mailToDelete, setMailToDelete] = useState<string | null>(null);
+
+  const handleDeleteClick = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
-    deleteMail(id);
+    setMailToDelete(id);
+  };
+
+  const confirmDelete = () => {
+    if (mailToDelete) {
+      deleteMail(mailToDelete);
+      setMailToDelete(null);
+    }
   };
 
   return (
-    <div className="bg-surface rounded-2xl shadow-sm border border-corporate-200 flex flex-col h-full overflow-hidden">
+    <div className="bg-surface rounded-2xl shadow-sm border border-corporate-200 flex flex-col h-full overflow-hidden relative">
+      {/* Delete Confirmation Modal */}
+      {createPortal(
+        <AnimatePresence>
+          {mailToDelete && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-corporate-900/40 backdrop-blur-sm"
+                onClick={(e) => { e.stopPropagation(); setMailToDelete(null) }}
+              />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-white rounded-2xl shadow-xl w-full max-w-sm relative z-10 overflow-hidden border border-corporate-100"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6">
+                <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
+                  <Trash2 className="text-red-500" size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-corporate-900 mb-2 tracking-tight">Delete Message</h3>
+                <p className="text-sm text-corporate-500 mb-6 leading-relaxed">
+                  Are you sure you want to permanently delete this message? This action cannot be undone.
+                </p>
+                <div className="flex items-center space-x-3">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setMailToDelete(null) }}
+                    className="flex-1 py-2.5 px-4 bg-white border border-corporate-200 hover:bg-corporate-50 rounded-xl text-sm font-semibold text-corporate-700 transition-colors shadow-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); confirmDelete() }}
+                    className="flex-1 py-2.5 px-4 bg-red-500 hover:bg-red-600 rounded-xl text-sm font-semibold text-white transition-colors shadow-sm"
+                  >
+                    Yes, Delete
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+        </AnimatePresence>,
+        document.body
+      )}
+
       <div className="p-6 border-b border-corporate-100 flex items-center justify-between bg-white shrink-0">
         <h1 className="text-2xl font-bold text-corporate-900 tracking-tight">Inbox</h1>
         <div className="flex space-x-2">
@@ -76,7 +136,7 @@ export default function Inbox() {
                     <div className="flex items-center md:justify-end justify-between space-x-3 pl-7 md:pl-0">
                       <span className={`text-[10px] md:text-xs ${mail.isUnread ? 'font-bold text-corporate-900' : 'text-corporate-500'}`}>{mail.date}</span>
                       <button
-                        onClick={(e) => handleDelete(e, mail.id)}
+                        onClick={(e) => handleDeleteClick(e, mail.id)}
                         className="opacity-100 md:opacity-0 group-hover:opacity-100 p-1.5 text-corporate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all focus:opacity-100"
                         title="Delete message"
                       >
