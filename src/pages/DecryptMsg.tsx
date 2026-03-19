@@ -15,7 +15,7 @@ const TRUE_MSG = "Hello team,\n\nThe Q3 financial records are attached and verif
 export default function DecryptMsg() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { mails, sentMails, markAsRead, sendDeliveryAck } = useMail();
+  const { mails, sentMails, markAsRead, sendDeliveryAck, deliveryAcks } = useMail();
   const { contacts } = useContacts();
   const { user } = useAuth();
   const [decryptionState, setDecryptionState] = useState<'locked' | 'password-entered' | 'decrypting' | 'decrypted'>('locked');
@@ -29,6 +29,8 @@ export default function DecryptMsg() {
   const [trueSenderPubKey, setTrueSenderPubKey] = useState<string | null>(null);
   const [msgTimestamp, setMsgTimestamp] = useState<string | null>(null);
   const [showCiphertextModal, setShowCiphertextModal] = useState(false);
+  const [ackStatus, setAckStatus] = useState<'pending' | 'verified' | 'failed'>('pending');
+  const [ackError, setAckError] = useState<string>('');
 
   const currentMail = [...mails, ...sentMails].find(m => m.id === id);
 
@@ -42,7 +44,7 @@ export default function DecryptMsg() {
 
   const handleReply = async () => {
     if (!currentMail) return;
-    
+
     navigate('/compose', { state: { replyTo: currentMail.senderPubKey } });
   };
 
@@ -56,6 +58,37 @@ export default function DecryptMsg() {
     content: currentMail?.content || TRUE_MSG,
     attachments: currentMail?.attachments || []
   };
+
+  useEffect(() => {
+    const processAck = async () => {
+      if (!isSenderLookingAtSentItem || !id || !user?.privateKey) return;
+      const ack = deliveryAcks.find(a => a.mailId === id);
+      if (!ack) {
+        setAckStatus('pending');
+        return;
+      }
+
+      try {
+        const payloadObj = unpackHybridPayload(ack.payload) as EncryptedMessagePayload;
+        const decrypted = await decryptMessageHybrid(
+          payloadObj,
+          user.privateKey,
+          ack.recipientPubKey,
+          user.publicKey!
+        );
+        if (decrypted.plaintext.startsWith("ACK:")) {
+          setAckStatus('verified');
+        } else {
+          setAckStatus('failed');
+          setAckError("Invalid plaintext prefix");
+        }
+      } catch (err: any) {
+        setAckStatus('failed');
+        setAckError(err.message || 'Unknown cryptographic failure');
+      }
+    };
+    processAck();
+  }, [deliveryAcks, isSenderLookingAtSentItem, id, user?.privateKey, user?.publicKey]);
 
   useEffect(() => {
     if (mailDetails) {
@@ -86,42 +119,42 @@ export default function DecryptMsg() {
 
     setErrorMsg('');
     setDecryptionState('password-entered');
-    
+
     try {
       if (!auth.currentUser) throw new Error("No active session");
       const credential = EmailAuthProvider.credential(user.email, password);
       await reauthenticateWithCredential(auth.currentUser, credential);
-      
+
       let finalPlaintext = mailDetails.content;
       try {
         if (mailDetails.content.includes('BEGIN FORTISMAIL ENCRYPTED MESSAGE')) {
           const payload = unpackHybridPayload(mailDetails.content);
-          
+
           const isSentItem = currentMail && currentMail.senderPubKey === user.publicKey && currentMail.recipientPubKey !== user.publicKey;
           const expectedRecipientKey = isSentItem ? mailDetails.recipientPubKey : user.publicKey;
 
           let rawDecryptedData;
           try {
             rawDecryptedData = await decryptMessageHybrid(
-               payload, 
-               user.privateKey, 
-               mailDetails.senderPubKey, 
-               expectedRecipientKey
+              payload,
+              user.privateKey,
+              mailDetails.senderPubKey,
+              expectedRecipientKey
             );
           } catch (e: any) {
-             setDecryptionState('locked');
-             setErrorMsg(e.message || 'CRITICAL SECURITY ALERT: Verification failed.');
-             return;
+            setDecryptionState('locked');
+            setErrorMsg(e.message || 'CRITICAL SECURITY ALERT: Verification failed.');
+            return;
           }
-          
+
           finalPlaintext = rawDecryptedData.plaintext;
           if (rawDecryptedData.timestamp) setMsgTimestamp(rawDecryptedData.timestamp);
           setSignatureVerified(true);
-          
+
           if (rawDecryptedData.verifiedSender && rawDecryptedData.verifiedSender !== 'SEALED') {
-             setTrueSenderPubKey(rawDecryptedData.verifiedSender);
+            setTrueSenderPubKey(rawDecryptedData.verifiedSender);
           }
-          
+
           // Delivery ACK Protocol
           if (!isSentItem && user.privateKey) {
             try {
@@ -129,24 +162,33 @@ export default function DecryptMsg() {
               const hashBuffer = await window.crypto.subtle.digest('SHA-256', enc.encode(finalPlaintext));
               const hashArray = Array.from(new Uint8Array(hashBuffer));
               const msg_hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-              
+
+              const actualSenderPubKey = (rawDecryptedData.verifiedSender && rawDecryptedData.verifiedSender !== 'SEALED')
+                ? rawDecryptedData.verifiedSender
+                : mailDetails.senderPubKey;
+
+              if (actualSenderPubKey === 'SEALED') {
+                console.warn("Sender is purely sealed. Cannot deliver ACK back.");
+                return;
+              }
+
               const ackPayload = await encryptMessageHybrid(
                 `ACK:${msg_hash}`,
-                mailDetails.senderPubKey,
+                actualSenderPubKey,
                 user.privateKey,
                 user.publicKey,
-                mailDetails.senderPubKey
+                actualSenderPubKey
               );
-              
+
               const encryptedAck = packHybridPayload(ackPayload);
               if (id) {
-                sendDeliveryAck(id, encryptedAck, mailDetails.senderPubKey);
+                sendDeliveryAck(id, encryptedAck, actualSenderPubKey);
               }
             } catch (ackErr) {
               console.error("Failed to generate and send Delivery ACK", ackErr);
             }
           }
-          
+
           setDecryptedPayload(payload);
         } else {
           // Fallback parsing for legacy JSON format
@@ -160,9 +202,9 @@ export default function DecryptMsg() {
       } catch (err) {
         console.warn("Not a hybrid encrypted payload, falling back to raw.", err);
       }
-      
+
       setDecryptedContent(finalPlaintext);
-      
+
       setTimeout(() => {
         setDecryptionState('decrypting');
         setTimeout(() => {
@@ -181,7 +223,7 @@ export default function DecryptMsg() {
       toast.error('Please decrypt the message first to unlock attachments.');
       return;
     }
-    
+
     if (!decryptedPayload || !decryptedPayload.attachmentKeys) {
       toast.error("Decryption keys for this attachment are missing or corrupted.");
       return;
@@ -200,14 +242,14 @@ export default function DecryptMsg() {
       const response = await fetch(file.url);
       if (!response.ok) throw new Error("Network response was not ok");
       const encryptedBlob = await response.blob();
-      
+
       const plaintextBlob = await decryptFile(
-        encryptedBlob, 
-        fileKeyData.fileKeyBase64, 
-        fileKeyData.ivBase64, 
+        encryptedBlob,
+        fileKeyData.fileKeyBase64,
+        fileKeyData.ivBase64,
         file.type
       );
-      
+
       const objectUrl = URL.createObjectURL(plaintextBlob);
       const a = document.createElement('a');
       a.href = objectUrl;
@@ -216,7 +258,7 @@ export default function DecryptMsg() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(objectUrl);
-      
+
       toast.success(`${file.name} decrypted successfully.`, { id: downloadToast });
     } catch (err) {
       console.error("File decryption failed:", err);
@@ -262,10 +304,35 @@ export default function DecryptMsg() {
           >
             {isSenderLookingAtSentItem ? (
               <div className="flex flex-col flex-1 bg-corporate-50 -m-8 p-8 rounded-xl overflow-y-auto min-h-full">
-                <div className="bg-green-50 text-green-700 border border-green-500/20 px-4 py-3 rounded-xl flex items-center mb-6 shadow-sm max-w-3xl mx-auto w-full shrink-0">
-                  <Lock size={16} className="mr-2 shrink-0 text-green-600" />
-                  <span className="text-sm font-medium">Đã ký & mã hoá - chỉ {resolveAlias(mailDetails.recipientPubKey)} mới giải mã được (kể cả bạn không đọc lại được)</span>
+                <div className="bg-white/60 text-corporate-600 border border-corporate-200 px-4 py-3 rounded-xl flex items-center mb-4 shadow-sm max-w-3xl mx-auto w-full shrink-0">
+                  <Lock size={16} className="mr-2 shrink-0 text-corporate-500" />
+                  <span className="text-sm font-medium">Signed and Encrypted - only {resolveAlias(mailDetails.recipientPubKey)} can decrypt it (even if you can't read it back)</span>
                 </div>
+
+                {ackStatus === 'verified' && (
+                  <div className="bg-green-50 text-green-700 border border-green-500/30 px-4 py-3 rounded-xl flex items-center mb-6 shadow-sm max-w-3xl mx-auto w-full shrink-0">
+                    <CheckCircle2 size={16} className="mr-2 text-green-600 shrink-0" />
+                    <span className="text-sm font-medium">The recipient has received the letter.</span>
+                  </div>
+                )}
+
+                {ackStatus === 'failed' && (
+                  <div className="bg-red-50 text-red-700 border border-red-500/30 px-4 py-3 rounded-xl flex flex-col mb-6 shadow-sm max-w-3xl mx-auto w-full shrink-0">
+                    <div className="flex items-center">
+                      <X size={16} className="mr-2 text-red-600 shrink-0" />
+                      <span className="text-sm font-medium">The ACK form failed. Decryption/Signature verification failed:
+                      </span>
+                    </div>
+                    <span className="text-xs font-mono mt-2 ml-6 break-all">{ackError}</span>
+                  </div>
+                )}
+
+                {ackStatus === 'pending' && (
+                  <div className="bg-amber-50/50 border border-amber-500/20 text-amber-800 px-4 py-3 rounded-xl flex items-center mb-6 shadow-sm max-w-3xl mx-auto w-full shrink-0">
+                    <div className="w-2 h-2 rounded-full bg-amber-500 mr-3 animate-pulse shrink-0"></div>
+                    <span className="text-sm font-medium">Waiting for <strong>{resolveAlias(mailDetails.recipientPubKey)}</strong> to open the email to generate the ACK confirmation slip...</span>
+                  </div>
+                )}
 
                 <div className="bg-white border border-corporate-200 shadow-sm rounded-xl relative mx-auto w-full max-w-3xl text-corporate-900 min-h-[400px] flex flex-col shrink-0">
                   <div className="absolute -top-4 right-6 h-8 w-8 bg-blue-50 border border-corporate-100 rounded-full shadow-sm flex items-center justify-center cursor-pointer" title="E2E Encrypted">
@@ -291,7 +358,7 @@ export default function DecryptMsg() {
                       <span className="text-accent-blue font-semibold font-mono text-xs bg-blue-50 px-2 py-1 rounded w-max">ECDH-P256 + AES-GCM-256</span>
                     </div>
                   </div>
-                  
+
                   <div className="mx-8 border-b border-corporate-100 mb-6"></div>
 
                   <div className="px-8 pb-10 prose prose-corporate max-w-none text-corporate-800 leading-relaxed font-sans whitespace-pre-wrap flex-1 flex flex-col text-center justify-center">
@@ -299,32 +366,32 @@ export default function DecryptMsg() {
                     <p className="text-corporate-400 text-sm bg-corporate-50 border border-corporate-100 p-4 rounded-lg inline-block mx-auto max-w-lg">[Nội dung đã được mã hoá E2E cho {resolveAlias(mailDetails.recipientPubKey)} - không thể giải mã trên thiết bị của bạn do Forward Secrecy]</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center justify-center space-x-4 mt-8 shrink-0">
-                  <button 
+                  <button
                     onClick={() => setShowCiphertextModal(true)}
                     className="bg-white hover:bg-slate-50 text-corporate-900 border border-corporate-200 px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center transition-colors shadow-sm"
                   >
                     <Search size={16} className="mr-2" /> Xem bản mã (ciphertext)
                   </button>
                 </div>
-                
+
                 {showCiphertextModal && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="mt-8 bg-slate-900 rounded-xl p-8 border border-slate-700 shadow-xl max-w-4xl mx-auto w-full relative shrink-0 flex flex-col items-center"
                   >
-                    <button 
+                    <button
                       onClick={() => setShowCiphertextModal(false)}
                       className="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors"
                     >
                       <X size={24} />
                     </button>
-                    
+
                     <ShieldCheck size={56} className="text-green-500 mb-4 mt-2" />
                     <h2 className="text-xl md:text-2xl font-bold text-white font-mono tracking-widest text-center mb-6 uppercase">RAW CIPHERTEXT PAYLOAD</h2>
-                    
+
                     <div className="w-full bg-black/95 rounded-xl p-6 max-h-[400px] overflow-y-auto border border-green-500/50 drop-shadow-[0_0_20px_rgba(34,197,94,0.15)] shadow-inner text-left">
                       <pre className="text-green-400 font-mono text-[11px] md:text-xs break-all whitespace-pre-wrap leading-relaxed select-all">
                         {rawCiphertext || mailDetails.content}
@@ -356,17 +423,17 @@ export default function DecryptMsg() {
                         <p className="text-sm text-corporate-500">Provide your Master Password to unlock your Private Key and read this message.</p>
                       </div>
                     </div>
-                    
+
                     <form onSubmit={handleDecrypt} className="flex flex-col sm:flex-row gap-4">
                       <div className="flex-1">
-                        <input 
-                          autoFocus 
-                          required 
-                          type="password" 
-                          value={password} 
-                          onChange={(e) => setPassword(e.target.value)} 
-                          placeholder="Encryption Password" 
-                          className="w-full bg-corporate-50 border border-corporate-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue focus:bg-white transition-all font-mono text-sm" 
+                        <input
+                          autoFocus
+                          required
+                          type="password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Encryption Password"
+                          className="w-full bg-corporate-50 border border-corporate-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue focus:bg-white transition-all font-mono text-sm"
                         />
                       </div>
                       <button type="submit" disabled={decryptionState === 'password-entered'} className="bg-corporate-900 hover:bg-black disabled:bg-corporate-400 text-white px-8 py-3 rounded-lg font-medium transition-colors shadow-sm whitespace-nowrap">
@@ -384,9 +451,25 @@ export default function DecryptMsg() {
             ) : (
               <div className="flex flex-col flex-1 bg-corporate-50 -m-8 p-8 rounded-xl overflow-y-auto min-h-full">
                 {signatureVerified && (
-                  <div className="bg-green-50/50 border border-green-500/20 text-green-700 px-4 py-3 rounded-xl flex items-center mb-6 shadow-sm max-w-3xl mx-auto w-full shrink-0">
-                    <CheckCircle2 size={18} className="mr-2 shrink-0 text-green-600" />
-                    <span className="text-sm font-medium">Chữ ký hợp lệ - xác nhận đúng là <span className="font-bold">{mailDetails.senderDisplay || 'Unknown'}</span> gửi, không bị giả mạo</span>
+                  <div className="bg-green-50/50 border border-green-500/20 text-green-700 px-5 py-4 rounded-xl mb-6 shadow-sm max-w-3xl mx-auto w-full shrink-0">
+                    <div className="flex items-center mb-3">
+                      <ShieldCheck size={20} className="mr-2 shrink-0 text-green-600" />
+                      <span className="font-bold text-base">E2E Cryptographic Verification Successful:</span>
+                    </div>
+                    <ul className="space-y-2 text-sm ml-1">
+                      <li className="flex items-start">
+                        <CheckCircle2 size={16} className="mr-2 mt-0.5 shrink-0 text-green-500" />
+                        <span><strong>Valid signature</strong> — confirming that it is indeed <span className="font-bold">{mailDetails.senderDisplay || 'Unknown'}</span> who signed.</span>
+                      </li>
+                      <li className="flex items-start">
+                        <CheckCircle2 size={16} className="mr-2 mt-0.5 shrink-0 text-green-500" />
+                        <span><strong>Recipient ID == "{user?.name || user?.alias || 'Bạn'}"</strong> — The message was sent to the right person.</span>
+                      </li>
+                      <li className="flex items-start">
+                        <CheckCircle2 size={16} className="mr-2 mt-0.5 shrink-0 text-green-500" />
+                        <span><strong>Valid timestamp</strong> — The message was not replayed.</span>
+                      </li>
+                    </ul>
                   </div>
                 )}
 
@@ -415,13 +498,13 @@ export default function DecryptMsg() {
                       <span className="text-accent-blue font-semibold font-mono text-xs bg-blue-50 px-2 py-1 rounded w-max">ECDH-P256 + AES-GCM-256</span>
                     </div>
                   </div>
-                  
+
                   <div className="mx-8 border-b border-corporate-100 mb-6"></div>
 
                   {/* Body */}
                   <div className="px-8 pb-8 prose prose-corporate max-w-none text-corporate-800 leading-relaxed font-sans whitespace-pre-wrap flex-1 flex flex-col">
                     {decryptedContent}
-                    
+
                     {mailDetails.attachments.length > 0 && (
                       <div className="mt-8 pt-6 border-t border-corporate-100 font-sans">
                         <h4 className="text-xs font-bold uppercase tracking-widest text-corporate-500 mb-4 flex items-center">
@@ -461,27 +544,27 @@ export default function DecryptMsg() {
                 </div>
 
                 <div className="flex items-center justify-center space-x-4 mt-8 shrink-0">
-                  <button 
+                  <button
                     onClick={() => setShowCiphertextModal(!showCiphertextModal)}
                     className="bg-white hover:bg-slate-50 text-corporate-900 border border-corporate-200 px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center transition-colors shadow-sm"
                   >
-                    <Search size={16} className="mr-2" /> Xem bản mã (ciphertext)
+                    <Search size={16} className="mr-2" /> View the ciphertext
                   </button>
                   <button
                     onClick={handleReply}
                     className="bg-white hover:bg-slate-50 text-corporate-900 border border-corporate-200 px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center transition-colors shadow-sm"
                   >
-                    <Reply size={16} className="mr-2" /> Phản hồi
+                    <Reply size={16} className="mr-2" /> Reply
                   </button>
                 </div>
-                
+
                 {showCiphertextModal && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="mt-8 bg-slate-900 rounded-xl p-8 border border-slate-700 shadow-xl max-w-4xl mx-auto w-full relative flex flex-col items-center"
                   >
-                    <button 
+                    <button
                       onClick={() => setShowCiphertextModal(false)}
                       className="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors"
                     >
@@ -490,7 +573,7 @@ export default function DecryptMsg() {
 
                     <ShieldCheck size={56} className="text-green-500 mb-4 mt-2" />
                     <h2 className="text-xl md:text-2xl font-bold text-white font-mono tracking-widest text-center mb-6 uppercase">RAW CIPHERTEXT PAYLOAD</h2>
-                    
+
                     <div className="w-full bg-black/95 rounded-xl p-6 max-h-[400px] overflow-y-auto border border-green-500/50 drop-shadow-[0_0_20px_rgba(34,197,94,0.15)] shadow-inner text-left">
                       <pre className="text-green-400 font-mono text-[11px] md:text-xs break-all whitespace-pre-wrap leading-relaxed select-all">
                         {rawCiphertext || mailDetails.content}

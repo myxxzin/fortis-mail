@@ -1,16 +1,26 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { useAuth } from '../context/AuthContext';
+import { useMail } from '../context/MailContext';
+import { useContacts } from '../context/ContactContext';
+import { decryptMessageHybrid, unpackHybridPayload, type EncryptedMessagePayload } from '../utils/cryptoAuth';
+import toast from 'react-hot-toast';
 import { X, Key, Fingerprint, ShieldCheck, Edit2, Save, User as UserIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function MainLayout() {
    const { user, loading, updateProfile } = useAuth();
+   const { deliveryAcks, sentMails } = useMail();
+   const { contacts } = useContacts();
+   
    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
    const [isEditingProfile, setIsEditingProfile] = useState(false);
    const [copiedPubKey, setCopiedPubKey] = useState(false);
+   
+   // Track ACKs that have already triggered a Toast
+   const processedAcksRef = useRef<Set<string>>(new Set());
 
    // Profile edit state
    const [editForm, setEditForm] = useState({
@@ -24,6 +34,76 @@ export default function MainLayout() {
          });
       }
    }, [user, isEditingProfile]);
+
+   const resolveAlias = (pubKey: string) => {
+      const contact = contacts.find(c => c.publicKey === pubKey);
+      return contact ? contact.alias : pubKey.substring(0, 16) + '...';
+   };
+
+   // Process and Toast new E2E Delivery ACKs (C4 Flowchart Step)
+   useEffect(() => {
+      if (!user?.privateKey || !deliveryAcks.length) return;
+
+      const processAcks = async () => {
+         for (const ack of deliveryAcks) {
+            if (processedAcksRef.current.has(ack.id)) continue;
+            
+            const sentMail = sentMails.find(m => m.id === ack.mailId);
+            if (!sentMail) continue;
+
+            try {
+               const payloadObj = unpackHybridPayload(ack.payload) as EncryptedMessagePayload;
+               
+               // C4: Decrypt with Priv_A, verify Signature of B
+               const decrypted = await decryptMessageHybrid(
+                  payloadObj,
+                  user.privateKey,         // A's Private Key
+                  ack.recipientPubKey,     // B's Public Key (Sender of the ACK)
+                  user.publicKey!          // A's Public Key (Recipient of the ACK)
+               );
+
+               if (decrypted.plaintext.startsWith("ACK:")) {
+                  // Valid ACK!
+                  toast.custom((t) => (
+                    <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-white shadow-2xl rounded-2xl pointer-events-auto flex border border-green-500/30 overflow-hidden`}>
+                      <div className="flex-1 w-0 p-5 bg-green-50/30">
+                        <div className="flex items-start">
+                          <div className="flex-shrink-0 pt-0.5">
+                            <ShieldCheck className="h-6 w-6 text-green-600" />
+                          </div>
+                          <div className="ml-3 flex-1">
+                            <p className="text-sm font-bold text-green-900 mb-2">
+                              Phiếu Xác Nhận E2E (ACK)
+                            </p>
+                            <p className="mt-1 text-xs text-green-800 space-y-1.5 leading-relaxed">
+                              <span className="block font-medium text-green-700 mb-2">Giải mã ACK thành công bằng Priv_A.</span>
+                              <span className="block">🔹 <strong>sig_ack hợp lệ</strong> — đúng chữ ký của {resolveAlias(ack.recipientPubKey)}</span>
+                              <span className="block">🔹 <strong>msg_hash</strong> trong ACK khớp với tin đã gửi</span>
+                              <span className="block">🔹 <strong>"To:A" hợp lệ</strong> — ACK không bị tái sử dụng.</span>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex border-l border-green-500/20 bg-white">
+                        <button
+                          onClick={() => toast.dismiss(t.id)}
+                          className="w-full border border-transparent rounded-none rounded-r-2xl px-4 py-3 flex items-center justify-center text-xs font-bold text-corporate-500 hover:text-corporate-900 transition-colors bg-green-50/10 hover:bg-green-100"
+                        >
+                          Đóng
+                        </button>
+                      </div>
+                    </div>
+                  ), { duration: 15000 });
+                  processedAcksRef.current.add(ack.id);
+               }
+            } catch (err) {
+               console.error("Failed to decrypt or verify ACK intercept", err);
+            }
+         }
+      };
+
+      processAcks();
+   }, [deliveryAcks, user, sentMails, contacts]);
 
    const handleSaveProfile = () => {
       updateProfile({

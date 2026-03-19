@@ -11,7 +11,7 @@ export default function Login() {
   const [identityId, setIdentityId] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const [errorMsg, setErrorMsg] = useState('');
   const [status, setStatus] = useState<'idle' | 'authenticating'>('idle');
 
@@ -50,7 +50,7 @@ export default function Login() {
       <div className="relative z-10 w-full max-w-md">
         <div className="text-center mb-8 space-y-4 flex flex-col items-center">
           <img src="/logo.png" alt="FortisMail" className="h-[80px] object-contain mb-2" />
-          <h1 className="text-2xl font-bold tracking-tight">Access Vault</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Welcome to Fortis Mail!</h1>
           <p className="text-corporate-300 text-sm font-medium">Zero-Knowledge Encrypted Environment.</p>
         </div>
 
@@ -88,12 +88,12 @@ export default function Login() {
                       className="w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium tracking-widest transition-all"
                     />
                     <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-3.5 text-corporate-400 hover:text-white transition-colors"
-                        tabIndex={-1}
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-3.5 text-corporate-400 hover:text-white transition-colors"
+                      tabIndex={-1}
                     >
-                        {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                      {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                     </button>
                   </div>
                 </div>
@@ -104,8 +104,8 @@ export default function Login() {
                 </button>
 
                 <div className="flex items-center justify-center space-x-2 text-xs text-corporate-500 font-medium pt-4 border-t border-white/10 mt-6">
-                    <ShieldCheck size={14} className="text-green-500" />
-                    <span>Keys are never stored in plaintext on our servers</span>
+                  <ShieldCheck size={14} className="text-green-500" />
+                  <span>Keys are never stored in plaintext on our servers</span>
                 </div>
 
                 {errorMsg && (
@@ -130,14 +130,14 @@ export default function Login() {
                 exit={{ opacity: 0, y: -20 }}
                 className="flex flex-col items-center justify-center py-8 space-y-6"
               >
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                    className="w-16 h-16 border-4 border-white/10 border-t-accent-blue rounded-full"
-                  />
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                  className="w-16 h-16 border-4 border-white/10 border-t-accent-blue rounded-full"
+                />
                 <div className="text-center space-y-2">
-                    <p className="text-sm font-bold tracking-widest text-white uppercase">Deriving Keys</p>
-                    <p className="text-xs text-corporate-400 font-mono">Running PBKDF2... Decrypting Enclave...</p>
+                  <p className="text-sm font-bold tracking-widest text-white uppercase">Deriving Keys</p>
+                  <p className="text-xs text-corporate-400 font-mono">Running PBKDF2... Decrypting Enclave...</p>
                 </div>
               </motion.div>
             )}
@@ -146,8 +146,8 @@ export default function Login() {
 
         <div className="mt-8 text-center">
           <p className="text-xs text-corporate-500 font-medium tracking-wider uppercase flex items-center justify-center space-x-1">
-             <KeyRound size={12} />
-             <span>Zero-Knowledge Architecture</span>
+            <KeyRound size={12} />
+            <span>Zero-Knowledge Architecture</span>
           </p>
         </div>
       </div>
