@@ -300,10 +300,10 @@ export default function DecryptMsg() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="relative z-20 bg-white p-8 rounded-xl shadow-sm border border-corporate-200 min-h-full flex flex-col"
+            className="relative z-20 min-h-full flex flex-col"
           >
             {isSenderLookingAtSentItem ? (
-              <div className="flex flex-col flex-1 bg-corporate-50 -m-4 md:-m-8 p-4 md:p-8 rounded-xl overflow-y-auto min-h-full">
+              <div className="flex flex-col flex-1 min-h-full">
                 <div className="bg-white/60 text-corporate-600 border border-corporate-200 px-4 py-3 rounded-xl flex items-center mb-4 shadow-sm w-full shrink-0">
                   <Lock size={16} className="mr-2 shrink-0 text-corporate-500" />
                   <span className="text-sm font-medium">Signed and Encrypted - only {resolveAlias(mailDetails.recipientPubKey)} can decrypt it (even if you can't read it back)</span>
@@ -449,7 +449,7 @@ export default function DecryptMsg() {
                 )}
               </div>
             ) : (
-              <div className="flex flex-col flex-1 bg-corporate-50 -m-8 p-8 rounded-xl overflow-y-auto min-h-full">
+              <div className="flex flex-col flex-1 min-h-full">
                 {signatureVerified && (
                   <div className="bg-green-50/50 border border-green-500/20 text-green-700 px-5 py-4 rounded-xl mb-6 shadow-sm w-full shrink-0">
                     <div className="flex items-center mb-3">
