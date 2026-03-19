@@ -18,6 +18,7 @@ export default function MainLayout() {
    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
    const [isEditingProfile, setIsEditingProfile] = useState(false);
    const [copiedPubKey, setCopiedPubKey] = useState(false);
+   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
    
    // Track ACKs that have already triggered a Toast
    const processedAcksRef = useRef<Set<string>>(new Set());
@@ -45,8 +46,23 @@ export default function MainLayout() {
       if (!user?.privateKey || !deliveryAcks.length) return;
 
       const processAcks = async () => {
+         const storageKey = `fortis_notified_acks_${user.uid}`;
+         try {
+            const stored = localStorage.getItem(storageKey);
+            if (stored) {
+               const parsed = JSON.parse(stored);
+               parsed.forEach((id: string) => processedAcksRef.current.add(id));
+            }
+         } catch (e) {}
+
+         let hasNew = false;
+
          for (const ack of deliveryAcks) {
             if (processedAcksRef.current.has(ack.id)) continue;
+            
+            // Immediately mark it processed to prevent race conditions & duplicate toasts
+            processedAcksRef.current.add(ack.id);
+            hasNew = true;
             
             const sentMail = sentMails.find(m => m.id === ack.mailId);
             if (!sentMail) continue;
@@ -57,7 +73,7 @@ export default function MainLayout() {
                // C4: Decrypt with Priv_A, verify Signature of B
                const decrypted = await decryptMessageHybrid(
                   payloadObj,
-                  user.privateKey,         // A's Private Key
+                  user.privateKey!,         // A's Private Key
                   ack.recipientPubKey,     // B's Public Key (Sender of the ACK)
                   user.publicKey!          // A's Public Key (Recipient of the ACK)
                );
@@ -94,11 +110,14 @@ export default function MainLayout() {
                       </div>
                     </div>
                   ), { duration: 15000 });
-                  processedAcksRef.current.add(ack.id);
                }
             } catch (err) {
                console.error("Failed to decrypt or verify ACK intercept", err);
             }
+         }
+
+         if (hasNew) {
+            localStorage.setItem(storageKey, JSON.stringify(Array.from(processedAcksRef.current)));
          }
       };
 
@@ -129,11 +148,43 @@ export default function MainLayout() {
    }
 
    return (
-      <div className="flex flex-col h-screen md:flex-row bg-corporate-50 overflow-hidden relative">
-         <Sidebar onOpenSettings={() => setIsSettingsOpen(true)} />
-         <div className="flex-1 flex flex-col min-w-0 h-full">
-            <Header />
-            <main className="flex-1 overflow-auto p-6 md:p-8">
+      <div className="flex h-screen bg-corporate-50 overflow-hidden relative w-full">
+         {/* Desktop Sidebar */}
+         <div className="hidden md:block h-full shrink-0 z-10 relative">
+            <Sidebar onOpenSettings={() => setIsSettingsOpen(true)} />
+         </div>
+
+         {/* Mobile Sidebar Overlay */}
+         <AnimatePresence>
+            {isMobileMenuOpen && (
+               <>
+                  <motion.div
+                     initial={{ opacity: 0 }}
+                     animate={{ opacity: 1 }}
+                     exit={{ opacity: 0 }}
+                     onClick={() => setIsMobileMenuOpen(false)}
+                     className="fixed inset-0 bg-corporate-900/40 backdrop-blur-sm z-40 md:hidden"
+                  />
+                  <motion.div
+                     initial={{ x: '-100%' }}
+                     animate={{ x: 0 }}
+                     exit={{ x: '-100%' }}
+                     transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
+                     className="fixed inset-y-0 left-0 w-[280px] bg-surface z-50 md:hidden shadow-2xl flex flex-col"
+                  >
+                     <Sidebar 
+                        onOpenSettings={() => { setIsSettingsOpen(true); setIsMobileMenuOpen(false); }} 
+                        onMobileClose={() => setIsMobileMenuOpen(false)}
+                     />
+                  </motion.div>
+               </>
+            )}
+         </AnimatePresence>
+
+         {/* Main Content Area */}
+         <div className="flex-1 flex flex-col min-w-0 h-full w-full relative z-0">
+            <Header onToggleMenu={() => setIsMobileMenuOpen(true)} />
+            <main className="flex-1 overflow-auto p-4 sm:p-6 md:p-8">
                <div className="max-w-6xl mx-auto h-full w-full">
                   <Outlet />
                </div>

@@ -35,7 +35,7 @@ export default function Inbox() {
 
       <div className="flex-1 overflow-auto relative bg-corporate-50/20">
         <table className="w-full text-left border-collapse">
-          <thead>
+          <thead className="hidden md:table-header-group">
             <tr className="border-b border-corporate-100 text-xs uppercase tracking-wider text-corporate-400 bg-corporate-50/50 sticky top-0 z-10 backdrop-blur-md">
               <th className="px-6 py-4 font-semibold w-1/4">Sender</th>
               <th className="px-6 py-4 font-semibold w-2/4">Subject</th>
@@ -54,9 +54,9 @@ export default function Inbox() {
                      if(mail.isUnread && mail.id !== 'msg-welcome') markAsRead(mail.id);
                      navigate(`/mail/${mail.id}`);
                   }}
-                  className={`group cursor-pointer transition-colors border-b border-corporate-100 last:border-0 ${mail.isUnread ? 'bg-blue-50 hover:bg-blue-100/50' : 'bg-white hover:bg-corporate-50/50'}`}
+                  className={`group cursor-pointer transition-colors border-b border-corporate-100 last:border-0 ${mail.isUnread ? 'bg-blue-50 hover:bg-blue-100/50' : 'bg-white hover:bg-corporate-50/50'} flex flex-col md:table-row relative py-2 md:py-0`}
                 >
-                  <td className="px-6 py-3 whitespace-nowrap">
+                  <td className="px-4 md:px-6 md:py-3 whitespace-nowrap block md:table-cell">
                     <div className="flex items-center space-x-3">
                       <div className={mail.isUnread ? "text-accent-blue" : "text-corporate-400"}><Lock size={16} /></div>
                       <div className="flex flex-col min-w-0 max-w-[200px] xl:max-w-xs">
@@ -67,17 +67,17 @@ export default function Inbox() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-3 min-w-[200px]">
-                    <div className={`text-sm truncate w-full ${mail.isUnread ? 'font-bold text-corporate-900' : 'text-corporate-600'} group-hover:text-accent-blue transition-colors`}>
+                  <td className="px-4 md:px-6 py-1 md:py-3 min-w-0 md:min-w-[200px] block md:table-cell">
+                    <div className={`text-sm truncate w-full ${mail.isUnread ? 'font-bold text-corporate-900' : 'text-corporate-600'} group-hover:text-accent-blue transition-colors pl-7 md:pl-0`}>
                       {mail.subject}
                     </div>
                   </td>
-                  <td className="px-6 py-3 whitespace-nowrap text-right">
-                    <div className="flex items-center justify-end space-x-3">
-                      <span className={`text-xs ${mail.isUnread ? 'font-bold text-corporate-900' : 'text-corporate-500'}`}>{mail.date}</span>
+                  <td className="px-4 md:px-6 py-1 md:py-3 whitespace-nowrap md:text-right block md:table-cell">
+                    <div className="flex items-center md:justify-end justify-between space-x-3 pl-7 md:pl-0">
+                      <span className={`text-[10px] md:text-xs ${mail.isUnread ? 'font-bold text-corporate-900' : 'text-corporate-500'}`}>{mail.date}</span>
                       <button
                         onClick={(e) => handleDelete(e, mail.id)}
-                        className="opacity-0 group-hover:opacity-100 p-1.5 text-corporate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all focus:opacity-100"
+                        className="opacity-100 md:opacity-0 group-hover:opacity-100 p-1.5 text-corporate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all focus:opacity-100"
                         title="Delete message"
                       >
                         <Trash2 size={16} />

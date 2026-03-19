@@ -296,14 +296,14 @@ export default function DecryptMsg() {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 relative bg-corporate-50 p-8 overflow-y-auto">
+        <div className="flex-1 relative bg-corporate-50 p-4 md:p-8 overflow-y-auto w-full">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="relative z-20 bg-white p-8 rounded-xl shadow-sm border border-corporate-200 min-h-full flex flex-col"
           >
             {isSenderLookingAtSentItem ? (
-              <div className="flex flex-col flex-1 bg-corporate-50 -m-8 p-8 rounded-xl overflow-y-auto min-h-full">
+              <div className="flex flex-col flex-1 bg-corporate-50 -m-4 md:-m-8 p-4 md:p-8 rounded-xl overflow-y-auto min-h-full">
                 <div className="bg-white/60 text-corporate-600 border border-corporate-200 px-4 py-3 rounded-xl flex items-center mb-4 shadow-sm max-w-3xl mx-auto w-full shrink-0">
                   <Lock size={16} className="mr-2 shrink-0 text-corporate-500" />
                   <span className="text-sm font-medium">Signed and Encrypted - only {resolveAlias(mailDetails.recipientPubKey)} can decrypt it (even if you can't read it back)</span>
@@ -340,30 +340,30 @@ export default function DecryptMsg() {
                   </div>
 
                   {/* Header Info Block */}
-                  <div className="px-8 pt-10 pb-6 text-sm text-corporate-500 flex flex-col space-y-4 font-sans">
-                    <div className="grid grid-cols-[100px_1fr]">
-                      <span className="opacity-70">Từ</span>
-                      <span className="font-semibold text-corporate-900">{user?.name || user?.alias || 'Bạn'} <span className="opacity-50 font-normal">(bạn)</span></span>
+                  <div className="px-5 md:px-8 pt-6 md:pt-10 pb-6 text-sm text-corporate-500 flex flex-col space-y-3 md:space-y-4 font-sans">
+                    <div className="flex flex-col md:grid md:grid-cols-[100px_1fr]">
+                      <span className="opacity-70 text-xs md:text-sm mb-0.5 md:mb-0">Từ</span>
+                      <span className="font-semibold text-corporate-900 break-words">{user?.name || user?.alias || 'Bạn'} <span className="opacity-50 font-normal">(bạn)</span></span>
                     </div>
-                    <div className="grid grid-cols-[100px_1fr]">
-                      <span className="opacity-70">Đến</span>
-                      <span className="font-semibold text-corporate-900">{resolveAlias(mailDetails.recipientPubKey)}</span>
+                    <div className="flex flex-col md:grid md:grid-cols-[100px_1fr]">
+                      <span className="opacity-70 text-xs md:text-sm mb-0.5 md:mb-0">Đến</span>
+                      <span className="font-semibold text-corporate-900 break-words">{resolveAlias(mailDetails.recipientPubKey)}</span>
                     </div>
-                    <div className="grid grid-cols-[100px_1fr]">
-                      <span className="opacity-70">Thời gian</span>
-                      <span className="text-corporate-900 font-medium">{mailDetails.date}</span>
+                    <div className="flex flex-col md:grid md:grid-cols-[100px_1fr]">
+                      <span className="opacity-70 text-xs md:text-sm mb-0.5 md:mb-0">Thời gian</span>
+                      <span className="text-corporate-900 font-medium break-words">{mailDetails.date}</span>
                     </div>
-                    <div className="grid grid-cols-[100px_1fr]">
-                      <span className="opacity-70">Mã hoá</span>
-                      <span className="text-accent-blue font-semibold font-mono text-xs bg-blue-50 px-2 py-1 rounded w-max">ECDH-P256 + AES-GCM-256</span>
+                    <div className="flex flex-col md:grid md:grid-cols-[100px_1fr]">
+                      <span className="opacity-70 text-xs md:text-sm mb-0.5 md:mb-0">Mã hoá</span>
+                      <span className="text-accent-blue font-semibold font-mono text-xs bg-blue-50 px-2 py-1 rounded w-max mt-1 md:mt-0 break-words">ECDH-P256 + AES-GCM-256</span>
                     </div>
                   </div>
 
-                  <div className="mx-8 border-b border-corporate-100 mb-6"></div>
+                  <div className="mx-4 md:mx-8 border-b border-corporate-100 mb-6"></div>
 
-                  <div className="px-8 pb-10 prose prose-corporate max-w-none text-corporate-800 leading-relaxed font-sans whitespace-pre-wrap flex-1 flex flex-col text-center justify-center">
-                    <p className="text-xl font-bold mb-4 text-corporate-900">{mailDetails.subject}</p>
-                    <p className="text-corporate-400 text-sm bg-corporate-50 border border-corporate-100 p-4 rounded-lg inline-block mx-auto max-w-lg">[Nội dung đã được mã hoá E2E cho {resolveAlias(mailDetails.recipientPubKey)} - không thể giải mã trên thiết bị của bạn do Forward Secrecy]</p>
+                  <div className="px-5 md:px-8 pb-10 prose prose-corporate max-w-none text-corporate-800 leading-relaxed font-sans whitespace-pre-wrap flex-1 flex flex-col text-center justify-center">
+                    <p className="text-lg md:text-xl font-bold mb-4 text-corporate-900">{mailDetails.subject}</p>
+                    <p className="text-corporate-400 text-xs md:text-sm bg-corporate-50 border border-corporate-100 p-3 md:p-4 rounded-lg inline-block mx-auto max-w-[90%] md:max-w-lg break-words leading-relaxed">[Nội dung đã được mã hoá E2E cho {resolveAlias(mailDetails.recipientPubKey)} - không thể giải mã trên thiết bị của bạn do Forward Secrecy]</p>
                   </div>
                 </div>
 
@@ -480,29 +480,29 @@ export default function DecryptMsg() {
                   </div>
 
                   {/* Header Info Block */}
-                  <div className="px-8 pt-10 pb-6 text-sm text-corporate-500 flex flex-col space-y-4 font-sans">
-                    <div className="grid grid-cols-[100px_1fr]">
-                      <span className="opacity-70">Từ</span>
-                      <span className="font-semibold text-corporate-900">{mailDetails.senderDisplay || 'Unknown'} <span className="text-[10px] font-normal opacity-50 ml-2">({resolveAlias(trueSenderPubKey || mailDetails.senderPubKey)})</span></span>
+                  <div className="px-5 md:px-8 pt-6 md:pt-10 pb-6 text-sm text-corporate-500 flex flex-col space-y-3 md:space-y-4 font-sans">
+                    <div className="flex flex-col md:grid md:grid-cols-[100px_1fr]">
+                      <span className="opacity-70 text-xs md:text-sm mb-0.5 md:mb-0">Từ</span>
+                      <span className="font-semibold text-corporate-900 break-words">{mailDetails.senderDisplay || 'Unknown'} <span className="text-[10px] font-normal opacity-50 ml-0 md:ml-2 block md:inline">({resolveAlias(trueSenderPubKey || mailDetails.senderPubKey)})</span></span>
                     </div>
-                    <div className="grid grid-cols-[100px_1fr]">
-                      <span className="opacity-70">Đến</span>
-                      <span className="font-semibold text-corporate-900">{user?.name || user?.alias || 'Bạn'}</span>
+                    <div className="flex flex-col md:grid md:grid-cols-[100px_1fr]">
+                      <span className="opacity-70 text-xs md:text-sm mb-0.5 md:mb-0">Đến</span>
+                      <span className="font-semibold text-corporate-900 break-words">{user?.name || user?.alias || 'Bạn'}</span>
                     </div>
-                    <div className="grid grid-cols-[100px_1fr]">
-                      <span className="opacity-70">Thời gian</span>
-                      <span className="text-corporate-900 font-medium">{msgTimestamp ? new Date(parseInt(msgTimestamp)).toLocaleString('vi-VN') : mailDetails.date}</span>
+                    <div className="flex flex-col md:grid md:grid-cols-[100px_1fr]">
+                      <span className="opacity-70 text-xs md:text-sm mb-0.5 md:mb-0">Thời gian</span>
+                      <span className="text-corporate-900 font-medium break-words">{msgTimestamp ? new Date(parseInt(msgTimestamp)).toLocaleString('vi-VN') : mailDetails.date}</span>
                     </div>
-                    <div className="grid grid-cols-[100px_1fr]">
-                      <span className="opacity-70">Mã hoá</span>
-                      <span className="text-accent-blue font-semibold font-mono text-xs bg-blue-50 px-2 py-1 rounded w-max">ECDH-P256 + AES-GCM-256</span>
+                    <div className="flex flex-col md:grid md:grid-cols-[100px_1fr]">
+                      <span className="opacity-70 text-xs md:text-sm mb-0.5 md:mb-0">Mã hoá</span>
+                      <span className="text-accent-blue font-semibold font-mono text-xs bg-blue-50 px-2 py-1 rounded w-max mt-1 md:mt-0 break-words">ECDH-P256 + AES-GCM-256</span>
                     </div>
                   </div>
 
-                  <div className="mx-8 border-b border-corporate-100 mb-6"></div>
+                  <div className="mx-4 md:mx-8 border-b border-corporate-100 mb-6"></div>
 
                   {/* Body */}
-                  <div className="px-8 pb-8 prose prose-corporate max-w-none text-corporate-800 leading-relaxed font-sans whitespace-pre-wrap flex-1 flex flex-col">
+                  <div className="px-5 md:px-8 pb-8 prose prose-corporate max-w-none text-corporate-800 leading-relaxed font-sans whitespace-pre-wrap flex-1 flex flex-col break-words text-sm md:text-base">
                     {decryptedContent}
 
                     {mailDetails.attachments.length > 0 && (

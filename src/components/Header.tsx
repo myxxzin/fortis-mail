@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Search, Bell, LogOut, CheckCheck } from 'lucide-react';
+import { Search, Bell, LogOut, CheckCheck, Menu } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useMail } from '../context/MailContext';
 import { useContacts } from '../context/ContactContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function Header() {
+export default function Header({ onToggleMenu }: { onToggleMenu?: () => void }) {
    const { logout, user } = useAuth();
    const { mails, unreadCount, markAsRead } = useMail();
    const { contacts } = useContacts();
@@ -39,14 +39,19 @@ export default function Header() {
    };
 
    return (
-      <header className="h-20 border-b border-corporate-100 bg-surface flex items-center justify-between px-8 shrink-0 relative z-40">
-         <div className="relative w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-corporate-400" size={18} />
-            <input
-               type="text"
-               placeholder="Search secure messages..."
-               className="w-full bg-corporate-50 border-none rounded-full py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-accent-blue focus:outline-none transition-shadow text-corporate-900 placeholder:text-corporate-400"
-            />
+      <header className="h-20 border-b border-corporate-100 bg-surface flex items-center justify-between px-4 md:px-8 shrink-0 relative z-40">
+         <div className="flex items-center w-full md:w-96 mr-4">
+            <button onClick={onToggleMenu} className="md:hidden p-2 mr-2 text-corporate-500 hover:bg-corporate-50 rounded-lg transition-colors">
+               <Menu size={24} />
+            </button>
+            <div className="relative flex-1">
+               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-corporate-400" size={18} />
+               <input
+                  type="text"
+                  placeholder="Search secure messages..."
+                  className="w-full bg-corporate-50 border-none rounded-full py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-accent-blue focus:outline-none transition-shadow text-corporate-900 placeholder:text-corporate-400"
+               />
+            </div>
          </div>
 
          <div className="flex items-center space-x-5 text-corporate-400 relative">

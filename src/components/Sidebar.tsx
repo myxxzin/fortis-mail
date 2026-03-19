@@ -2,22 +2,22 @@ import { Link, useLocation } from 'react-router-dom';
 import { Inbox, Send, FileEdit, Settings, ShieldAlert, Cpu, Users } from 'lucide-react';
 import { useMail } from '../context/MailContext';
 
-export default function Sidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
+export default function Sidebar({ onOpenSettings, onMobileClose }: { onOpenSettings: () => void, onMobileClose?: () => void }) {
   const location = useLocation();
   const { unreadCount } = useMail();
 
   return (
     <div className="w-full md:w-64 bg-surface border-r border-corporate-200 h-full flex flex-col shrink-0">
       <div className="h-20 flex px-6 border-b border-corporate-100 bg-corporate-50 shrink-0">
-        <Link to="/inbox" className="flex items-center w-full group">
+        <Link to="/inbox" onClick={onMobileClose} className="flex items-center w-full group">
           <img src="/logo.png" alt="FortisMail" className="h-10 object-contain group-hover:scale-105 transition-transform" />
         </Link>
       </div>
 
       <div className="px-4 mb-6 mt-6 shrink-0">
-        <Link to="/compose" className="w-full bg-corporate-900 hover:bg-corporate-800 text-white flex items-center justify-center space-x-2 py-3 rounded-xl transition-all shadow-[0_4px_14px_0_rgba(15,23,42,0.15)] hover:shadow-[0_6px_20px_rgba(15,23,42,0.2)] font-medium">
+        <Link to="/compose" onClick={onMobileClose} className="w-full bg-corporate-900 hover:bg-corporate-800 text-white flex items-center justify-center space-x-2 py-3 rounded-xl transition-all shadow-[0_4px_14px_0_rgba(15,23,42,0.15)] hover:shadow-[0_6px_20px_rgba(15,23,42,0.2)] font-medium">
           <FileEdit size={18} />
-          <span>New Secure Mail</span>
+          <span>Compose</span>
         </Link>
       </div>
 
@@ -32,9 +32,10 @@ export default function Sidebar({ onOpenSettings }: { onOpenSettings: () => void
           <Link
             key={item.label}
             to={item.path}
+            onClick={onMobileClose}
             className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-colors ${location.pathname === item.path
-                ? 'bg-blue-50 text-accent-blue font-semibold'
-                : 'text-corporate-600 hover:bg-corporate-50 hover:text-corporate-900'
+              ? 'bg-blue-50 text-accent-blue font-semibold'
+              : 'text-corporate-600 hover:bg-corporate-50 hover:text-corporate-900'
               }`}
           >
             <div className="flex items-center space-x-3">

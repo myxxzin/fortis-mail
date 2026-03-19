@@ -77,19 +77,19 @@ export default function Compose() {
         for (const file of files) {
           const uniqueId = Math.random().toString(36).substring(2, 15);
           const fileRef = ref(storage, `attachments/${user.uid}/${Date.now()}-${uniqueId}-${file.name}`);
-          
+
           const { ciphertextBlob, fileKeyBase64, ivBase64 } = await encryptFile(file);
-          
+
           const snapshot = await uploadBytes(fileRef, ciphertextBlob);
           const downloadUrl = await getDownloadURL(snapshot.ref);
-          
+
           uploadedFiles.push({
             name: file.name,
             url: downloadUrl,
             size: file.size,
             type: file.type
           });
-          
+
           attachmentKeys.push({
             id: downloadUrl,
             fileKeyBase64,
@@ -101,14 +101,14 @@ export default function Compose() {
       const keysParam = attachmentKeys.length > 0 ? attachmentKeys : undefined;
 
       const payload = await encryptMessageHybrid(
-        body, 
-        recipientPubKey.trim(), 
-        user!.privateKey!, 
-        user!.publicKey, 
-        recipientPubKey.trim(), 
+        body,
+        recipientPubKey.trim(),
+        user!.privateKey!,
+        user!.publicKey,
+        recipientPubKey.trim(),
         keysParam
       );
-      
+
       const asciiArmor = packHybridPayload(payload);
       const encryptedContent = asciiArmor;
 
@@ -152,12 +152,12 @@ export default function Compose() {
         <ArrowLeft size={16} />
         <span className="text-sm font-medium">Back to Inbox</span>
       </button>
-      
+
       <div className="bg-surface rounded-2xl shadow-sm border border-corporate-200 flex flex-col relative w-full max-w-4xl mx-auto overflow-hidden">
         <div className="px-6 py-5 border-b border-corporate-100 flex items-center justify-between bg-white shrink-0">
           <h1 className="text-2xl font-bold text-corporate-900 tracking-tight flex items-center">
             <img src="/logo.png" alt="FortisMail" className="h-8 object-contain mr-3" />
-            New Secure Mail
+            Compose
           </h1>
           <div className="text-xs font-bold uppercase tracking-widest text-corporate-400 bg-corporate-50 px-3 py-1.5 rounded-lg border border-corporate-100">
             RSA-4096 Encrypted
@@ -190,22 +190,22 @@ export default function Compose() {
               <form onSubmit={handleSend} className="flex flex-col relative">
                 {/* Form Body */}
                 <div className="p-6 md:p-8 space-y-6 bg-corporate-50/10">
-                  <div className="grid grid-cols-[100px_1fr] items-center gap-4">
-                    <label className="text-xs font-semibold uppercase text-corporate-500 tracking-wider text-right">From</label>
+                  <div className="flex flex-col md:grid md:grid-cols-[100px_1fr] md:items-center gap-1 md:gap-4">
+                    <label className="text-xs font-semibold uppercase text-corporate-500 tracking-wider text-left md:text-right pl-1 md:pl-0">From</label>
                     <div className="relative">
                       <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-corporate-400" size={16} />
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         value={senderDisplay}
                         onChange={e => setSenderDisplay(e.target.value)}
-                        placeholder="e.g. John Doe (CEO) or Anonymous" 
-                        className="w-full bg-white text-corporate-900 border border-corporate-200 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent-blue transition-all font-medium" 
+                        placeholder="e.g. John Doe (CEO) or Anonymous"
+                        className="w-full bg-white text-corporate-900 border border-corporate-200 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent-blue transition-all font-medium"
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-[100px_1fr] flex-start gap-4 relative">
-                    <label className="text-xs font-semibold uppercase text-corporate-500 tracking-wider text-right pt-3">To (Key)</label>
+                  <div className="flex flex-col md:grid md:grid-cols-[100px_1fr] flex-start gap-1 md:gap-4 relative">
+                    <label className="text-xs font-semibold uppercase text-corporate-500 tracking-wider text-left md:text-right md:pt-3 pl-1 md:pl-0">Demand Public Key</label>
                     <div className="relative">
                       <div className="flex justify-between items-center mb-1">
                         <span className="text-[10px] text-corporate-400 font-medium h-4">{recipientAlias && `Contact: ${recipientAlias}`}</span>
@@ -226,19 +226,19 @@ export default function Compose() {
                           </button>
                         </div>
                       </div>
-                      
+
                       <div className="relative">
-                        <textarea 
-                          required 
-                          value={recipientPubKey} 
-                          onChange={e => { setRecipientPubKey(e.target.value); setRecipientAlias(''); setPasteError(''); }} 
+                        <textarea
+                          required
+                          value={recipientPubKey}
+                          onChange={e => { setRecipientPubKey(e.target.value); setRecipientAlias(''); setPasteError(''); }}
                           onFocus={() => setShowContactDropdown(true)}
                           onBlur={() => setTimeout(() => setShowContactDropdown(false), 200)}
-                          rows={2} 
-                          placeholder="-----BEGIN PUBLIC KEY-----..." 
+                          rows={2}
+                          placeholder="-----BEGIN PUBLIC KEY-----..."
                           className="w-full bg-white border border-corporate-200 rounded-lg pr-3 pl-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-accent-blue transition-all font-mono resize-none"
                         />
-                        
+
                         {/* Contact Dropdown overlay directly on Public Key */}
                         <AnimatePresence>
                           {showContactDropdown && contacts.length > 0 && (
@@ -278,8 +278,8 @@ export default function Compose() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-[100px_1fr] items-center gap-4">
-                    <label className="text-xs font-semibold uppercase text-corporate-500 tracking-wider text-right">Subject</label>
+                  <div className="flex flex-col md:grid md:grid-cols-[100px_1fr] md:items-center gap-1 md:gap-4">
+                    <label className="text-xs font-semibold uppercase text-corporate-500 tracking-wider text-left md:text-right pl-1 md:pl-0">Subject</label>
                     <div className="relative">
                       <FileText className="absolute left-3 top-1/2 -translate-y-1/2 text-corporate-400" size={16} />
                       <input type="text" required value={subject} onChange={e => setSubject(e.target.value)} placeholder="Encrypted Message Subject" className="w-full bg-white border border-corporate-200 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent-blue transition-all font-medium" />
@@ -300,11 +300,11 @@ export default function Compose() {
                     <div className="flex items-center justify-between mb-4">
                       <label className="text-xs font-semibold uppercase text-corporate-500 tracking-wider">Attachments</label>
                       <div>
-                        <input 
+                        <input
                           id="file-upload"
-                          type="file" 
-                          multiple 
-                          className="hidden" 
+                          type="file"
+                          multiple
+                          className="hidden"
                           onChange={(e) => {
                             if (e.target.files && e.target.files.length > 0) {
                               const selectedFiles = Array.from(e.target.files);
@@ -333,8 +333,8 @@ export default function Compose() {
                                 <span className="text-xs text-corporate-500">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
                               </div>
                             </div>
-                            <button 
-                              type="button" 
+                            <button
+                              type="button"
                               onClick={() => setFiles(files.filter((_, i) => i !== index))}
                               className="w-8 h-8 flex items-center justify-center text-corporate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0"
                             >
@@ -359,8 +359,8 @@ export default function Compose() {
                     </div>
 
                     <div className="flex justify-end space-x-3 shrink-0 flex-wrap">
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={() => {
                           setStep('compose');
                           setSubject('');
@@ -369,25 +369,25 @@ export default function Compose() {
                           setRecipientAlias('');
                           setFiles([]);
                           navigate('/inbox');
-                        }} 
+                        }}
                         className="px-4 py-2.5 border border-corporate-200 rounded-xl text-sm font-semibold text-corporate-700 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors shadow-sm flex items-center space-x-2"
                       >
                         <Trash2 size={16} />
                         <span className="hidden sm:inline">Discard</span>
                       </button>
 
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={async () => {
                           if (!subject && !body && !recipientPubKey) return;
                           await saveDraft({
-                             subject,
-                             content: body,
-                             recipientPubKey,
-                             senderDisplay: senderDisplay || 'Anonymous'
+                            subject,
+                            content: body,
+                            recipientPubKey,
+                            senderDisplay: senderDisplay || 'Anonymous'
                           });
                           navigate('/drafts');
-                        }} 
+                        }}
                         className="px-4 py-2.5 border border-corporate-200 rounded-xl text-sm font-semibold text-corporate-700 hover:bg-blue-50 hover:text-accent-blue hover:border-blue-200 transition-colors shadow-sm flex items-center space-x-2"
                       >
                         <Save size={16} />
