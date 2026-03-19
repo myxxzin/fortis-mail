@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { auth, db } from '../config/firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { deriveAESKey, decryptPrivateKey, encryptPrivateKey, generateVerifierHash } from '../utils/cryptoAuth';
+import { deriveAESKey, decryptPrivateKeys, encryptPrivateKeys, generateVerifierHash, ab2base64, base642ab } from '../utils/cryptoAuth';
 
 interface User {
   uid: string;
@@ -18,8 +18,8 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (identityId: string, pass: string, seedPhrase: string[]) => Promise<void>;
-  register: (identityId: string, pass: string, alias: string, seedPhrase: string[], publicKey: string, privateKey: string) => Promise<void>;
+  login: (identityId: string, pass: string) => Promise<void>;
+  register: (identityId: string, pass: string, alias: string, publicKey: string, privateKey: string) => Promise<void>;
   logout: () => void;
   updateProfile: (updates: Partial<User>) => void;
 }
@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const login = async (identityId: string, pass: string, seedPhrase: string[]) => {
+  const login = async (identityId: string, pass: string) => {
     const email = `${identityId.toLowerCase()}@fortismail.internal`;
     
     // 1. Authenticate with Firebase using dummy email + Master Password
@@ -73,18 +73,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     const data = docSnap.data();
     
-    // 3. Verify the Hash locally to ensure they provided the right Seed Phrase
-    const localHash = await generateVerifierHash(seedPhrase, pass, identityId);
+    // Support legacy (identityId as salt) or new strong random salt
+    const salt = data.saltBase64 
+      ? new Uint8Array(base642ab(data.saltBase64))
+      : new TextEncoder().encode(identityId + "FORTISMAIL_SALT");
+
+    // 3. Verify the Hash locally
+    const localHash = await generateVerifierHash(pass, salt);
     if (localHash !== data.verifierHash) {
         await signOut(auth);
-        throw new Error("Invalid Master Password or Seed Phrase. Cryptographic verification failed.");
+        throw new Error("Invalid Master Password. Cryptographic verification failed.");
     }
 
     // 4. Derive AES key and Decrypt the Private Key into memory
-    const aesKey = await deriveAESKey(seedPhrase, pass, identityId);
+    const aesKey = await deriveAESKey(pass, salt);
     let decryptedPrivateKey = "";
     try {
-        decryptedPrivateKey = await decryptPrivateKey(data.encryptedPrivateKey, aesKey);
+        decryptedPrivateKey = await decryptPrivateKeys(data.encryptedPrivateKey, aesKey);
     } catch (e) {
         await signOut(auth);
         throw new Error("Failed to decrypt Secure Enclave. Check your credentials.");
@@ -100,18 +105,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const register = async (identityId: string, pass: string, alias: string, seedPhrase: string[], publicKey: string, privateKey: string) => {
+  const register = async (identityId: string, pass: string, alias: string, publicKey: string, privateKey: string) => {
     const email = `${identityId.toLowerCase()}@fortismail.internal`;
     
     // 1. Create Firebase Auth user
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     
-    // 2. Derive AES Key and encrypt the Private Key
-    const aesKey = await deriveAESKey(seedPhrase, pass, identityId);
-    const encryptedPrivateKey = await encryptPrivateKey(privateKey, aesKey);
+    // 2. Derive AES Key with Random PBKDF2 Salt
+    const salt = window.crypto.getRandomValues(new Uint8Array(16));
+    const saltBase64 = ab2base64(salt.buffer);
+
+    const aesKey = await deriveAESKey(pass, salt);
+    const encryptedPrivateKey = await encryptPrivateKeys(privateKey, aesKey);
     
     // 3. Generate Verifier Hash
-    const verifierHash = await generateVerifierHash(seedPhrase, pass, identityId);
+    const verifierHash = await generateVerifierHash(pass, salt);
 
     // 4. Save to Firestore (Zero-Knowledge: Private key cipher only)
     const newUserProfile = {
@@ -120,7 +128,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       alias,
       publicKey: publicKey.trim(),
       encryptedPrivateKey,
-      verifierHash
+      verifierHash,
+      saltBase64
     };
 
     try {

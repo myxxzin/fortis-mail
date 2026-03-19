@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, CheckCircle2, User as UserIcon, FileText, ClipboardList, Paperclip, X, Trash2, Save, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { Lock, CheckCircle2, User as UserIcon, FileText, ClipboardList, Paperclip, X, Trash2, Save, ArrowLeft } from 'lucide-react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../config/firebase';
@@ -14,7 +14,6 @@ import { toast } from 'react-hot-toast';
 export default function Compose() {
   const [step, setStep] = useState<'compose' | 'encrypting' | 'success' | 'sent'>('compose');
   const [isEncrypting, setIsEncrypting] = useState(false);
-  const [generatedCiphertext, setGeneratedCiphertext] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -101,24 +100,22 @@ export default function Compose() {
 
       const keysParam = attachmentKeys.length > 0 ? attachmentKeys : undefined;
 
-      const payload = await encryptMessageHybrid(body, recipientPubKey.trim(), keysParam);
+      const payload = await encryptMessageHybrid(
+        body, 
+        recipientPubKey.trim(), 
+        user!.privateKey!, 
+        user!.publicKey, 
+        recipientPubKey.trim(), 
+        keysParam
+      );
+      
       const asciiArmor = packHybridPayload(payload);
       const encryptedContent = asciiArmor;
-      
-      let senderEncryptedContent;
-      if (user && user.publicKey) {
-        const senderPayload = await encryptMessageHybrid(body, user.publicKey, keysParam);
-        senderEncryptedContent = packHybridPayload(senderPayload);
-      }
-      
-      setGeneratedCiphertext(asciiArmor);
-      await new Promise(resolve => setTimeout(resolve, 4000)); // Expose ASCII Armor for 4s
 
       await sendMail({
         recipientPubKey: recipientPubKey.trim(),
         subject,
         content: encryptedContent,
-        senderContent: senderEncryptedContent,
         senderDisplay: senderDisplay || 'Anonymous',
         attachments: uploadedFiles.length > 0 ? uploadedFiles : undefined
       });
@@ -127,7 +124,6 @@ export default function Compose() {
         await deleteDraft(draftId);
       }
 
-      setGeneratedCiphertext(null);
       setStep('success');
       setIsEncrypting(false);
       setTimeout(() => {
@@ -168,30 +164,17 @@ export default function Compose() {
           </div>
         </div>
 
-        {(isEncrypting || generatedCiphertext) && (
+        {isEncrypting && (
           <div className="absolute inset-0 z-[100] bg-corporate-900/95 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-8">
-            {!generatedCiphertext ? (
-              <div className="flex flex-col items-center">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-                  className="w-16 h-16 border-4 border-corporate-700 border-t-accent-blue rounded-full mb-6"
-                />
-                <h2 className="text-xl font-bold text-white font-mono tracking-widest leading-relaxed">ENCRYPTING PAYLOAD...</h2>
-                <p className="text-sm text-corporate-400 font-mono mt-2">Applying AES-256-GCM symmetric session keys</p>
-              </div>
-            ) : (
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center w-full max-w-4xl">
-                 <ShieldCheck size={56} className="text-green-500 mb-4" />
-                 <h2 className="text-2xl font-bold text-white font-mono tracking-widest text-center mb-4">SUCCESS: CIPHERTEXT GENERATED</h2>
-                 <div className="w-full bg-black/95 rounded-xl p-6 h-[400px] overflow-y-auto border border-green-500/50 mb-6 drop-shadow-[0_0_20px_rgba(34,197,94,0.15)] text-left shadow-xl">
-                   <pre className="text-green-400 font-mono text-[11px] md:text-xs break-all whitespace-pre-wrap leading-relaxed select-all">
-                     {generatedCiphertext}
-                   </pre>
-                 </div>
-                 <p className="text-sm text-green-500/80 font-mono mt-2 uppercase animate-pulse tracking-widest">Transmitting securely to Firebase...</p>
-              </motion.div>
-            )}
+            <div className="flex flex-col items-center">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                className="w-16 h-16 border-4 border-corporate-700 border-t-accent-blue rounded-full mb-6"
+              />
+              <h2 className="text-xl font-bold text-white font-mono tracking-widest leading-relaxed">ENCRYPTING PAYLOAD...</h2>
+              <p className="text-sm text-corporate-400 font-mono mt-2">Applying AES-256-GCM symmetric session keys</p>
+            </div>
           </div>
         )}
 

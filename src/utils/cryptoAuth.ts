@@ -1,60 +1,28 @@
-// Utility for Zero-Knowledge Seed Phrase Authentication
+// Utility for Zero-Knowledge Authentication
+// Upgraded to Ephemeral ECDH and separated ECDSA/ECDH Key Pairs.
 
-// A curated list of 256 words (simplified BIP39 style) for demo purposes
-const WORD_LIST = [
-  "abandon", "ability", "able", "about", "above", "absent", "absorb", "abstract", "absurd", "abuse",
-  "access", "accident", "account", "accuse", "achieve", "acid", "acoustic", "acquire", "across", "act",
-  "action", "actor", "actress", "actual", "adapt", "add", "addict", "address", "adjust", "admit",
-  "adult", "advance", "advice", "aerobic", "affair", "afford", "afraid", "again", "age", "agent",
-  "agree", "ahead", "aim", "air", "airport", "aisle", "alarm", "album", "alcohol", "alert",
-  "alien", "all", "alley", "allow", "almost", "alone", "alpha", "already", "also", "alter",
-  "always", "amateur", "amazing", "among", "amount", "amused", "analyst", "anchor", "ancient", "anger",
-  "angle", "angry", "animal", "ankle", "announce", "annual", "another", "answer", "antenna", "antique",
-  "anxiety", "any", "apart", "apology", "appear", "apple", "approve", "april", "arch", "arctic",
-  "area", "arena", "argue", "arm", "armed", "armor", "army", "around", "arrange", "arrest",
-  "arrive", "arrow", "art", "artefact", "artist", "artwork", "ask", "aspect", "assault", "asset",
-  "assist", "assume", "asthma", "athlete", "atom", "attack", "attend", "attitude", "attract", "auction",
-  "audit", "august", "aunt", "author", "auto", "autumn", "average", "avocado", "avoid", "awake",
-  "aware", "away", "awesome", "awful", "awkward", "axis", "baby", "bachelor", "bacon", "badge",
-  "bag", "balance", "balcony", "ball", "bamboo", "banana", "banner", "bar", "barely", "bargain",
-  "barrel", "base", "basic", "basket", "battle", "beach", "bean", "beauty", "because", "become",
-  "beef", "before", "begin", "behave", "behind", "believe", "below", "belt", "bench", "benefit",
-  "best", "betray", "better", "between", "beyond", "bicycle", "bid", "bike", "bind", "biology",
-  "bird", "birth", "bitter", "black", "blade", "blame", "blanket", "blast", "bleak", "bless",
-  "blind", "blood", "blossom", "blouse", "blue", "blur", "blush", "board", "boat", "body",
-  "boil", "bomb", "bone", "bonus", "book", "boost", "border", "boring", "borrow", "boss",
-  "bottom", "bounce", "box", "boy", "bracket", "brain", "brand", "brass", "brave", "bread",
-  "breeze", "brick", "bridge", "brief", "bright", "bring", "brisk", "broccoli", "broken", "bronze",
-  "broom", "brother", "brown", "brush", "bubble", "buddy", "budget", "buffalo", "build", "bulb",
-  "bulk", "bullet", "bundle", "bunker", "burden", "burger", "burst", "bus", "business", "butter",
-  "buyer", "buzz", "cabbage", "cabin", "cable", "cactus", "cage", "cake", "call", "calm"
-];
+const enc = new TextEncoder();
+const dec = new TextDecoder();
 
-/**
- * Generates a 6-word random seed phrase from the word list.
- */
-export const generateSeedPhrase = (): string[] => {
-  const phrase: string[] = [];
-  const cryptoObj = window.crypto;
-  const array = new Uint32Array(6);
-  cryptoObj.getRandomValues(array);
-  
-  for (let i = 0; i < 6; i++) {
-    const index = array[i] % WORD_LIST.length;
-    phrase.push(WORD_LIST[index]);
+export function ab2base64(buf: ArrayBuffer | ArrayBufferLike | Uint8Array | any): string {
+  const bytes = buf instanceof Uint8Array ? buf : new Uint8Array(buf as ArrayBuffer);
+  const binString = String.fromCodePoint(...bytes);
+  return window.btoa(binString);
+}
+
+export function base642ab(base64: string): ArrayBuffer {
+  const binString = window.atob(base64);
+  const bytes = new Uint8Array(binString.length);
+  for (let i = 0; i < binString.length; i++) {
+    bytes[i] = binString.codePointAt(i)!;
   }
-  return phrase;
-};
+  return bytes.buffer;
+}
 
-/**
- * Derives a 256-bit AES-GCM key from the Seed Phrase and Master Password.
- * We use PBKDF2 with 100,000 iterations to make brute-forcing very expensive.
- */
-export const deriveAESKey = async (seedPhrase: string[], password: string, identityId: string): Promise<CryptoKey> => {
-  const enc = new TextEncoder();
-  const material = enc.encode(seedPhrase.join(' ') + password);
-  const salt = enc.encode(identityId + "FORTISMAIL_SALT");
+// --- Key Derivation ---
 
+export const deriveAESKey = async (password: string, salt: Uint8Array): Promise<CryptoKey> => {
+  const material = enc.encode(password);
   const keyMaterial = await window.crypto.subtle.importKey(
     "raw",
     material,
@@ -66,7 +34,7 @@ export const deriveAESKey = async (seedPhrase: string[], password: string, ident
   return window.crypto.subtle.deriveKey(
     {
       name: "PBKDF2",
-      salt: salt,
+      salt: salt as any,
       iterations: 100000,
       hash: "SHA-256"
     },
@@ -77,227 +45,219 @@ export const deriveAESKey = async (seedPhrase: string[], password: string, ident
   );
 };
 
-/**
- * Generates a Verifier Hash to send to the server.
- * The server stores this hash and compares it during login.
- */
-export const generateVerifierHash = async (seedPhrase: string[], password: string, identityId: string): Promise<string> => {
-    const enc = new TextEncoder();
-    const data = enc.encode(seedPhrase.join('') + password + identityId + "VERIFIER");
+export const generateVerifierHash = async (password: string, salt: Uint8Array): Promise<string> => {
+    const data = enc.encode(password + ab2base64(salt) + "VERIFIER");
     const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 };
 
-/**
- * Encrypts the Private Key using the derived AES key for storage on Firestore.
- */
-export const encryptPrivateKey = async (privateKey: string, aesKey: CryptoKey): Promise<{ ciphertext: string, iv: string }> => {
-  const enc = new TextEncoder();
+export const encryptPrivateKeys = async (privateKeysJson: string, aesKey: CryptoKey): Promise<{ ciphertext: string, iv: string }> => {
   const iv = window.crypto.getRandomValues(new Uint8Array(12));
-  const encodedContent = enc.encode(privateKey);
+  const encodedContent = enc.encode(privateKeysJson);
 
   const encryptedBuffer = await window.crypto.subtle.encrypt(
-    {
-      name: "AES-GCM",
-      iv: iv
-    },
+    { name: "AES-GCM", iv: iv },
     aesKey,
     encodedContent
   );
 
-  const ciphertextArray = Array.from(new Uint8Array(encryptedBuffer));
-  const ciphertextBase64 = btoa(String.fromCharCode.apply(null, ciphertextArray));
-  
-  const ivArray = Array.from(iv);
-  const ivBase64 = btoa(String.fromCharCode.apply(null, ivArray));
-
-  return { ciphertext: ciphertextBase64, iv: ivBase64 };
+  return { ciphertext: ab2base64(encryptedBuffer), iv: ab2base64(iv.buffer) };
 };
 
-/**
- * Decrypts the Private Key from Firestore using the AES key derived from user input.
- */
-export const decryptPrivateKey = async (encryptedData: { ciphertext: string, iv: string }, aesKey: CryptoKey): Promise<string> => {
-  const ciphertextBytes = Uint8Array.from(atob(encryptedData.ciphertext), c => c.charCodeAt(0));
-  const ivBytes = Uint8Array.from(atob(encryptedData.iv), c => c.charCodeAt(0));
+export const decryptPrivateKeys = async (encryptedData: { ciphertext: string, iv: string }, aesKey: CryptoKey): Promise<string> => {
+  const ciphertextBytes = base642ab(encryptedData.ciphertext);
+  const ivBytes = base642ab(encryptedData.iv);
 
   const decryptedBuffer = await window.crypto.subtle.decrypt(
-    {
-      name: "AES-GCM",
-      iv: ivBytes
-    },
+    { name: "AES-GCM", iv: new Uint8Array(ivBytes) },
     aesKey,
     ciphertextBytes
   );
 
-  const dec = new TextDecoder();
   return dec.decode(decryptedBuffer);
 };
 
-// --- Real Asymmetric Cryptography (WebCrypto RSA-OAEP & AES-GCM Hybrid) ---
+// --- ECC (Elliptic Curve Cryptography) ---
 
-function ab2str(buf: ArrayBuffer): string {
-  return String.fromCharCode.apply(null, new Uint8Array(buf) as any);
-}
-
-function str2ab(str: string): ArrayBuffer {
-  const buf = new ArrayBuffer(str.length);
-  const bufView = new Uint8Array(buf);
-  for (let i = 0, strLen = str.length; i < strLen; i++) {
-    bufView[i] = str.charCodeAt(i);
-  }
-  return buf;
-}
-
-export const generateRSAKeyPair = async (): Promise<CryptoKeyPair> => {
+export const generateECCSignKeyPair = async (): Promise<CryptoKeyPair> => {
   return window.crypto.subtle.generateKey(
-    {
-      name: "RSA-OAEP",
-      modulusLength: 4096,
-      publicExponent: new Uint8Array([1, 0, 1]),
-      hash: "SHA-256",
-    },
+    { name: "ECDSA", namedCurve: "P-256" },
     true,
-    ["encrypt", "decrypt"]
+    ["sign", "verify"]
   );
 };
 
-export const exportPublicKey = async (key: CryptoKey): Promise<string> => {
+export const generateECCEncryptKeyPair = async (): Promise<CryptoKeyPair> => {
+  return window.crypto.subtle.generateKey(
+    { name: "ECDH", namedCurve: "P-256" },
+    true,
+    ["deriveKey", "deriveBits"]
+  );
+};
+
+export const exportPublicKey = async (key: CryptoKey, type: 'SIGN' | 'ENCRYPT'): Promise<string> => {
   const exported = await window.crypto.subtle.exportKey("spki", key);
-  const exportedAsString = ab2str(exported);
-  const exportedAsBase64 = window.btoa(exportedAsString);
-  return `-----BEGIN PUBLIC KEY-----\n${exportedAsBase64.match(/.{1,64}/g)?.join('\n')}\n-----END PUBLIC KEY-----`;
+  const exportedAsBase64 = ab2base64(exported);
+  return `-----BEGIN FORTIS ${type} PUBLIC KEY-----\n${exportedAsBase64.match(/.{1,64}/g)?.join('\n')}\n-----END FORTIS ${type} PUBLIC KEY-----`;
 };
 
-export const exportPrivateKey = async (key: CryptoKey): Promise<string> => {
+export const exportPrivateKey = async (key: CryptoKey, type: 'SIGN' | 'ENCRYPT'): Promise<string> => {
   const exported = await window.crypto.subtle.exportKey("pkcs8", key);
-  const exportedAsString = ab2str(exported);
-  const exportedAsBase64 = window.btoa(exportedAsString);
-  return `-----BEGIN PRIVATE KEY-----\n${exportedAsBase64.match(/.{1,64}/g)?.join('\n')}\n-----END PRIVATE KEY-----`;
+  const exportedAsBase64 = ab2base64(exported);
+  return `-----BEGIN FORTIS ${type} PRIVATE KEY-----\n${exportedAsBase64.match(/.{1,64}/g)?.join('\n')}\n-----END FORTIS ${type} PRIVATE KEY-----`;
 };
 
-export const importPublicKey = async (pem: string): Promise<CryptoKey> => {
-  const pemHeader = "-----BEGIN PUBLIC KEY-----";
-  const pemFooter = "-----END PUBLIC KEY-----";
-  
-  if (!pem || !pem.includes(pemHeader) || !pem.includes(pemFooter)) {
-    throw new Error("The recipient's Public Key is invalid. It must be a valid RSA PEM format starting with '-----BEGIN PUBLIC KEY-----'.");
+const extractPemContents = (pem: string, keyType: 'PUBLIC' | 'PRIVATE', usage: 'SIGN' | 'ENCRYPT'): ArrayBuffer => {
+  const header = `-----BEGIN FORTIS ${usage} ${keyType} KEY-----`;
+  const footer = `-----END FORTIS ${usage} ${keyType} KEY-----`;
+  if (!pem || !pem.includes(header) || !pem.includes(footer)) {
+    throw new Error(`Invalid ${usage.toLowerCase()} ${keyType.toLowerCase()} key format.`);
   }
-
-  try {
-    const pemContents = pem.substring(pem.indexOf(pemHeader) + pemHeader.length, pem.indexOf(pemFooter)).replace(/\s/g, '');
-    const binaryDerString = window.atob(pemContents);
-    const binaryDer = str2ab(binaryDerString);
-
-    return await window.crypto.subtle.importKey(
-      "spki",
-      binaryDer,
-      { name: "RSA-OAEP", hash: "SHA-256" },
-      true,
-      ["encrypt"]
-    );
-  } catch (err) {
-    throw new Error("Failed to read the Public Key. It may be corrupted or incorrectly formatted.");
-  }
+  const contents = pem.substring(pem.indexOf(header) + header.length, pem.indexOf(footer)).replace(/\s/g, '');
+  return base642ab(contents);
 };
 
-export const importPrivateKey = async (pem: string): Promise<CryptoKey> => {
-  const pemHeader = "-----BEGIN PRIVATE KEY-----";
-  const pemFooter = "-----END PRIVATE KEY-----";
-  
-  if (!pem || !pem.includes(pemHeader) || !pem.includes(pemFooter)) {
-    throw new Error("Your Private Key is invalid. It must be a valid RSA PEM format starting with '-----BEGIN PRIVATE KEY-----'.");
-  }
+export const importPublicKeyForECDSA = async (pem: string): Promise<CryptoKey> => {
+  const binaryDer = extractPemContents(pem, 'PUBLIC', 'SIGN');
+  return await window.crypto.subtle.importKey(
+    "spki", binaryDer, { name: "ECDSA", namedCurve: "P-256" }, true, ["verify"]
+  );
+};
 
-  try {
-    const pemContents = pem.substring(pem.indexOf(pemHeader) + pemHeader.length, pem.indexOf(pemFooter)).replace(/\s/g, '');
-    const binaryDerString = window.atob(pemContents);
-    const binaryDer = str2ab(binaryDerString);
+export const importPrivateKeyForECDSA = async (pem: string): Promise<CryptoKey> => {
+  const binaryDer = extractPemContents(pem, 'PRIVATE', 'SIGN');
+  return await window.crypto.subtle.importKey(
+    "pkcs8", binaryDer, { name: "ECDSA", namedCurve: "P-256" }, true, ["sign"]
+  );
+};
 
-    return await window.crypto.subtle.importKey(
-      "pkcs8",
-      binaryDer,
-      { name: "RSA-OAEP", hash: "SHA-256" },
-      true,
-      ["decrypt"]
-    );
-  } catch (err) {
-    throw new Error("Failed to unlock Private Key. It may be corrupted.");
-  }
+export const importPublicKeyForECDH = async (pem: string): Promise<CryptoKey> => {
+  const binaryDer = extractPemContents(pem, 'PUBLIC', 'ENCRYPT');
+  return await window.crypto.subtle.importKey(
+    "spki", binaryDer, { name: "ECDH", namedCurve: "P-256" }, true, []
+  );
+};
+
+export const importPrivateKeyForECDH = async (pem: string): Promise<CryptoKey> => {
+  const binaryDer = extractPemContents(pem, 'PRIVATE', 'ENCRYPT');
+  return await window.crypto.subtle.importKey(
+    "pkcs8", binaryDer, { name: "ECDH", namedCurve: "P-256" }, true, ["deriveKey"]
+  );
+};
+
+// --- Operations ---
+
+export const signPayload = async (payloadStr: string, privateKeyPem: string): Promise<string> => {
+  const privateKey = await importPrivateKeyForECDSA(privateKeyPem);
+  const signatureBuffer = await window.crypto.subtle.sign(
+    { name: "ECDSA", hash: { name: "SHA-256" } },
+    privateKey,
+    enc.encode(payloadStr)
+  );
+  return ab2base64(signatureBuffer);
+};
+
+export const verifySignature = async (payloadStr: string, signatureBase64: string, publicKeyPem: string): Promise<boolean> => {
+  const publicKey = await importPublicKeyForECDSA(publicKeyPem);
+  const signatureBuffer = base642ab(signatureBase64);
+  return await window.crypto.subtle.verify(
+    { name: "ECDSA", hash: { name: "SHA-256" } },
+    publicKey,
+    signatureBuffer,
+    enc.encode(payloadStr)
+  );
 };
 
 export interface EncryptedMessagePayload {
-  encryptedSessionKeyBase64: string;
+  ephemeralPubKeyPem: string;
   ivBase64: string;
   ciphertextBase64: string;
   attachmentKeys?: {
-    id: string; // matches the attachment URL or unique identifier
+    id: string;
     fileKeyBase64: string;
     ivBase64: string;
   }[];
 }
 
-export const encryptMessageHybrid = async (plaintext: string, recipientPubKeyPem: string, attachmentKeys?: { id: string, fileKeyBase64: string, ivBase64: string }[]): Promise<EncryptedMessagePayload> => {
-  // 1. Import Recipient's RSA Public Key
-  const publicKey = await importPublicKey(recipientPubKeyPem);
+export const encryptMessageHybrid = async (
+  plaintext: string, 
+  recipientEncryptPubKeyPem: string,
+  senderSignPrivKeyPem: string,
+  senderSignPubKeyPem: string,
+  recipientIdentityId: string,
+  attachmentKeys?: { id: string, fileKeyBase64: string, ivBase64: string }[]
+): Promise<EncryptedMessagePayload> => {
+  // 1. Context-Bound Signature
+  const timestamp = Date.now().toString();
+  const contextBoundPayload = `${plaintext}||To:${recipientIdentityId}||${timestamp}`;
+  const signatureBase64 = await signPayload(contextBoundPayload, senderSignPrivKeyPem);
 
-  // 2. Generate a random AES-GCM session key
-  const sessionKey = await window.crypto.subtle.generateKey(
+  // 2. Sealed Payload JSON
+  const innerPayloadObj = {
+    body: plaintext,
+    senderPubKey: senderSignPubKeyPem,
+    timestamp: timestamp,
+    signatureBase64: signatureBase64
+  };
+  const innerPayloadStr = JSON.stringify(innerPayloadObj);
+
+  // 3. Ephemeral ECDH Key Derivation
+  const ephemeralKeyPair = await generateECCEncryptKeyPair();
+  const ecdhPubKey = await importPublicKeyForECDH(recipientEncryptPubKeyPem);
+
+  const sessionKey = await window.crypto.subtle.deriveKey(
+    { name: "ECDH", public: ecdhPubKey },
+    ephemeralKeyPair.privateKey,
     { name: "AES-GCM", length: 256 },
-    true,
-    ["encrypt", "decrypt"]
+    false,
+    ["encrypt"]
   );
 
-  // 3. Encrypt the plaintext with the AES session key
-  const enc = new TextEncoder();
+  const ephemeralPubKeyPem = await exportPublicKey(ephemeralKeyPair.publicKey, 'ENCRYPT');
+
+  // 4. Encrypt with AES-GCM
   const iv = window.crypto.getRandomValues(new Uint8Array(12));
   const ciphertextBuffer = await window.crypto.subtle.encrypt(
     { name: "AES-GCM", iv: iv },
     sessionKey,
-    enc.encode(plaintext)
-  );
-
-  // 4. Encrypt the AES session key using the Recipient's RSA Public Key
-  const exportedSessionKey = await window.crypto.subtle.exportKey("raw", sessionKey);
-  const encryptedSessionKeyBuffer = await window.crypto.subtle.encrypt(
-    { name: "RSA-OAEP" },
-    publicKey,
-    exportedSessionKey
+    enc.encode(innerPayloadStr)
   );
 
   return {
-    encryptedSessionKeyBase64: window.btoa(ab2str(encryptedSessionKeyBuffer)),
-    ivBase64: window.btoa(ab2str(iv.buffer)),
-    ciphertextBase64: window.btoa(ab2str(ciphertextBuffer)),
+    ephemeralPubKeyPem,
+    ivBase64: ab2base64(iv.buffer),
+    ciphertextBase64: ab2base64(ciphertextBuffer),
     ...(attachmentKeys ? { attachmentKeys } : {})
   };
 };
 
-export const decryptMessageHybrid = async (payload: EncryptedMessagePayload, userPrivKeyPem: string): Promise<string> => {
-  // 1. Import User's RSA Private Key
-  const privateKey = await importPrivateKey(userPrivKeyPem);
+export const decryptMessageHybrid = async (
+  payload: EncryptedMessagePayload, 
+  userEncryptPrivKeyPem: string, 
+  expectedSenderSignPubKeyPem: string,
+  myIdentityId: string
+): Promise<{ plaintext: string, verifiedSender: string, timestamp: string }> => {
+  
+  if (!payload.ephemeralPubKeyPem) {
+      throw new Error("Missing ephemeral public key in payload. Legacy static ECDH not supported.");
+  }
 
-  // 2. Decrypt the AES session key using the RSA Private Key
-  const encryptedSessionKeyBuffer = str2ab(window.atob(payload.encryptedSessionKeyBase64));
-  const sessionKeyRaw = await window.crypto.subtle.decrypt(
-    { name: "RSA-OAEP" },
-    privateKey,
-    encryptedSessionKeyBuffer
-  );
+  // 1. Derivation of ECDH Session Key from Ephemeral Pub + User Encrypt Priv
+  const ecdhPrivKey = await importPrivateKeyForECDH(userEncryptPrivKeyPem);
+  const ephemeralPubKey = await importPublicKeyForECDH(payload.ephemeralPubKeyPem);
 
-  // 3. Import the decrypted AES session key
-  const sessionKey = await window.crypto.subtle.importKey(
-    "raw",
-    sessionKeyRaw,
+  const sessionKey = await window.crypto.subtle.deriveKey(
+    { name: "ECDH", public: ephemeralPubKey },
+    ecdhPrivKey,
     { name: "AES-GCM", length: 256 },
-    true,
+    false,
     ["decrypt"]
   );
 
-  // 4. Decrypt the ciphertext using the AES session key
-  const ivBuffer = str2ab(window.atob(payload.ivBase64));
-  const ciphertextBuffer = str2ab(window.atob(payload.ciphertextBase64));
+  // 2. AES-GCM Decryption
+  const ivBuffer = base642ab(payload.ivBase64);
+  const ciphertextBuffer = base642ab(payload.ciphertextBase64);
 
   const plaintextBuffer = await window.crypto.subtle.decrypt(
     { name: "AES-GCM", iv: new Uint8Array(ivBuffer) },
@@ -305,16 +265,48 @@ export const decryptMessageHybrid = async (payload: EncryptedMessagePayload, use
     ciphertextBuffer
   );
 
-  const dec = new TextDecoder();
-  return dec.decode(plaintextBuffer);
+  const rawDecrypted = dec.decode(plaintextBuffer);
+  let innerPayloadObj;
+  try {
+    innerPayloadObj = JSON.parse(rawDecrypted);
+  } catch(e) {
+    throw new Error("Failed to parse decrypted payload structure.");
+  }
+
+  // 3. Context-Bound Signature Verification
+  if (!innerPayloadObj.body || !innerPayloadObj.signatureBase64 || !innerPayloadObj.senderPubKey || !innerPayloadObj.timestamp) {
+     throw new Error("Message is missing critical signature metadata.");
+  }
+
+  const contextBoundPayload = `${innerPayloadObj.body}||To:${myIdentityId}||${innerPayloadObj.timestamp}`;
+  
+  const isValid = await verifySignature(
+    contextBoundPayload, 
+    innerPayloadObj.signatureBase64, 
+    innerPayloadObj.senderPubKey
+  );
+
+  if (!isValid) {
+    throw new Error("CRITICAL SECURITY ALERT: Digital Signature Invalid. The message was forged, tampered with, or surreptitiously forwarded.");
+  }
+
+  if (expectedSenderSignPubKeyPem !== 'SEALED' && innerPayloadObj.senderPubKey !== expectedSenderSignPubKeyPem) {
+    throw new Error("CRITICAL SECURITY ALERT: Sender Public Key mismatch. Message forged by an unauthorized identity.");
+  }
+
+  return {
+    plaintext: innerPayloadObj.body,
+    verifiedSender: innerPayloadObj.senderPubKey,
+    timestamp: innerPayloadObj.timestamp
+  };
 };
 
 export const packHybridPayload = (payload: EncryptedMessagePayload): string => {
   const jsonStr = JSON.stringify(payload);
-  const base64Str = window.btoa(jsonStr);
+  const base64Str = ab2base64(enc.encode(jsonStr).buffer);
   
   return `-----BEGIN FORTISMAIL ENCRYPTED MESSAGE-----
-Version: 1.0 (AES-GCM-256 / RSA-OAEP-4096)
+Version: 3.0 (Ephemeral ECDH P-256 / AES-GCM-256)
 Comment: https://fortismail.internal
 
 ${base64Str.trim()}
@@ -343,16 +335,11 @@ export const unpackHybridPayload = (asciiArmor: string): EncryptedMessagePayload
   const base64Str = base64Parts.join('');
   if (!base64Str) throw new Error("Invalid ASCII Armor representation.");
   
-  const jsonStr = window.atob(base64Str);
+  const jsonStr = dec.decode(base642ab(base64Str));
   return JSON.parse(jsonStr) as EncryptedMessagePayload;
 };
 
 // --- E2E Attachment Encryption ---
-
-/**
- * Encrypts a File blob using a freshly generated AES-GCM 256-bit key.
- * Returns the encrypted Blob and the base64-encoded key and IV.
- */
 export const encryptFile = async (file: File): Promise<{ ciphertextBlob: Blob, fileKeyBase64: string, ivBase64: string }> => {
   const fileKey = await window.crypto.subtle.generateKey(
     { name: "AES-GCM", length: 256 },
@@ -373,17 +360,14 @@ export const encryptFile = async (file: File): Promise<{ ciphertextBlob: Blob, f
   
   return {
     ciphertextBlob: new Blob([encryptedBuffer]),
-    fileKeyBase64: window.btoa(ab2str(exportedKey)),
-    ivBase64: window.btoa(ab2str(iv.buffer))
+    fileKeyBase64: ab2base64(exportedKey),
+    ivBase64: ab2base64(iv.buffer)
   };
 };
 
-/**
- * Decrypts an encrypted file Blob back into a plaintext Blob.
- */
 export const decryptFile = async (ciphertextBlob: Blob, fileKeyBase64: string, ivBase64: string, mimeType: string): Promise<Blob> => {
-  const fileKeyRaw = str2ab(window.atob(fileKeyBase64));
-  const ivBuffer = str2ab(window.atob(ivBase64));
+  const fileKeyRaw = base642ab(fileKeyBase64);
+  const ivBuffer = base642ab(ivBase64);
   
   const fileKey = await window.crypto.subtle.importKey(
     "raw",

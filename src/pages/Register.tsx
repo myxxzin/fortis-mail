@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Lock, User as UserIcon, CheckCircle2, KeyRound, AlertTriangle, Copy, ArrowRight, ShieldCheck, Eye, EyeOff } from 'lucide-react';
+import { Lock, User as UserIcon, CheckCircle2, KeyRound, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { generateSeedPhrase, generateRSAKeyPair, exportPublicKey, exportPrivateKey } from '../utils/cryptoAuth';
+import { generateECCSignKeyPair, generateECCEncryptKeyPair, exportPublicKey, exportPrivateKey } from '../utils/cryptoAuth';
 
 export default function Register() {
   const navigate = useNavigate();
   const { register } = useAuth();
 
-  const [step, setStep] = useState<'setup' | 'seed' | 'verify' | 'generating' | 'success'>('setup');
+  const [step, setStep] = useState<'setup' | 'generating' | 'success'>('setup');
   
   // Form State
   const [identityId, setIdentityId] = useState('');
@@ -18,15 +18,10 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
-  // Seed Phrase State
-  const [seedPhrase, setSeedPhrase] = useState<string[]>([]);
-  const [verifyIndices, setVerifyIndices] = useState<number[]>([]);
-  const [verifyInputs, setVerifyInputs] = useState<string[]>(['', '']);
 
   const [errorMsg, setErrorMsg] = useState('');
 
-  const handleSetupSubmit = (e: React.FormEvent) => {
+  const handleSetupSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!identityId || !alias || !password || !confirmPassword) return;
 
@@ -44,57 +39,31 @@ export default function Register() {
     }
 
     setErrorMsg('');
-    const newSeed = generateSeedPhrase();
-    setSeedPhrase(newSeed);
-    setStep('seed');
-  };
+    setStep('generating');
 
-  const handleCopySeed = () => {
-      navigator.clipboard.writeText(seedPhrase.join(' '));
-  };
-
-  const handleProceedToVerify = () => {
-      // Pick 2 random indices to verify (e.g. out of 0-5)
-      const indices: number[] = [];
-      while(indices.length < 2) {
-          const r = Math.floor(Math.random() * 6);
-          if(indices.indexOf(r) === -1) indices.push(r);
-      }
-      setVerifyIndices(indices.sort());
-      setStep('verify');
-  };
-
-  const handleVerifySubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
+    try {
+      const signKeyPair = await generateECCSignKeyPair();
+      const encryptKeyPair = await generateECCEncryptKeyPair();
       
-      const isCorrect = 
-        verifyInputs[0].trim().toLowerCase() === seedPhrase[verifyIndices[0]] &&
-        verifyInputs[1].trim().toLowerCase() === seedPhrase[verifyIndices[1]];
-
-      if (!isCorrect) {
-          setErrorMsg("Verification failed. The words do not match your Seed Phrase.");
-          return;
-      }
-
-      setErrorMsg('');
-      setStep('generating');
-
-      try {
-        const keyPair = await generateRSAKeyPair();
-        const pubKey = await exportPublicKey(keyPair.publicKey);
-        const privKey = await exportPrivateKey(keyPair.privateKey);
-        
-        await register(identityId, password, alias, seedPhrase, pubKey, privKey);
-        
-        setStep('success');
-        setTimeout(() => {
-          navigate('/login', { replace: true });
-        }, 2500);
-      } catch (err: any) {
-        console.error("DEBUG: Registration failed", err);
-        setErrorMsg(err.message || "Failed to create identity.");
-        setStep('setup');
-      }
+      const signPubKey = await exportPublicKey(signKeyPair.publicKey, 'SIGN');
+      const signPrivKey = await exportPrivateKey(signKeyPair.privateKey, 'SIGN');
+      const encryptPubKey = await exportPublicKey(encryptKeyPair.publicKey, 'ENCRYPT');
+      const encryptPrivKey = await exportPrivateKey(encryptKeyPair.privateKey, 'ENCRYPT');
+      
+      const identityBlock = `${signPubKey}\n${encryptPubKey}`;
+      const privateKeyBlock = `${signPrivKey}\n${encryptPrivKey}`;
+      
+      await register(identityId, password, alias, identityBlock, privateKeyBlock);
+      
+      setStep('success');
+      setTimeout(() => {
+        navigate('/login', { replace: true });
+      }, 2500);
+    } catch (err: any) {
+      console.error("DEBUG: Registration failed", err);
+      setErrorMsg(err.message || "Failed to create identity.");
+      setStep('setup');
+    }
   };
 
   return (
@@ -205,118 +174,6 @@ export default function Register() {
                 </div>
               </motion.form>
             )}
-
-            {/* STEP 2: SEED PHRASE */}
-            {step === 'seed' && (
-              <motion.div
-                key="seed"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="space-y-6 flex flex-col items-center"
-              >
-                <div className="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center text-yellow-500 mb-2">
-                    <AlertTriangle size={24} />
-                </div>
-                <div className="text-center">
-                    <h2 className="text-xl font-bold text-white mb-2">Secret Recovery Phrase</h2>
-                    <p className="text-sm text-corporate-300 leading-relaxed">
-                        These 6 words are the ONLY way to recover your account and decrypt your messages. 
-                        Write them down on paper and keep them in a safe place. Do not share them.
-                    </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 w-full bg-black/30 p-4 rounded-xl border border-white/10">
-                    {seedPhrase.map((word, idx) => (
-                        <div key={idx} className="flex items-center space-x-3 bg-white/5 p-3 rounded-lg border border-white/5">
-                            <span className="text-corporate-500 font-mono text-xs font-bold w-4">{idx + 1}</span>
-                            <span className="text-white font-medium tracking-wide">{word}</span>
-                        </div>
-                    ))}
-                </div>
-
-                <div className="flex w-full space-x-3">
-                    <button onClick={handleCopySeed} className="flex-1 bg-white/10 hover:bg-white/20 text-white py-3 rounded-xl font-medium transition-colors flex justify-center items-center space-x-2">
-                        <Copy size={16} />
-                        <span>Copy</span>
-                    </button>
-                    <button onClick={handleProceedToVerify} className="flex-1 bg-accent-blue hover:bg-accent-blue-hover text-white py-3 rounded-xl font-bold transition-colors shadow-[0_0_15px_rgba(37,99,235,0.4)]">
-                        I saved them
-                    </button>
-                </div>
-              </motion.div>
-            )}
-
-            {/* STEP 3: VERIFY */}
-            {step === 'verify' && (
-               <motion.form
-                key="verify"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                onSubmit={handleVerifySubmit}
-                className="space-y-6 flex flex-col items-center w-full"
-              >
-                <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center text-accent-blue mb-2">
-                    <ShieldCheck size={24} />
-                </div>
-                <div className="text-center w-full">
-                    <h2 className="text-xl font-bold text-white mb-2">Verify Phrase</h2>
-                    <p className="text-sm text-corporate-300 leading-relaxed">
-                        To ensure you've saved the phrase, enter the words corresponding to these numbers.
-                    </p>
-                </div>
-
-                <div className="space-y-4 w-full">
-                    {verifyIndices.map((seedIdx, arrayIdx) => (
-                         <div key={seedIdx} className="relative">
-                            <span className="absolute left-4 top-3.5 text-corporate-400 font-mono text-xs font-bold w-6">
-                                #{seedIdx + 1}
-                            </span>
-                            <input
-                              type="text"
-                              required
-                              value={verifyInputs[arrayIdx]}
-                              onChange={(e) => {
-                                  const val = e.target.value;
-                                  const words = val.trim().toLowerCase().split(/\s+/).filter(Boolean);
-                                  
-                                  const newInputs = [...verifyInputs];
-                                  if (words.length === 6) {
-                                      // User pasted the whole seed phrase. Smart-fill!
-                                      newInputs[0] = words[verifyIndices[0]];
-                                      newInputs[1] = words[verifyIndices[1]];
-                                  } else if (words.length > 0) {
-                                      // Take only the first word to prevent accidental multi-word inputs
-                                      newInputs[arrayIdx] = words[0];
-                                  } else {
-                                      newInputs[arrayIdx] = '';
-                                  }
-                                  setVerifyInputs(newInputs);
-                              }}
-                              placeholder="Type word here..."
-                              className="w-full bg-black/20 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white font-medium transition-all"
-                            />
-                         </div>
-                    ))}
-                </div>
-
-                <button type="submit" className="w-full bg-accent-blue hover:bg-accent-blue-hover text-white py-3.5 rounded-xl font-bold transition-colors shadow-[0_0_20px_rgba(37,99,235,0.4)]">
-                  Verify & Create Identity
-                </button>
-
-                {errorMsg && (
-                  <div className="text-red-400 text-sm text-center mt-2 w-full bg-red-400/10 py-2 rounded-lg border border-red-400/20">
-                    {errorMsg}
-                  </div>
-                )}
-                
-                <button type="button" onClick={() => setStep('seed')} className="text-sm text-corporate-400 hover:text-white transition-colors">
-                    Back to Seed Phrase
-                </button>
-               </motion.form>
-            )}
-
             {/* STEP 4: GENERATING */}
             {step === 'generating' && (
               <motion.div

@@ -1,11 +1,11 @@
-import { Lock } from 'lucide-react';
+import { Lock, Check, CheckCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useMail } from '../context/MailContext';
 import { useContacts } from '../context/ContactContext';
 import { motion } from 'framer-motion';
 
 export default function Sent() {
-  const { sentMails } = useMail();
+  const { sentMails, deliveryAcks } = useMail();
   const { contacts } = useContacts();
 
   const resolveAlias = (pubKey: string) => {
@@ -49,7 +49,18 @@ export default function Sent() {
                   </Link>
                 </td>
                 <td className="px-6 py-4.5 text-right text-sm text-corporate-500 whitespace-nowrap">
-                  <span>{mail.date}</span>
+                  <div className="flex items-center justify-end space-x-2">
+                    <span>{mail.date}</span>
+                    {deliveryAcks?.some(ack => ack.mailId === mail.id) ? (
+                      <div className="flex items-center text-accent-blue" title="Delivered & Cryptographically ACKed">
+                        <CheckCheck size={16} />
+                      </div>
+                    ) : (
+                      <div className="flex items-center text-corporate-400" title="Sent (Unverified Receipt)">
+                        <Check size={16} />
+                      </div>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}

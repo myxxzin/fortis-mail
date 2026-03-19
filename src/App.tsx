@@ -34,7 +34,7 @@ function App() {
             </Routes>
           </BrowserRouter>
           <Toaster 
-            position="top-right" 
+            position="bottom-right" 
             toastOptions={{
               className: 'font-mono text-sm shadow-xl',
               duration: 4000

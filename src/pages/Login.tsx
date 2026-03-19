@@ -11,7 +11,6 @@ export default function Login() {
   const [identityId, setIdentityId] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [seedInput, setSeedInput] = useState('');
   
   const [errorMsg, setErrorMsg] = useState('');
   const [status, setStatus] = useState<'idle' | 'authenticating'>('idle');
@@ -26,23 +25,17 @@ export default function Login() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!identityId || !password || !seedInput) return;
-
-    const seedWords = seedInput.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    if (seedWords.length !== 6) {
-        setErrorMsg(`Please enter exactly 6 words. You entered ${seedWords.length}.`);
-        return;
-    }
+    if (!identityId || !password) return;
 
     setStatus('authenticating');
     setErrorMsg('');
 
     try {
-      await login(identityId, password, seedWords);
+      await login(identityId, password);
       // Wait for useEffect to navigate once user state propagates
     } catch (err: any) {
       console.error(err);
-      setErrorMsg(err.message || 'Authentication failed. Incorrect Password or Seed Phrase.');
+      setErrorMsg(err.message || 'Authentication failed. Incorrect Username or Password.');
       setStatus('idle');
     }
   };
@@ -103,21 +96,10 @@ export default function Login() {
                         {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                     </button>
                   </div>
-                  <div className="relative">
-                    <KeyRound className="absolute left-3 top-3.5 text-corporate-300" size={18} />
-                    <textarea
-                      required
-                      value={seedInput}
-                      onChange={(e) => setSeedInput(e.target.value)}
-                      placeholder="6-Word Recovery Phrase (separated by spaces)"
-                      rows={2}
-                      className="w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium transition-all resize-none"
-                    />
-                  </div>
                 </div>
 
                 <button type="submit" className="w-full bg-accent-blue hover:bg-accent-blue-hover text-white py-3.5 rounded-xl font-bold transition-colors shadow-[0_0_20px_rgba(37,99,235,0.4)] flex items-center justify-center space-x-2">
-                  <span>Derive Keys & Authenticate</span>
+                  <span>Login to Fortis Mail</span>
                   <ArrowRight size={18} />
                 </button>
 

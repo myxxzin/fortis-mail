@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Lock, ShieldCheck, ArrowLeft, Reply, Download, FileText } from 'lucide-react';
+import { Lock, ShieldCheck, ArrowLeft, Reply, Download, FileText, CheckCircle2, Search, X } from 'lucide-react';
 import { useMail } from '../context/MailContext';
 import { useContacts } from '../context/ContactContext';
 import { useAuth } from '../context/AuthContext';
 import { auth } from '../config/firebase';
 import { EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
-import { decryptMessageHybrid, unpackHybridPayload, type EncryptedMessagePayload, decryptFile } from '../utils/cryptoAuth';
+import { decryptMessageHybrid, unpackHybridPayload, decryptFile, encryptMessageHybrid, packHybridPayload, type EncryptedMessagePayload } from '../utils/cryptoAuth';
 import { toast } from 'react-hot-toast';
 
 const TRUE_MSG = "Hello team,\n\nThe Q3 financial records are attached and verified. We have successfully secured the new investments without any leakage of company secrets.\n\nPlease keep this information strictly within the leadership circle.\n\nBest Regards,\nHR & Finance";
@@ -15,7 +15,7 @@ const TRUE_MSG = "Hello team,\n\nThe Q3 financial records are attached and verif
 export default function DecryptMsg() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { markAsRead, mails, sentMails } = useMail();
+  const { mails, sentMails, markAsRead, sendDeliveryAck } = useMail();
   const { contacts } = useContacts();
   const { user } = useAuth();
   const [decryptionState, setDecryptionState] = useState<'locked' | 'password-entered' | 'decrypting' | 'decrypted'>('locked');
@@ -25,6 +25,10 @@ export default function DecryptMsg() {
   const [rawCiphertext, setRawCiphertext] = useState<string | null>(null);
   const [decryptedPayload, setDecryptedPayload] = useState<EncryptedMessagePayload | null>(null);
   const [downloadingFile, setDownloadingFile] = useState<string | null>(null);
+  const [signatureVerified, setSignatureVerified] = useState<boolean | null>(null);
+  const [trueSenderPubKey, setTrueSenderPubKey] = useState<string | null>(null);
+  const [msgTimestamp, setMsgTimestamp] = useState<string | null>(null);
+  const [showCiphertextModal, setShowCiphertextModal] = useState(false);
 
   const currentMail = [...mails, ...sentMails].find(m => m.id === id);
 
@@ -33,6 +37,8 @@ export default function DecryptMsg() {
     const contact = contacts.find(c => c.publicKey === pubKey);
     return contact ? contact.alias : (pubKey ? pubKey.substring(0, 24) + '...' : 'Unknown');
   };
+
+  const isSenderLookingAtSentItem = currentMail?.senderPubKey === user?.publicKey && currentMail?.recipientPubKey !== user?.publicKey;
 
   const handleReply = async () => {
     if (!currentMail) return;
@@ -47,9 +53,7 @@ export default function DecryptMsg() {
     subject: currentMail?.subject || 'Unknown Subject',
     date: currentMail?.date || 'Unknown Date',
     isSystem: currentMail?.isSystem || false,
-    content: (currentMail && currentMail.senderPubKey === user?.publicKey && currentMail.recipientPubKey !== user?.publicKey && currentMail.senderContent) 
-             ? currentMail.senderContent 
-             : (currentMail?.content || TRUE_MSG),
+    content: currentMail?.content || TRUE_MSG,
     attachments: currentMail?.attachments || []
   };
 
@@ -92,13 +96,64 @@ export default function DecryptMsg() {
       try {
         if (mailDetails.content.includes('BEGIN FORTISMAIL ENCRYPTED MESSAGE')) {
           const payload = unpackHybridPayload(mailDetails.content);
-          finalPlaintext = await decryptMessageHybrid(payload, user.privateKey);
+          
+          const isSentItem = currentMail && currentMail.senderPubKey === user.publicKey && currentMail.recipientPubKey !== user.publicKey;
+          const expectedRecipientKey = isSentItem ? mailDetails.recipientPubKey : user.publicKey;
+
+          let rawDecryptedData;
+          try {
+            rawDecryptedData = await decryptMessageHybrid(
+               payload, 
+               user.privateKey, 
+               mailDetails.senderPubKey, 
+               expectedRecipientKey
+            );
+          } catch (e: any) {
+             setDecryptionState('locked');
+             setErrorMsg(e.message || 'CRITICAL SECURITY ALERT: Verification failed.');
+             return;
+          }
+          
+          finalPlaintext = rawDecryptedData.plaintext;
+          if (rawDecryptedData.timestamp) setMsgTimestamp(rawDecryptedData.timestamp);
+          setSignatureVerified(true);
+          
+          if (rawDecryptedData.verifiedSender && rawDecryptedData.verifiedSender !== 'SEALED') {
+             setTrueSenderPubKey(rawDecryptedData.verifiedSender);
+          }
+          
+          // Delivery ACK Protocol
+          if (!isSentItem && user.privateKey) {
+            try {
+              const enc = new TextEncoder();
+              const hashBuffer = await window.crypto.subtle.digest('SHA-256', enc.encode(finalPlaintext));
+              const hashArray = Array.from(new Uint8Array(hashBuffer));
+              const msg_hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+              
+              const ackPayload = await encryptMessageHybrid(
+                `ACK:${msg_hash}`,
+                mailDetails.senderPubKey,
+                user.privateKey,
+                user.publicKey,
+                mailDetails.senderPubKey
+              );
+              
+              const encryptedAck = packHybridPayload(ackPayload);
+              if (id) {
+                sendDeliveryAck(id, encryptedAck, mailDetails.senderPubKey);
+              }
+            } catch (ackErr) {
+              console.error("Failed to generate and send Delivery ACK", ackErr);
+            }
+          }
+          
           setDecryptedPayload(payload);
         } else {
           // Fallback parsing for legacy JSON format
           const payload = JSON.parse(mailDetails.content) as EncryptedMessagePayload;
           if (payload.ciphertextBase64) {
-            finalPlaintext = await decryptMessageHybrid(payload, user.privateKey);
+            const legacyDecrypted = await decryptMessageHybrid(payload, user.privateKey, mailDetails.senderPubKey, user.publicKey);
+            finalPlaintext = legacyDecrypted.plaintext;
             setDecryptedPayload(payload);
           }
         }
@@ -189,11 +244,11 @@ export default function DecryptMsg() {
               <span>Message: {mailDetails.subject}</span>
             </h1>
             <p className="text-sm text-corporate-500">
-              From: <span className="text-corporate-900 font-semibold">{mailDetails.senderDisplay || 'Unknown'}</span> <span className="text-xs font-mono text-corporate-400 ml-1">({resolveAlias(mailDetails.senderPubKey)})</span>
+              From: <span className="text-corporate-900 font-semibold">{mailDetails.senderDisplay || 'Unknown'}</span> <span className="text-xs font-mono text-corporate-400 ml-1">({resolveAlias(trueSenderPubKey || mailDetails.senderPubKey)})</span>
             </p>
           </div>
           <div className="flex items-center space-x-2 text-sm text-corporate-500 bg-corporate-50 px-3 py-1.5 rounded-lg border border-corporate-200">
-            <ShieldCheck size={16} className="text-green-600" />
+            <ShieldCheck size={16} className="text-accent-blue" />
             <span>E2E Encrypted</span>
           </div>
         </div>
@@ -205,14 +260,81 @@ export default function DecryptMsg() {
             animate={{ opacity: 1 }}
             className="relative z-20 bg-white p-8 rounded-xl shadow-sm border border-corporate-200 min-h-full flex flex-col"
           >
-            {decryptionState !== 'decrypted' ? (
-              <div className="flex flex-col space-y-6 flex-1">
-                <div className="bg-slate-900 rounded-lg p-6 border border-slate-700 shadow-inner overflow-x-auto flex-1 h-[300px] overflow-y-auto">
-                   <pre className="font-mono text-[11px] text-green-400 leading-relaxed select-all">
-                     {rawCiphertext || mailDetails.content}
-                   </pre>
+            {isSenderLookingAtSentItem ? (
+              <div className="flex flex-col flex-1 bg-corporate-50 -m-8 p-8 rounded-xl overflow-y-auto min-h-full">
+                <div className="bg-green-50 text-green-700 border border-green-500/20 px-4 py-3 rounded-xl flex items-center mb-6 shadow-sm max-w-3xl mx-auto w-full shrink-0">
+                  <Lock size={16} className="mr-2 shrink-0 text-green-600" />
+                  <span className="text-sm font-medium">Đã ký & mã hoá - chỉ {resolveAlias(mailDetails.recipientPubKey)} mới giải mã được (kể cả bạn không đọc lại được)</span>
+                </div>
+
+                <div className="bg-white border border-corporate-200 shadow-sm rounded-xl relative mx-auto w-full max-w-3xl text-corporate-900 min-h-[400px] flex flex-col shrink-0">
+                  <div className="absolute -top-4 right-6 h-8 w-8 bg-blue-50 border border-corporate-100 rounded-full shadow-sm flex items-center justify-center cursor-pointer" title="E2E Encrypted">
+                    <Lock size={14} className="text-accent-blue" />
+                  </div>
+
+                  {/* Header Info Block */}
+                  <div className="px-8 pt-10 pb-6 text-sm text-corporate-500 flex flex-col space-y-4 font-sans">
+                    <div className="grid grid-cols-[100px_1fr]">
+                      <span className="opacity-70">Từ</span>
+                      <span className="font-semibold text-corporate-900">{user?.name || user?.alias || 'Bạn'} <span className="opacity-50 font-normal">(bạn)</span></span>
+                    </div>
+                    <div className="grid grid-cols-[100px_1fr]">
+                      <span className="opacity-70">Đến</span>
+                      <span className="font-semibold text-corporate-900">{resolveAlias(mailDetails.recipientPubKey)}</span>
+                    </div>
+                    <div className="grid grid-cols-[100px_1fr]">
+                      <span className="opacity-70">Thời gian</span>
+                      <span className="text-corporate-900 font-medium">{mailDetails.date}</span>
+                    </div>
+                    <div className="grid grid-cols-[100px_1fr]">
+                      <span className="opacity-70">Mã hoá</span>
+                      <span className="text-accent-blue font-semibold font-mono text-xs bg-blue-50 px-2 py-1 rounded w-max">ECDH-P256 + AES-GCM-256</span>
+                    </div>
+                  </div>
+                  
+                  <div className="mx-8 border-b border-corporate-100 mb-6"></div>
+
+                  <div className="px-8 pb-10 prose prose-corporate max-w-none text-corporate-800 leading-relaxed font-sans whitespace-pre-wrap flex-1 flex flex-col text-center justify-center">
+                    <p className="text-xl font-bold mb-4 text-corporate-900">{mailDetails.subject}</p>
+                    <p className="text-corporate-400 text-sm bg-corporate-50 border border-corporate-100 p-4 rounded-lg inline-block mx-auto max-w-lg">[Nội dung đã được mã hoá E2E cho {resolveAlias(mailDetails.recipientPubKey)} - không thể giải mã trên thiết bị của bạn do Forward Secrecy]</p>
+                  </div>
                 </div>
                 
+                <div className="flex items-center justify-center space-x-4 mt-8 shrink-0">
+                  <button 
+                    onClick={() => setShowCiphertextModal(true)}
+                    className="bg-white hover:bg-slate-50 text-corporate-900 border border-corporate-200 px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center transition-colors shadow-sm"
+                  >
+                    <Search size={16} className="mr-2" /> Xem bản mã (ciphertext)
+                  </button>
+                </div>
+                
+                {showCiphertextModal && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-8 bg-slate-900 rounded-xl p-8 border border-slate-700 shadow-xl max-w-4xl mx-auto w-full relative shrink-0 flex flex-col items-center"
+                  >
+                    <button 
+                      onClick={() => setShowCiphertextModal(false)}
+                      className="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors"
+                    >
+                      <X size={24} />
+                    </button>
+                    
+                    <ShieldCheck size={56} className="text-green-500 mb-4 mt-2" />
+                    <h2 className="text-xl md:text-2xl font-bold text-white font-mono tracking-widest text-center mb-6 uppercase">RAW CIPHERTEXT PAYLOAD</h2>
+                    
+                    <div className="w-full bg-black/95 rounded-xl p-6 max-h-[400px] overflow-y-auto border border-green-500/50 drop-shadow-[0_0_20px_rgba(34,197,94,0.15)] shadow-inner text-left">
+                      <pre className="text-green-400 font-mono text-[11px] md:text-xs break-all whitespace-pre-wrap leading-relaxed select-all">
+                        {rawCiphertext || mailDetails.content}
+                      </pre>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+            ) : decryptionState !== 'decrypted' ? (
+              <div className="flex flex-col space-y-6 flex-1 justify-center max-w-2xl mx-auto w-full">
                 {decryptionState === 'decrypting' ? (
                   <div className="flex flex-col items-center justify-center p-8 bg-corporate-50 rounded-xl border border-corporate-200 shrink-0">
                     <motion.div
@@ -260,64 +382,122 @@ export default function DecryptMsg() {
                 )}
               </div>
             ) : (
-              <div className="flex flex-col flex-1">
-                <div className="prose prose-corporate max-w-none text-corporate-800 leading-relaxed font-sans whitespace-pre-wrap flex-1">
-                  {decryptedContent}
-                </div>
-
-                {mailDetails.attachments.length > 0 && (
-                  <div className="mt-8 pt-6 border-t border-corporate-100">
-                    <h4 className="text-sm font-bold uppercase tracking-widest text-corporate-400 mb-4 flex items-center">
-                      <FileText size={16} className="mr-2" />
-                      Secure Attachments ({mailDetails.attachments.length})
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {mailDetails.attachments.map((file, idx) => (
-                        <a
-                          key={idx}
-                          href="#"
-                          onClick={(e) => handleDownloadAttachment(e, file)}
-                          className="flex items-center justify-between p-4 bg-corporate-50 border border-corporate-200 hover:border-accent-blue rounded-xl transition-all group cursor-pointer"
-                        >
-                          <div className="flex items-center space-x-3 overflow-hidden">
-                            <div className="w-10 h-10 rounded-lg bg-white border border-corporate-200 flex items-center justify-center text-accent-blue shrink-0 group-hover:scale-105 transition-transform">
-                              <FileText size={20} />
-                            </div>
-                            <div className="flex flex-col min-w-0 pr-2">
-                              <span className="text-sm font-semibold text-corporate-900 truncate">{file.name}</span>
-                              <span className="text-xs text-corporate-500">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
-                            </div>
-                          </div>
-                          <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-corporate-400 group-hover:bg-accent-blue group-hover:text-white transition-colors shrink-0 shadow-sm border border-corporate-100">
-                            {downloadingFile === file.name ? (
-                              <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} className="w-4 h-4 border-2 border-t-transparent border-corporate-400 group-hover:border-white rounded-full" />
-                            ) : (
-                              <Download size={14} />
-                            )}
-                          </div>
-                        </a>
-                      ))}
-                    </div>
+              <div className="flex flex-col flex-1 bg-corporate-50 -m-8 p-8 rounded-xl overflow-y-auto min-h-full">
+                {signatureVerified && (
+                  <div className="bg-green-50/50 border border-green-500/20 text-green-700 px-4 py-3 rounded-xl flex items-center mb-6 shadow-sm max-w-3xl mx-auto w-full shrink-0">
+                    <CheckCircle2 size={18} className="mr-2 shrink-0 text-green-600" />
+                    <span className="text-sm font-medium">Chữ ký hợp lệ - xác nhận đúng là <span className="font-bold">{mailDetails.senderDisplay || 'Unknown'}</span> gửi, không bị giả mạo</span>
                   </div>
                 )}
 
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  className="mt-12 pt-6 border-t border-corporate-100 flex items-center justify-between"
-                >
-                  <div className="flex items-center text-green-600 text-sm font-medium">
-                    <ShieldCheck size={16} className="mr-2" /> Signature Verified
+                <div className="bg-white border border-corporate-200 shadow-sm rounded-xl relative mx-auto w-full max-w-3xl text-corporate-900 min-h-[400px] flex flex-col shrink-0">
+                  {/* Lock icon pinned on top right */}
+                  <div className="absolute -top-4 right-6 h-8 w-8 bg-blue-50 border border-corporate-100 rounded-full shadow-sm flex items-center justify-center cursor-pointer" title="E2E Encrypted">
+                    <Lock size={14} className="text-accent-blue" />
                   </div>
+
+                  {/* Header Info Block */}
+                  <div className="px-8 pt-10 pb-6 text-sm text-corporate-500 flex flex-col space-y-4 font-sans">
+                    <div className="grid grid-cols-[100px_1fr]">
+                      <span className="opacity-70">Từ</span>
+                      <span className="font-semibold text-corporate-900">{mailDetails.senderDisplay || 'Unknown'} <span className="text-[10px] font-normal opacity-50 ml-2">({resolveAlias(trueSenderPubKey || mailDetails.senderPubKey)})</span></span>
+                    </div>
+                    <div className="grid grid-cols-[100px_1fr]">
+                      <span className="opacity-70">Đến</span>
+                      <span className="font-semibold text-corporate-900">{user?.name || user?.alias || 'Bạn'}</span>
+                    </div>
+                    <div className="grid grid-cols-[100px_1fr]">
+                      <span className="opacity-70">Thời gian</span>
+                      <span className="text-corporate-900 font-medium">{msgTimestamp ? new Date(parseInt(msgTimestamp)).toLocaleString('vi-VN') : mailDetails.date}</span>
+                    </div>
+                    <div className="grid grid-cols-[100px_1fr]">
+                      <span className="opacity-70">Mã hoá</span>
+                      <span className="text-accent-blue font-semibold font-mono text-xs bg-blue-50 px-2 py-1 rounded w-max">ECDH-P256 + AES-GCM-256</span>
+                    </div>
+                  </div>
+                  
+                  <div className="mx-8 border-b border-corporate-100 mb-6"></div>
+
+                  {/* Body */}
+                  <div className="px-8 pb-8 prose prose-corporate max-w-none text-corporate-800 leading-relaxed font-sans whitespace-pre-wrap flex-1 flex flex-col">
+                    {decryptedContent}
+                    
+                    {mailDetails.attachments.length > 0 && (
+                      <div className="mt-8 pt-6 border-t border-corporate-100 font-sans">
+                        <h4 className="text-xs font-bold uppercase tracking-widest text-corporate-500 mb-4 flex items-center">
+                          <FileText size={14} className="mr-2" />
+                          Tài liệu đính kèm ({mailDetails.attachments.length})
+                        </h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {mailDetails.attachments.map((file, idx) => (
+                            <a
+                              key={idx}
+                              href="#"
+                              onClick={(e) => handleDownloadAttachment(e, file)}
+                              className="flex items-center justify-between p-4 bg-corporate-50 border border-corporate-100 hover:border-accent-blue rounded-xl transition-all group cursor-pointer"
+                            >
+                              <div className="flex items-center space-x-3 overflow-hidden">
+                                <div className="w-10 h-10 rounded-lg bg-white border border-corporate-200 flex items-center justify-center text-corporate-500 shrink-0 group-hover:scale-105 transition-transform group-hover:text-accent-blue">
+                                  <FileText size={20} />
+                                </div>
+                                <div className="flex flex-col min-w-0 pr-2">
+                                  <span className="text-sm font-semibold text-corporate-900 truncate">{file.name}</span>
+                                  <span className="text-xs text-corporate-500">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                                </div>
+                              </div>
+                              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-corporate-400 group-hover:bg-accent-blue group-hover:text-white transition-colors shrink-0 shadow-sm border border-corporate-200">
+                                {downloadingFile === file.name ? (
+                                  <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} className="w-4 h-4 border-2 border-t-transparent border-corporate-400 group-hover:border-white rounded-full" />
+                                ) : (
+                                  <Download size={14} />
+                                )}
+                              </div>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-center space-x-4 mt-8 shrink-0">
+                  <button 
+                    onClick={() => setShowCiphertextModal(!showCiphertextModal)}
+                    className="bg-white hover:bg-slate-50 text-corporate-900 border border-corporate-200 px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center transition-colors shadow-sm"
+                  >
+                    <Search size={16} className="mr-2" /> Xem bản mã (ciphertext)
+                  </button>
                   <button
                     onClick={handleReply}
-                    className="flex items-center space-x-2 px-6 py-2 bg-corporate-50 hover:bg-corporate-100 text-corporate-900 rounded-lg transition-colors font-medium border border-corporate-200"
+                    className="bg-white hover:bg-slate-50 text-corporate-900 border border-corporate-200 px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center transition-colors shadow-sm"
                   >
-                    <Reply size={16} />
-                    <span>Reply Securely</span>
+                    <Reply size={16} className="mr-2" /> Phản hồi
                   </button>
-                </motion.div>
+                </div>
+                
+                {showCiphertextModal && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-8 bg-slate-900 rounded-xl p-8 border border-slate-700 shadow-xl max-w-4xl mx-auto w-full relative flex flex-col items-center"
+                  >
+                    <button 
+                      onClick={() => setShowCiphertextModal(false)}
+                      className="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors"
+                    >
+                      <X size={24} />
+                    </button>
+
+                    <ShieldCheck size={56} className="text-green-500 mb-4 mt-2" />
+                    <h2 className="text-xl md:text-2xl font-bold text-white font-mono tracking-widest text-center mb-6 uppercase">RAW CIPHERTEXT PAYLOAD</h2>
+                    
+                    <div className="w-full bg-black/95 rounded-xl p-6 max-h-[400px] overflow-y-auto border border-green-500/50 drop-shadow-[0_0_20px_rgba(34,197,94,0.15)] shadow-inner text-left">
+                      <pre className="text-green-400 font-mono text-[11px] md:text-xs break-all whitespace-pre-wrap leading-relaxed select-all">
+                        {rawCiphertext || mailDetails.content}
+                      </pre>
+                    </div>
+                  </motion.div>
+                )}
               </div>
             )}
           </motion.div>

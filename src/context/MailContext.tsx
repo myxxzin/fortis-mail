@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, addDoc, setDoc, serverTimestamp, getDocs } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from './AuthContext';
 
@@ -11,7 +11,6 @@ export interface Mail {
   recipientPubKey: string;
   subject: string;
   content: string; // The encrypted ciphertext for the recipient
-  senderContent?: string; // The encrypted ciphertext for the sender (Sent Items)
   date: string;
   timestamp: any;
   isUnread: boolean;
@@ -24,6 +23,15 @@ export interface Mail {
   }[];
 }
 
+export interface DeliveryAck {
+  id: string;
+  mailId: string;
+  recipientPubKey: string;
+  senderPubKey: string;
+  payload: string;
+  timestamp: any;
+}
+
 interface MailContextType {
   mails: Mail[];
   sentMails: Mail[];
@@ -34,6 +42,8 @@ interface MailContextType {
   drafts: any[];
   saveDraft: (draftData: any) => Promise<string>;
   deleteDraft: (id: string) => Promise<void>;
+  deliveryAcks: DeliveryAck[];
+  sendDeliveryAck: (mailId: string, encryptedAckPayload: string, senderPubKey: string) => Promise<void>;
 }
 
 const MailContext = createContext<MailContextType | undefined>(undefined);
@@ -42,6 +52,7 @@ export function MailProvider({ children }: { children: ReactNode }) {
   const [mails, setMails] = useState<Mail[]>([]);
   const [sentMails, setSentMails] = useState<Mail[]>([]);
   const [drafts, setDrafts] = useState<any[]>([]);
+  const [deliveryAcks, setDeliveryAcks] = useState<DeliveryAck[]>([]);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -49,6 +60,7 @@ export function MailProvider({ children }: { children: ReactNode }) {
       setMails([]);
       setSentMails([]);
       setDrafts([]);
+      setDeliveryAcks([]);
       return;
     }
 
@@ -86,13 +98,13 @@ export function MailProvider({ children }: { children: ReactNode }) {
       setMails([welcomeMail, ...inboxData]);
     });
 
-    // Listen for Sent messages (where senderPubKey is current user's public key)
-    const sentQuery = query(mailsRef, where('senderPubKey', '==', user.publicKey));
-    const unsubscribeSent = onSnapshot(sentQuery, (snapshot) => {
-      const sentData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        date: doc.data().timestamp ? new Date(doc.data().timestamp.toDate()).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Just now'
+    // Listen for Sent messages from the user's private encrypted log, rather than the public mails collection
+    const sentLogRef = collection(db, 'users', user.uid, 'sentLog');
+    const unsubscribeSent = onSnapshot(sentLogRef, (snapshot) => {
+      const sentData = snapshot.docs.map(document => ({
+        id: document.id,
+        ...document.data(),
+        date: document.data().timestamp ? new Date(document.data().timestamp.toDate()).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Just now'
       })) as Mail[];
 
       sentData.sort((a, b) => {
@@ -123,10 +135,21 @@ export function MailProvider({ children }: { children: ReactNode }) {
       setDrafts(draftsData);
     });
 
+    // Listen for ACKs intended for the current user's sent mails
+    const acksQuery = query(collection(db, 'deliveryAcks'), where('senderPubKey', '==', user.publicKey));
+    const unsubscribeAcks = onSnapshot(acksQuery, (snapshot) => {
+      const acksData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as DeliveryAck[];
+      setDeliveryAcks(acksData);
+    });
+
     return () => {
       unsubscribeInbox();
       unsubscribeSent();
       unsubscribeDrafts();
+      unsubscribeAcks();
     };
   }, [user]);
 
@@ -160,11 +183,25 @@ export function MailProvider({ children }: { children: ReactNode }) {
         Object.entries(mailData).filter(([_, v]) => v !== undefined)
       );
 
-      await addDoc(mailsRef, {
+      // 1. Send strictly anonymized metadata to the global 'mails' collection
+      const docRef = await addDoc(mailsRef, {
         ...sanitizedData,
-        senderPubKey: user.publicKey,
+        senderPubKey: 'SEALED',
+        senderDisplay: 'Anonymous',
         timestamp: serverTimestamp(),
         isUnread: true,
+        isSystem: false
+      });
+
+      // 2. Preserve a private local record in the user's secret log so their "Sent Items" UI still functions
+      const sentLogRef = collection(db, 'users', user.uid, 'sentLog');
+      await setDoc(doc(sentLogRef, docRef.id), {
+        recipientPubKey: sanitizedData.recipientPubKey,
+        subject: sanitizedData.subject,
+        timestamp: serverTimestamp(),
+        content: "SEALED",
+        senderPubKey: user.publicKey,
+        isUnread: false,
         isSystem: false
       });
     } catch (err) {
@@ -193,8 +230,33 @@ export function MailProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const sendDeliveryAck = async (mailId: string, encryptedAckPayload: string, senderPubKey: string) => {
+    try {
+      if (!user) return;
+      
+      const acksRef = collection(db, 'deliveryAcks');
+      const q = query(acksRef, where('mailId', '==', mailId));
+      const snapshot = await getDocs(q);
+      
+      if (!snapshot.empty) return; // ACK already exists for this mail
+
+      await addDoc(acksRef, {
+        mailId,
+        recipientPubKey: user.publicKey,
+        senderPubKey,
+        payload: encryptedAckPayload,
+        timestamp: serverTimestamp()
+      });
+    } catch (err) {
+      console.error("Failed to send Delivery ACK", err);
+    }
+  };
+
   return (
-    <MailContext.Provider value={{ mails, sentMails, drafts, unreadCount, markAsRead, deleteMail, sendMail, saveDraft, deleteDraft }}>
+    <MailContext.Provider value={{ 
+      mails, sentMails, drafts, deliveryAcks, 
+      unreadCount, markAsRead, deleteMail, sendMail, saveDraft, deleteDraft, sendDeliveryAck 
+    }}>
       {children}
     </MailContext.Provider>
   );
