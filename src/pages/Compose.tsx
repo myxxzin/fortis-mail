@@ -164,22 +164,28 @@ export default function Compose() {
           </div>
         </div>
 
-        {isEncrypting && (
-          <div className="absolute inset-0 z-[100] bg-corporate-900/95 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-8">
-            <div className="flex flex-col items-center">
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-                className="w-16 h-16 border-4 border-corporate-700 border-t-accent-blue rounded-full mb-6"
-              />
-              <h2 className="text-xl font-bold text-white font-mono tracking-widest leading-relaxed">ENCRYPTING PAYLOAD...</h2>
-              <p className="text-sm text-corporate-400 font-mono mt-2">Applying AES-256-GCM symmetric session keys</p>
-            </div>
-          </div>
-        )}
-
         <AnimatePresence mode="wait">
-          {step === 'compose' && (
+          {isEncrypting && (
+            <motion.div
+              key="encrypting"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="flex flex-col items-center justify-center space-y-4 flex-1 min-h-[400px] bg-corporate-900 p-12 rounded-b-2xl"
+            >
+              <div className="flex flex-col items-center">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                  className="w-16 h-16 border-4 border-corporate-700 border-t-accent-blue rounded-full mb-6"
+                />
+                <h2 className="text-xl font-bold text-white font-mono tracking-widest leading-relaxed">ENCRYPTING PAYLOAD...</h2>
+                <p className="text-sm text-white font-mono mt-2">Applying AES-256-GCM symmetric session keys</p>
+              </div>
+            </motion.div>
+          )}
+
+          {step === 'compose' && !isEncrypting && (
             <motion.div
               key="compose"
               initial={{ opacity: 0, y: 10 }}
@@ -190,7 +196,7 @@ export default function Compose() {
               <form onSubmit={handleSend} className="flex flex-col relative">
                 {/* Form Body */}
                 <div className="p-6 md:p-8 space-y-6 bg-corporate-50/10">
-                  <div className="flex flex-col md:grid md:grid-cols-[100px_1fr] md:items-center gap-1 md:gap-4">
+                  <div className="flex flex-col md:grid md:grid-cols-[150px_1fr] md:items-center gap-1 md:gap-4">
                     <label className="text-xs font-semibold uppercase text-corporate-500 tracking-wider text-left md:text-right pl-1 md:pl-0">From</label>
                     <div className="relative">
                       <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-corporate-400" size={16} />
@@ -204,12 +210,12 @@ export default function Compose() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col md:grid md:grid-cols-[100px_1fr] flex-start gap-1 md:gap-4 relative">
-                    <label className="text-xs font-semibold uppercase text-corporate-500 tracking-wider text-left md:text-right md:pt-3 pl-1 md:pl-0">Demand Public Key</label>
+                  <div className="flex flex-col md:grid md:grid-cols-[150px_1fr] md:items-center gap-1 md:gap-4 relative">
+                    <label className="text-xs font-semibold uppercase text-corporate-500 tracking-wider text-left md:text-right pl-1 md:pl-0">Demand Public Key</label>
                     <div className="relative">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-[10px] text-corporate-400 font-medium h-4">{recipientAlias && `Contact: ${recipientAlias}`}</span>
-                        <div className="flex items-center space-x-2">
+                      <div className="absolute right-0 bottom-full mb-1 flex justify-end md:justify-between items-end w-full pointer-events-none z-10">
+                        <span className="hidden md:block text-[10px] text-corporate-400 font-medium h-4 text-left pointer-events-auto">{recipientAlias && `Contact: ${recipientAlias}`}</span>
+                        <div className="flex items-center space-x-2 pointer-events-auto">
                           {pasteError && <span className="text-[10px] text-red-500 font-medium">{pasteError}</span>}
                           <button type="button" onClick={async () => {
                             try {
@@ -278,7 +284,7 @@ export default function Compose() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col md:grid md:grid-cols-[100px_1fr] md:items-center gap-1 md:gap-4">
+                  <div className="flex flex-col md:grid md:grid-cols-[150px_1fr] md:items-center gap-1 md:gap-4">
                     <label className="text-xs font-semibold uppercase text-corporate-500 tracking-wider text-left md:text-right pl-1 md:pl-0">Subject</label>
                     <div className="relative">
                       <FileText className="absolute left-3 top-1/2 -translate-y-1/2 text-corporate-400" size={16} />
@@ -354,7 +360,7 @@ export default function Compose() {
                       <Lock className="text-green-600 mt-0.5 shrink-0" size={16} />
                       <div className="flex-1 w-full flex flex-col justify-center">
                         <p className="text-xs font-semibold text-corporate-900 mb-0.5">Asymmetric Encryption Active</p>
-                        <p className="text-[10px] text-corporate-500 font-medium">Message will be sealed using the Recipient's Public Key.</p>
+                        <p className="text-[10px] text-corporate-500 font-medium"></p>
                       </div>
                     </div>
 
