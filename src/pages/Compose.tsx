@@ -72,7 +72,7 @@ export default function Compose() {
             setSenderDisplay(parsed.senderDisplay || user?.name || '');
             if (parsed.draftId) currentDraftId.current = parsed.draftId;
           }
-        } catch (e) {}
+        } catch (e) { }
         localStorage.removeItem('fortis_composing_draft');
       }
       draftLoaded.current = true;
@@ -101,7 +101,7 @@ export default function Compose() {
         // Asynchronously save to Firebase drafts the final state
         saveDraft({
           subject, content: body, recipientPubKey, senderDisplay: senderDisplay || 'Anonymous'
-        }, currentDraftId.current || undefined).catch(() => {});
+        }, currentDraftId.current || undefined).catch(() => { });
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -240,7 +240,7 @@ export default function Compose() {
             Compose
           </h1>
           <div className="text-xs font-bold uppercase tracking-widest text-corporate-400 bg-corporate-50 px-3 py-1.5 rounded-lg border border-corporate-100">
-            RSA-4096 Encrypted
+            Encrypted
           </div>
         </div>
 
