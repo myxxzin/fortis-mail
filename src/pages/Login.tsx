@@ -48,10 +48,9 @@ export default function Login() {
       </div>
 
       <div className="relative z-10 w-full max-w-md">
-        <div className="text-center mb-8 space-y-4 flex flex-col items-center">
+        <div className="text-center mb-8 flex flex-col items-center">
           <img src="/logo.png" alt="FortisMail" className="h-[80px] object-contain mb-2" />
-          <h1 className="text-2xl font-bold tracking-tight">Welcome to Fortis Mail!</h1>
-          <p className="text-corporate-300 text-sm font-medium">Zero-Knowledge Encrypted Environment.</p>
+          <h1 className="text-3xl font-bold tracking-tight mt-6">Welcome to Fortis Mail!</h1>
         </div>
 
         <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl min-h-[400px] flex flex-col justify-center">
@@ -90,7 +89,7 @@ export default function Login() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-3.5 text-corporate-400 hover:text-white transition-colors peer-autofill:text-corporate-900"
+                      className="absolute right-4 top-3.5 text-corporate-400 hover:text-white transition-colors peer-autofill:text-corporate-900 peer-autofill:hover:text-corporate-900"
                       tabIndex={-1}
                     >
                       {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
