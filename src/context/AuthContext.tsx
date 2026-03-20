@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       cred = await signInWithEmailAndPassword(auth, email, pass);
     } catch (err: any) {
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-          throw new Error("Invalid Identity ID or Master Password.");
+          throw new Error("Invalid Username or Password");
       }
       throw err;
     }

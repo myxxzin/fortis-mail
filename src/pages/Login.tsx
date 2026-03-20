@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { User as UserIcon, Lock, KeyRound, ArrowRight, ShieldCheck, Eye, EyeOff } from 'lucide-react';
+import { User as UserIcon, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Login() {
@@ -67,30 +67,30 @@ export default function Login() {
               >
                 <div className="space-y-4">
                   <div className="relative">
-                    <UserIcon className="absolute left-3 top-3.5 text-corporate-300" size={18} />
                     <input
                       type="text"
                       required
                       value={identityId}
                       onChange={(e) => setIdentityId(e.target.value)}
                       placeholder="Username (e.g. john_doe)"
-                      className="w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium transition-all"
+                      className="peer w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium transition-all"
                     />
+                    <UserIcon className="absolute left-3 top-3.5 text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
                   </div>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3.5 text-corporate-300" size={18} />
                     <input
                       type={showPassword ? 'text' : 'password'}
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Master Password"
-                      className="w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium tracking-widest transition-all"
+                      className="peer w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium tracking-widest transition-all"
                     />
+                    <Lock className="absolute left-3 top-3.5 text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-3.5 text-corporate-400 hover:text-white transition-colors"
+                      className="absolute right-4 top-3.5 text-corporate-400 hover:text-white transition-colors peer-autofill:text-corporate-900"
                       tabIndex={-1}
                     >
                       {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
@@ -103,10 +103,6 @@ export default function Login() {
                   <ArrowRight size={18} />
                 </button>
 
-                <div className="flex items-center justify-center space-x-2 text-xs text-corporate-500 font-medium pt-4 border-t border-white/10 mt-6">
-                  <ShieldCheck size={14} className="text-green-500" />
-                  <span>Keys are never stored in plaintext on our servers</span>
-                </div>
 
                 {errorMsg && (
                   <div className="text-red-400 text-sm text-center mt-2 bg-red-400/10 py-2 rounded-lg border border-red-400/20">
@@ -116,7 +112,7 @@ export default function Login() {
 
                 <div className="text-center mt-4">
                   <Link to="/register" className="text-sm text-corporate-300 hover:text-white transition-colors">
-                    Don't have an identity? Create one
+                    Don't have an account? <span className="font-bold text-white">Create account</span>
                   </Link>
                 </div>
               </motion.form>
@@ -144,12 +140,6 @@ export default function Login() {
           </AnimatePresence>
         </div>
 
-        <div className="mt-8 text-center">
-          <p className="text-xs text-corporate-500 font-medium tracking-wider uppercase flex items-center justify-center space-x-1">
-            <KeyRound size={12} />
-            <span>Zero-Knowledge Architecture</span>
-          </p>
-        </div>
       </div>
     </div>
   );

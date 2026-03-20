@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Lock, User as UserIcon, CheckCircle2, KeyRound, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { Lock, User as UserIcon, CheckCircle2, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { generateECCSignKeyPair, generateECCEncryptKeyPair, exportPublicKey, exportPrivateKey } from '../utils/cryptoAuth';
 
@@ -10,7 +10,7 @@ export default function Register() {
   const { register } = useAuth();
 
   const [step, setStep] = useState<'setup' | 'generating' | 'success'>('setup');
-  
+
   // Form State
   const [identityId, setIdentityId] = useState('');
   const [alias, setAlias] = useState('');
@@ -34,8 +34,8 @@ export default function Register() {
       return;
     }
     if (identityId.length < 4 || !/^[a-zA-Z0-9_]+$/.test(identityId)) {
-        setErrorMsg("Username must be at least 4 characters and contain only letters, numbers, and underscores.");
-        return;
+      setErrorMsg("Username must be at least 4 characters and contain only letters, numbers, and underscores.");
+      return;
     }
 
     setErrorMsg('');
@@ -44,17 +44,17 @@ export default function Register() {
     try {
       const signKeyPair = await generateECCSignKeyPair();
       const encryptKeyPair = await generateECCEncryptKeyPair();
-      
+
       const signPubKey = await exportPublicKey(signKeyPair.publicKey, 'SIGN');
       const signPrivKey = await exportPrivateKey(signKeyPair.privateKey, 'SIGN');
       const encryptPubKey = await exportPublicKey(encryptKeyPair.publicKey, 'ENCRYPT');
       const encryptPrivKey = await exportPrivateKey(encryptKeyPair.privateKey, 'ENCRYPT');
-      
+
       const identityBlock = `${signPubKey}\n${encryptPubKey}`;
       const privateKeyBlock = `${signPrivKey}\n${encryptPrivKey}`;
-      
+
       await register(identityId, password, alias, identityBlock, privateKeyBlock);
-      
+
       setStep('success');
       setTimeout(() => {
         navigate('/login', { replace: true });
@@ -82,7 +82,7 @@ export default function Register() {
 
         <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl min-h-[450px] flex flex-col justify-center">
           <AnimatePresence mode="wait">
-            
+
             {/* STEP 1: SETUP */}
             {step === 'setup' && (
               <motion.form
@@ -95,63 +95,63 @@ export default function Register() {
               >
                 <div className="space-y-4">
                   <div className="relative">
-                    <UserIcon className="absolute left-3 top-3.5 text-corporate-300" size={18} />
                     <input
                       type="text"
                       required
                       value={identityId}
                       onChange={(e) => setIdentityId(e.target.value)}
                       placeholder="Username (e.g. john_doe)"
-                      className="w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium transition-all"
+                      className="peer w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium transition-all"
                     />
+                    <UserIcon className="absolute left-3 top-3.5 text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
                   </div>
                   <div className="relative">
-                    <UserIcon className="absolute left-3 top-3.5 text-corporate-300" size={18} />
                     <input
                       type="text"
                       required
                       value={alias}
                       onChange={(e) => setAlias(e.target.value)}
                       placeholder="Display Name / Alias"
-                      className="w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium transition-all"
+                      className="peer w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium transition-all"
                     />
+                    <UserIcon className="absolute left-3 top-3.5 text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
                   </div>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3.5 text-corporate-300" size={18} />
                     <input
                       type={showPassword ? 'text' : 'password'}
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Master Password"
-                      className="w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium tracking-widest transition-all"
+                      className="peer w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium tracking-widest transition-all"
                     />
+                    <Lock className="absolute left-3 top-3.5 text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
                     <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-3.5 text-corporate-400 hover:text-white transition-colors"
-                        tabIndex={-1}
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-3.5 text-corporate-400 hover:text-white transition-colors peer-autofill:text-corporate-900"
+                      tabIndex={-1}
                     >
-                        {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                      {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                     </button>
                   </div>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3.5 text-corporate-300" size={18} />
                     <input
                       type={showConfirmPassword ? 'text' : 'password'}
                       required
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Confirm Master Password"
-                      className="w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium tracking-widest transition-all"
+                      className="peer w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium tracking-widest transition-all"
                     />
+                    <Lock className="absolute left-3 top-3.5 text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
                     <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-4 top-3.5 text-corporate-400 hover:text-white transition-colors"
-                        tabIndex={-1}
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-4 top-3.5 text-corporate-400 hover:text-white transition-colors peer-autofill:text-corporate-900"
+                      tabIndex={-1}
                     >
-                        {showConfirmPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                      {showConfirmPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                     </button>
                   </div>
                 </div>
@@ -169,7 +169,7 @@ export default function Register() {
 
                 <div className="text-center mt-4">
                   <Link to="/login" className="text-sm text-corporate-300 hover:text-white transition-colors">
-                    Already have an identity? Login here
+                    Already have an account? <span className="font-bold text-white">Login here</span>
                   </Link>
                 </div>
               </motion.form>
@@ -183,14 +183,14 @@ export default function Register() {
                 exit={{ opacity: 0, y: -20 }}
                 className="flex flex-col items-center justify-center py-8 space-y-6 h-full"
               >
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                    className="w-16 h-16 border-4 border-white/10 border-t-accent-blue rounded-full"
-                  />
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                  className="w-16 h-16 border-4 border-white/10 border-t-accent-blue rounded-full"
+                />
                 <div className="text-center space-y-2">
-                    <p className="text-sm font-bold tracking-widest text-white uppercase">Deriving Keys</p>
-                    <p className="text-xs text-corporate-400 font-mono">Running PBKDF2... Encrypting Enclave...</p>
+                  <p className="text-sm font-bold tracking-widest text-white uppercase">Deriving Keys</p>
+                  <p className="text-xs text-corporate-400 font-mono">Running PBKDF2... Encrypting Enclave...</p>
                 </div>
               </motion.div>
             )}
@@ -214,12 +214,6 @@ export default function Register() {
           </AnimatePresence>
         </div>
 
-        <div className="mt-8 text-center">
-          <p className="text-xs text-corporate-500 font-medium tracking-wider uppercase flex items-center justify-center space-x-1">
-             <KeyRound size={12} />
-             <span>Zero-Knowledge Architecture</span>
-          </p>
-        </div>
       </div>
     </div>
   );
