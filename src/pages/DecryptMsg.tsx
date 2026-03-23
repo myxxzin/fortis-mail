@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Lock, ShieldCheck, ArrowLeft, Reply, Download, FileText, CheckCircle2, Search, X } from 'lucide-react';
+import { Lock, ShieldCheck, ArrowLeft, Reply, Download, FileText, CheckCircle2, X } from 'lucide-react';
 import { useMail } from '../context/MailContext';
 import { useContacts } from '../context/ContactContext';
 import { useAuth } from '../context/AuthContext';
@@ -24,13 +24,13 @@ export default function DecryptMsg() {
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [decryptedContent, setDecryptedContent] = useState<string>('');
-  const [rawCiphertext, setRawCiphertext] = useState<string | null>(null);
+
   const [decryptedPayload, setDecryptedPayload] = useState<EncryptedMessagePayload | null>(null);
   const [downloadingFile, setDownloadingFile] = useState<string | null>(null);
   const [signatureVerified, setSignatureVerified] = useState<boolean | null>(null);
   const [trueSenderPubKey, setTrueSenderPubKey] = useState<string | null>(null);
   const [msgTimestamp, setMsgTimestamp] = useState<string | null>(null);
-  const [showCiphertextModal, setShowCiphertextModal] = useState(false);
+
   const [ackStatus, setAckStatus] = useState<'pending' | 'verified' | 'failed'>('pending');
   const [ackError, setAckError] = useState<string>('');
 
@@ -92,8 +92,7 @@ export default function DecryptMsg() {
   }, [deliveryAcks, isSenderLookingAtSentItem, id, user?.privateKey, user?.publicKey]);
 
   useEffect(() => {
-    if (mailDetails) {
-      if (mailDetails.isSystem) {
+    if (mailDetails && mailDetails.isSystem) {
         setDecryptedContent(mailDetails.content);
         setDecryptionState('password-entered');
         setTimeout(() => {
@@ -102,9 +101,6 @@ export default function DecryptMsg() {
             setDecryptionState('decrypted');
           }, 1500);
         }, 500);
-      } else {
-        setRawCiphertext(mailDetails.content);
-      }
     }
   }, [mailDetails.content, mailDetails.isSystem]);
 
@@ -362,38 +358,7 @@ export default function DecryptMsg() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-center space-x-4 mt-8 shrink-0">
-                  <button
-                    onClick={() => setShowCiphertextModal(true)}
-                    className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-corporate-900 dark:text-white border border-corporate-200 dark:border-slate-700 px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center transition-colors shadow-sm"
-                  >
-                    <Search size={16} className="mr-2" /> {t('decrypt.viewCiphertext')}
-                  </button>
-                </div>
 
-                {showCiphertextModal && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-8 bg-slate-900 rounded-xl p-8 border border-slate-700 shadow-xl max-w-4xl mx-auto w-full relative shrink-0 flex flex-col items-center"
-                  >
-                    <button
-                      onClick={() => setShowCiphertextModal(false)}
-                      className="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors"
-                    >
-                      <X size={24} />
-                    </button>
-
-                    <ShieldCheck size={56} className="text-green-500 mb-4 mt-2" />
-                    <h2 className="text-xl md:text-2xl font-bold text-white font-mono tracking-widest text-center mb-6 uppercase">RAW CIPHERTEXT PAYLOAD</h2>
-
-                    <div className="w-full bg-black/95 rounded-xl p-6 max-h-[400px] overflow-y-auto border border-green-500/50 drop-shadow-[0_0_20px_rgba(34,197,94,0.15)] shadow-inner text-left">
-                      <pre className="text-green-400 font-mono text-[11px] md:text-xs break-all whitespace-pre-wrap leading-relaxed select-all">
-                        {rawCiphertext || mailDetails.content}
-                      </pre>
-                    </div>
-                  </motion.div>
-                )}
               </div>
             ) : decryptionState !== 'decrypted' ? (
               <div className="flex flex-col space-y-6 flex-1 justify-center max-w-2xl mx-auto w-full">
@@ -536,42 +501,12 @@ export default function DecryptMsg() {
 
                 <div className="flex items-center justify-center space-x-4 mt-8 shrink-0">
                   <button
-                    onClick={() => setShowCiphertextModal(!showCiphertextModal)}
-                    className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-corporate-900 dark:text-white border border-corporate-200 dark:border-slate-700 px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center transition-colors shadow-sm"
-                  >
-                    <Search size={16} className="mr-2" /> {t('decrypt.viewCiphertext')}
-                  </button>
-                  <button
                     onClick={handleReply}
                     className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-corporate-900 dark:text-white border border-corporate-200 dark:border-slate-700 px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center transition-colors shadow-sm"
                   >
                     <Reply size={16} className="mr-2" /> {t('decrypt.reply')}
                   </button>
                 </div>
-
-                {showCiphertextModal && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-8 bg-slate-900 rounded-xl p-8 border border-slate-700 shadow-xl max-w-4xl mx-auto w-full relative flex flex-col items-center shrink-0"
-                  >
-                    <button
-                      onClick={() => setShowCiphertextModal(false)}
-                      className="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors"
-                    >
-                      <X size={24} />
-                    </button>
-
-                    <ShieldCheck size={56} className="text-green-500 mb-4 mt-2" />
-                    <h2 className="text-xl md:text-2xl font-bold text-white font-mono tracking-widest text-center mb-6 uppercase">RAW CIPHERTEXT PAYLOAD</h2>
-
-                    <div className="w-full bg-black/95 rounded-xl p-6 max-h-[400px] overflow-y-auto border border-green-500/50 drop-shadow-[0_0_20px_rgba(34,197,94,0.15)] shadow-inner text-left">
-                      <pre className="text-green-400 font-mono text-[11px] md:text-xs break-all whitespace-pre-wrap leading-relaxed select-all">
-                        {rawCiphertext || mailDetails.content}
-                      </pre>
-                    </div>
-                  </motion.div>
-                )}
               </div>
             )}
           </motion.div>
