@@ -411,25 +411,9 @@ export default function DecryptMsg() {
             ) : (
               <div className="flex flex-col flex-1 min-h-full">
                 {signatureVerified && (
-                  <div className="bg-green-50/50 dark:bg-green-500/10 border border-green-500/20 dark:border-green-500/20 text-green-700 dark:text-green-400 px-5 py-4 rounded-xl mb-6 shadow-sm w-full shrink-0">
-                    <div className="flex items-center mb-3">
-                      <ShieldCheck size={20} className="mr-2 shrink-0 text-green-600 dark:text-green-500" />
-                      <span className="font-bold text-base">{t('decrypt.verificationSuccess')}</span>
-                    </div>
-                    <ul className="space-y-2 text-sm ml-1">
-                      <li className="flex items-start">
-                        <CheckCircle2 size={16} className="mr-2 mt-0.5 shrink-0 text-green-500 dark:text-green-400" />
-                        <span dangerouslySetInnerHTML={{ __html: t('decrypt.validSig').replace('{sender}', `<span class="font-bold">${mailDetails.senderDisplay || t('decrypt.unknown')}</span>`) }}></span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle2 size={16} className="mr-2 mt-0.5 shrink-0 text-green-500 dark:text-green-400" />
-                        <span>{t('decrypt.recipientId').replace('{recipient}', user?.name || user?.alias || t('decrypt.you'))}</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle2 size={16} className="mr-2 mt-0.5 shrink-0 text-green-500 dark:text-green-400" />
-                        <span>{t('decrypt.validTimestamp')}</span>
-                      </li>
-                    </ul>
+                  <div className="bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/30 px-4 py-3 rounded-xl flex items-center mb-6 shadow-sm w-full shrink-0">
+                    <ShieldCheck size={16} className="mr-2 text-green-600 dark:text-green-500 shrink-0" />
+                    <span className="text-sm font-medium">{t('decrypt.recipientId').replace('{recipient}', user?.name || user?.alias || t('decrypt.you'))}</span>
                   </div>
                 )}
 

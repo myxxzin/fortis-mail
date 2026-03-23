@@ -8,11 +8,13 @@ import { useContacts } from '../context/ContactContext';
 import { decryptMessageHybrid, unpackHybridPayload, type EncryptedMessagePayload } from '../utils/cryptoAuth';
 import { X, Key, Fingerprint, ShieldCheck, Edit2, Save, User as UserIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function MainLayout() {
    const { user, loading, updateProfile } = useAuth();
    const { deliveryAcks, sentMails } = useMail();
    const { contacts } = useContacts();
+   const { t } = useLanguage();
    
    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
    const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -168,7 +170,7 @@ export default function MainLayout() {
                      <div className="flex items-center justify-between p-6 border-b border-corporate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
                         <div className="flex items-center space-x-3">
                            <ShieldCheck className="text-accent-blue" size={24} />
-                           <h2 className="text-xl font-bold text-corporate-900 dark:text-white">Security Center & Profile</h2>
+                           <h2 className="text-xl font-bold text-corporate-900 dark:text-white">{t('settings.title')}</h2>
                         </div>
                         <button onClick={() => { setIsSettingsOpen(false); setIsEditingProfile(false); }} className="text-corporate-400 dark:text-white hover:text-corporate-900 dark:hover:text-white rounded-lg p-1 hover:bg-corporate-50 dark:hover:bg-white/10 transition-colors">
                            <X size={20} />
@@ -179,16 +181,16 @@ export default function MainLayout() {
                         {/* Identity Section */}
                         <div>
                            <div className="flex items-center justify-between mb-4">
-                              <h3 className="text-sm uppercase tracking-wider font-semibold text-corporate-500 dark:text-white flex items-center"><Fingerprint size={16} className="mr-2" /> Your Identity</h3>
+                              <h3 className="text-sm uppercase tracking-wider font-semibold text-corporate-500 dark:text-white flex items-center"><Fingerprint size={16} className="mr-2" /> {t('settings.identity')}</h3>
                               {!isEditingProfile ? (
                                  <button onClick={() => setIsEditingProfile(true)} className="flex items-center text-xs text-accent-blue hover:text-accent-blue-hover font-medium bg-blue-50 dark:bg-accent-blue/10 px-3 py-1.5 rounded-lg transition-colors">
-                                    <Edit2 size={14} className="mr-1" /> Edit Profile
+                                    <Edit2 size={14} className="mr-1" /> {t('settings.editProfile')}
                                  </button>
                               ) : (
                                  <div className="flex space-x-2">
-                                    <button onClick={() => setIsEditingProfile(false)} className="text-xs text-corporate-500 dark:text-white hover:text-corporate-900 dark:hover:text-white px-3 py-1.5 font-medium transition-colors">Cancel</button>
+                                    <button onClick={() => setIsEditingProfile(false)} className="text-xs text-corporate-500 dark:text-white hover:text-corporate-900 dark:hover:text-white px-3 py-1.5 font-medium transition-colors">{t('settings.cancel')}</button>
                                     <button onClick={handleSaveProfile} className="flex items-center text-xs text-white bg-accent-blue hover:bg-accent-blue-hover px-4 py-1.5 rounded-lg shadow-sm font-medium transition-all">
-                                       <Save size={14} className="mr-1" /> Save
+                                       <Save size={14} className="mr-1" /> {t('settings.save')}
                                     </button>
                                  </div>
                               )}
@@ -198,26 +200,26 @@ export default function MainLayout() {
                               {!isEditingProfile ? (
                                  <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                       <p className="text-xs text-corporate-400 dark:text-white font-medium mb-1">Display Name / Alias</p>
+                                       <p className="text-xs text-corporate-400 dark:text-white font-medium mb-1">{t('settings.displayName')}</p>
                                        <p className="font-semibold text-corporate-900 dark:text-white">{user.name}</p>
                                     </div>
                                     <div>
-                                        <p className="text-xs text-corporate-400 dark:text-white font-medium mb-1">Username</p>
+                                        <p className="text-xs text-corporate-400 dark:text-white font-medium mb-1">{t('settings.username')}</p>
                                        <p className="text-sm font-medium text-corporate-700 dark:text-white flex items-center"><UserIcon size={14} className="mr-1.5 text-corporate-400 dark:text-white" /> {user.identityId}</p>
                                     </div>
                                     <div className="col-span-2">
-                                       <p className="text-xs text-corporate-400 dark:text-white font-medium mb-1">Routing Email (Internal routing only)</p>
+                                       <p className="text-xs text-corporate-400 dark:text-white font-medium mb-1">{t('settings.routingEmail')}</p>
                                        <p className="text-sm font-medium text-corporate-600 dark:text-white font-mono">{user.email}</p>
                                     </div>
                                  </div>
                               ) : (
                                  <div className="grid grid-cols-1 gap-4">
                                     <div className="space-y-1">
-                                       <label className="text-xs text-corporate-500 dark:text-white font-medium pl-1">Display Name / Alias</label>
+                                       <label className="text-xs text-corporate-500 dark:text-white font-medium pl-1">{t('settings.displayName')}</label>
                                        <input type="text" value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} className="w-full bg-white dark:bg-slate-800 text-corporate-900 dark:text-white border border-corporate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent-blue transition-all" />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-xs text-corporate-400 dark:text-white font-medium pl-1">Username (Immutable)</label>
+                                        <label className="text-xs text-corporate-400 dark:text-white font-medium pl-1">{t('settings.usernameImmutable')}</label>
                                        <div className="relative">
                                           <UserIcon className="absolute left-3 top-2.5 text-corporate-400 dark:text-white" size={14} />
                                           <input type="text" disabled value={user.identityId} className="w-full bg-corporate-100 dark:bg-slate-800 text-corporate-500 dark:text-white border border-corporate-200 dark:border-slate-700 rounded-lg pl-9 pr-3 py-2 text-sm cursor-not-allowed" />
@@ -229,8 +231,8 @@ export default function MainLayout() {
                         </div>
 
                         <div>
-                           <h3 className="text-sm uppercase tracking-wider font-semibold text-corporate-500 dark:text-white mb-4 flex items-center"><Key size={16} className="mr-2" /> Public Key (Share with senders)</h3>
-                           <p className="text-xs text-corporate-500 dark:text-white mb-2 leading-relaxed">Share this key with anyone so they can send encrypted messages specifically to you. Only your private key can decrypt these messages.</p>
+                           <h3 className="text-sm uppercase tracking-wider font-semibold text-corporate-500 dark:text-white mb-4 flex items-center"><Key size={16} className="mr-2" /> {t('settings.publicKey')}</h3>
+                           <p className="text-xs text-corporate-500 dark:text-white mb-2 leading-relaxed">{t('settings.publicKeyDesc')}</p>
                            <div className="relative group">
                               <pre className="text-xs font-mono text-corporate-700 dark:text-white bg-corporate-50 dark:bg-slate-800 p-4 rounded-xl border border-corporate-200 dark:border-slate-700 overflow-x-auto selection:bg-accent-blue selection:text-white pb-10">
                                  {user.publicKey}
@@ -245,17 +247,17 @@ export default function MainLayout() {
                                  }}
                                  className="absolute bottom-3 right-3 bg-white dark:bg-slate-700 border border-corporate-200 dark:border-slate-600 text-xs font-medium px-3 py-1.5 rounded-lg shadow-sm text-corporate-700 dark:text-corporate-200 hover:text-accent-blue dark:hover:text-accent-blue hover:border-accent-blue transition-all"
                               >
-                                 {copiedPubKey ? 'Copied!' : 'Copy Public Key'}
+                                 {copiedPubKey ? t('settings.copied') : t('settings.copyPubKey')}
                               </button>
                            </div>
                         </div>
 
                         <div>
-                           <h3 className="text-sm uppercase tracking-wider font-semibold text-red-500 dark:text-red-400 mb-4 flex items-center"><Key size={16} className="mr-2" /> Private Key (DO NOT SHARE)</h3>
-                           <p className="text-xs text-corporate-500 dark:text-white mb-2 leading-relaxed">This key is derived from your Master Password. It never leaves your device and is used locally to decrypt incoming messages.</p>
+                           <h3 className="text-sm uppercase tracking-wider font-semibold text-red-500 dark:text-red-400 mb-4 flex items-center"><Key size={16} className="mr-2" /> {t('settings.privateKey')}</h3>
+                           <p className="text-xs text-corporate-500 dark:text-white mb-2 leading-relaxed">{t('settings.privateKeyDesc')}</p>
                            <div className="relative">
                               <div className="absolute inset-0 bg-white/60 dark:bg-slate-900/60 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-xl cursor-default transition-opacity hover:opacity-0 group">
-                                 <span className="bg-corporate-900 dark:bg-white text-white dark:text-corporate-900 font-bold text-xs px-4 py-2 rounded-lg shadow-lg group-hover:scale-95 transition-transform">Hover to reveal</span>
+                                 <span className="bg-corporate-900 dark:bg-white text-white dark:text-corporate-900 font-bold text-xs px-4 py-2 rounded-lg shadow-lg group-hover:scale-95 transition-transform">{t('settings.hoverReveal')}</span>
                               </div>
                               <pre className="text-xs font-mono text-corporate-700 dark:text-white bg-red-50 dark:bg-red-500/10 p-4 rounded-xl border border-red-100 dark:border-red-500/20 overflow-x-auto selection:bg-red-500 selection:text-white">
                                  {user.privateKey}
