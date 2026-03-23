@@ -13,30 +13,27 @@ export default function Register() {
 
   // Form State
   const [identityId, setIdentityId] = useState('');
-  const [alias, setAlias] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [errorMsg, setErrorMsg] = useState('');
 
+  // Validation Logic
+  const isUsernameLengthValid = identityId.length >= 4;
+  const isUsernameNumberValid = /[0-9]/.test(identityId);
+  const isUsernameValid = isUsernameLengthValid && isUsernameNumberValid;
+
+  const isPasswordLengthValid = password.length >= 8;
+  const isPasswordNumberValid = /[0-9]/.test(password);
+  const isPasswordUppercaseValid = /[A-Z]/.test(password);
+  const isPasswordSpecialValid = /[^a-zA-Z0-9]/.test(password);
+  const isPasswordValid = isPasswordLengthValid && isPasswordNumberValid && isPasswordUppercaseValid && isPasswordSpecialValid;
+
+  const isFormValid = isUsernameValid && isPasswordValid;
+
   const handleSetupSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!identityId || !alias || !password || !confirmPassword) return;
-
-    if (password !== confirmPassword) {
-      setErrorMsg("Passwords do not match.");
-      return;
-    }
-    if (password.length < 8) {
-      setErrorMsg("Master Password must be at least 8 characters.");
-      return;
-    }
-    if (identityId.length < 4 || !/^[a-zA-Z0-9_]+$/.test(identityId)) {
-      setErrorMsg("Username must be at least 4 characters and contain only letters, numbers, and underscores.");
-      return;
-    }
+    if (!isFormValid) return;
 
     setErrorMsg('');
     setStep('generating');
@@ -53,7 +50,7 @@ export default function Register() {
       const identityBlock = `${signPubKey}\n${encryptPubKey}`;
       const privateKeyBlock = `${signPrivKey}\n${encryptPrivKey}`;
 
-      await register(identityId, password, alias, identityBlock, privateKeyBlock);
+      await register(identityId, password, identityId, identityBlock, privateKeyBlock);
 
       setStep('success');
       setTimeout(() => {
@@ -69,13 +66,15 @@ export default function Register() {
   return (
     <div className="flex min-h-screen bg-[#020617] text-white relative overflow-hidden flex-col items-center justify-center p-6">
       <div className="relative z-10 w-full max-w-lg">
-        <div className="text-center mb-8 space-y-4 flex flex-col items-center">
+        <div className="text-center mb-10 flex flex-col items-center">
           <div className="flex items-center justify-center gap-4 mb-3">
             <img src="/hub.png" alt="HUB Logo" className="h-[55px] object-contain" />
             <img src="/ds.png" alt="Data Science Logo" className="h-[55px] object-contain" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">Create Cryptographic Identity</h1>
-          <p className="text-corporate-300 text-sm font-medium">Zero-Knowledge Enterprise Environment.</p>
+          <div className="flex items-center justify-center gap-2.5 mt-6 w-full overflow-hidden">
+            <h1 className="text-3xl font-bold tracking-tight leading-none whitespace-nowrap">Welcome to</h1>
+            <img src="/ten.light.png" alt="FORTISMail" className="h-[22px] object-contain" />
+          </div>
         </div>
 
         <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl min-h-[450px] flex flex-col justify-center">
@@ -89,72 +88,109 @@ export default function Register() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 onSubmit={handleSetupSubmit}
-                className="space-y-5"
+                className="space-y-6 pt-5"
               >
-                <div className="space-y-4">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      required
-                      value={identityId}
-                      onChange={(e) => setIdentityId(e.target.value)}
-                      placeholder="Username (e.g. john_doe)"
-                      className="peer w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium transition-all"
-                    />
-                    <UserIcon className="absolute left-3 top-3.5 text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
+                <div className="space-y-5">
+                  <div className="relative space-y-2">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        required
+                        value={identityId}
+                        onChange={(e) => setIdentityId(e.target.value)}
+                        placeholder="Username (e.g. john_doe)"
+                        className="peer w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium transition-all"
+                      />
+                      <UserIcon className="absolute left-3 top-3.5 text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
+                      {isUsernameValid && (
+                        <CheckCircle2 className="absolute right-3 top-3.5 text-green-500" size={18} />
+                      )}
+                    </div>
+                    {/* Username Criteria */}
+                    <AnimatePresence>
+                      {!isUsernameValid && (
+                        <motion.div 
+                          initial={{ opacity: 0, height: 0 }} 
+                          animate={{ opacity: 1, height: 'auto' }} 
+                          exit={{ opacity: 0, height: 0 }}
+                          className="px-1 overflow-hidden"
+                        >
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
+                            <div className="flex items-center gap-1.5 text-[11px]">
+                              <CheckCircle2 size={12} className={isUsernameLengthValid ? "text-green-500" : "text-corporate-400"} />
+                              <span className={isUsernameLengthValid ? "text-corporate-200" : "text-corporate-400"}>4+ chars</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-[11px]">
+                              <CheckCircle2 size={12} className={isUsernameNumberValid ? "text-green-500" : "text-corporate-400"} />
+                              <span className={isUsernameNumberValid ? "text-corporate-200" : "text-corporate-400"}>1 number</span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      required
-                      value={alias}
-                      onChange={(e) => setAlias(e.target.value)}
-                      placeholder="Display Name / Alias"
-                      className="peer w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium transition-all"
-                    />
-                    <UserIcon className="absolute left-3 top-3.5 text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
-                  </div>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Master Password"
-                      className="peer w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium tracking-widest transition-all"
-                    />
-                    <Lock className="absolute left-3 top-3.5 text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-3.5 text-corporate-400 hover:text-white transition-colors peer-autofill:text-corporate-900 peer-autofill:hover:text-corporate-900"
-                      tabIndex={-1}
-                    >
-                      {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
-                    </button>
-                  </div>
-                  <div className="relative">
-                    <input
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      required
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Confirm Master Password"
-                      className="peer w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium tracking-widest transition-all"
-                    />
-                    <Lock className="absolute left-3 top-3.5 text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-4 top-3.5 text-corporate-400 hover:text-white transition-colors peer-autofill:text-corporate-900 peer-autofill:hover:text-corporate-900"
-                      tabIndex={-1}
-                    >
-                      {showConfirmPassword ? <Eye size={18} /> : <EyeOff size={18} />}
-                    </button>
+
+                  <div className="relative space-y-2">
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Master Password"
+                        className="peer w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-16 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium tracking-widest transition-all"
+                      />
+                      <Lock className="absolute left-3 top-3.5 text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
+                      {isPasswordValid && (
+                        <CheckCircle2 className="absolute right-3 top-3.5 text-green-500" size={18} />
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-10 top-3.5 text-corporate-400 hover:text-white transition-colors peer-autofill:text-corporate-900 peer-autofill:hover:text-corporate-900"
+                        tabIndex={-1}
+                      >
+                        {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                      </button>
+                    </div>
+                    {/* Password Criteria */}
+                    <AnimatePresence>
+                      {!isPasswordValid && (
+                        <motion.div 
+                          initial={{ opacity: 0, height: 0 }} 
+                          animate={{ opacity: 1, height: 'auto' }} 
+                          exit={{ opacity: 0, height: 0 }}
+                          className="px-1 overflow-hidden"
+                        >
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
+                            <div className="flex items-center gap-1.5 text-[11px]">
+                              <CheckCircle2 size={12} className={isPasswordLengthValid ? "text-green-500" : "text-corporate-400"} />
+                              <span className={isPasswordLengthValid ? "text-corporate-200" : "text-corporate-400"}>8+ chars</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-[11px]">
+                              <CheckCircle2 size={12} className={isPasswordNumberValid ? "text-green-500" : "text-corporate-400"} />
+                              <span className={isPasswordNumberValid ? "text-corporate-200" : "text-corporate-400"}>1 number</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-[11px]">
+                              <CheckCircle2 size={12} className={isPasswordUppercaseValid ? "text-green-500" : "text-corporate-400"} />
+                              <span className={isPasswordUppercaseValid ? "text-corporate-200" : "text-corporate-400"}>1 uppercase</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-[11px]">
+                              <CheckCircle2 size={12} className={isPasswordSpecialValid ? "text-green-500" : "text-corporate-400"} />
+                              <span className={isPasswordSpecialValid ? "text-corporate-200" : "text-corporate-400"}>1 symbol</span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
 
-                <button type="submit" className="w-full bg-[linear-gradient(360deg,#226214,#43cc25)] hover:brightness-110 text-white py-3.5 rounded-xl font-bold transition-all duration-300 flex items-center justify-center space-x-2">
+                <button 
+                  type="submit" 
+                  disabled={!isFormValid}
+                  className={`w-full py-3.5 rounded-xl font-bold transition-all duration-300 flex items-center justify-center space-x-2 ${isFormValid ? 'bg-[linear-gradient(360deg,#226214,#43cc25)] hover:brightness-110 text-white cursor-pointer' : 'bg-white/5 text-corporate-400 cursor-not-allowed opacity-70'}`}
+                >
                   <span>Continue</span>
                   <ArrowRight size={18} />
                 </button>
@@ -169,6 +205,10 @@ export default function Register() {
                   <Link to="/login" className="text-sm text-corporate-300 hover:text-white transition-colors">
                     Already have an account? <span className="font-bold text-white">Login here</span>
                   </Link>
+                </div>
+
+                <div className="pt-3 pb-0 flex justify-center items-center opacity-90 hover:opacity-100 transition-opacity mt-2">
+                  <img src="/logo.png" alt="Fortis Shield" className="h-[75px] object-contain drop-shadow-[0_0_15px_rgba(67,204,37,0.3)]" />
                 </div>
               </motion.form>
             )}
@@ -208,10 +248,12 @@ export default function Register() {
                 </p>
               </motion.div>
             )}
-
           </AnimatePresence>
         </div>
 
+        <div className="mt-8 text-center text-[13px] text-corporate-300">
+          <span className="font-bold text-white">FORTISMail:</span> Secure, High-Performance Email for Businesses and Individuals.
+        </div>
       </div>
     </div>
   );

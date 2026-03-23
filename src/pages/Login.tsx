@@ -50,7 +50,7 @@ export default function Login() {
           </div>
           <div className="flex items-center justify-center gap-2.5 mt-6 w-full overflow-hidden">
             <h1 className="text-3xl font-bold tracking-tight leading-none whitespace-nowrap">Welcome to</h1>
-            <img src="/ten.png" alt="FORTISMail" className="h-[22px] object-contain" />
+            <img src="/ten.light.png" alt="FORTISMail" className="h-[22px] object-contain" />
           </div>
         </div>
 
@@ -140,10 +140,12 @@ export default function Login() {
                   <p className="text-xs text-corporate-400 font-mono">Running PBKDF2... Decrypting Enclave...</p>
                 </div>
               </motion.div>
-            )}
-          </AnimatePresence>
+            )}          </AnimatePresence>
         </div>
 
+        <div className="mt-8 text-center text-[13px] text-corporate-300">
+          <span className="font-bold text-white">FORTISMail:</span> Secure, High-Performance Email for Businesses and Individuals.
+        </div>
       </div>
     </div>
   );
