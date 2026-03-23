@@ -13,11 +13,13 @@ import Register from './pages/Register';
 import { ContactProvider } from './context/ContactContext';
 import { Toaster } from 'react-hot-toast';
 import { LanguageProvider } from './contexts/LanguageContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 function App() {
   return (
-    <LanguageProvider>
-      <AuthProvider>
+    <ThemeProvider>
+      <LanguageProvider>
+        <AuthProvider>
       <MailProvider>
         <ContactProvider>
           <BrowserRouter>
@@ -44,8 +46,9 @@ function App() {
           />
         </ContactProvider>
       </MailProvider>
-      </AuthProvider>
-    </LanguageProvider>
+        </AuthProvider>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 }
 

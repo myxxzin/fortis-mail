@@ -67,7 +67,7 @@ export default function Register() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#020617] text-white relative overflow-hidden flex-col items-center justify-center p-6">
+    <div className="flex min-h-screen bg-[#eef2f7] dark:bg-[#020617] text-corporate-900 dark:text-white relative overflow-hidden flex-col items-center justify-center p-6 transition-colors duration-300">
       <LanguageSwitcher />
       <div className="relative z-10 w-full max-w-lg">
         <div className="text-center mb-10 flex flex-col items-center">
@@ -77,11 +77,12 @@ export default function Register() {
           </div>
           <div className="flex items-center justify-center gap-2.5 mt-6 w-full">
             <h1 className="text-3xl font-bold font-['Inter'] tracking-tight whitespace-nowrap pb-1">{t('common.welcomeTo')}</h1>
-            <img src="/ten.light.png" alt="FORTISMail" className="h-[22px] object-contain" />
+            <img src="/ten.light.png" alt="FORTISMail" className="h-[22px] object-contain hidden dark:block" />
+            <img src="/ten.lightmode.png" alt="FORTISMail" className="h-[22px] object-contain block dark:hidden" />
           </div>
         </div>
 
-        <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl min-h-[450px] flex flex-col justify-center">
+        <div className="bg-white/60 dark:bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-black/5 dark:border-white/20 shadow-2xl min-h-[450px] flex flex-col justify-center transition-colors duration-300">
           <AnimatePresence mode="wait">
 
             {/* STEP 1: SETUP */}
@@ -103,9 +104,9 @@ export default function Register() {
                         value={identityId}
                         onChange={(e) => setIdentityId(e.target.value)}
                         placeholder={t('common.usernamePlaceholder')}
-                        className="peer w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium transition-all"
+                        className="peer w-full bg-white dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl pl-10 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-corporate-900 dark:text-white placeholder:text-corporate-500 dark:placeholder:text-corporate-400 font-medium transition-all"
                       />
-                      <UserIcon className="absolute left-3 top-3.5 text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
+                      <UserIcon className="absolute left-3 top-3.5 text-corporate-400 dark:text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
                       {isUsernameValid && (
                         <CheckCircle2 className="absolute right-3 top-3.5 text-green-500" size={18} />
                       )}
@@ -121,12 +122,12 @@ export default function Register() {
                         >
                           <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
                             <div className="flex items-center gap-1.5 text-[11px]">
-                              <CheckCircle2 size={12} className={isUsernameLengthValid ? "text-green-500" : "text-corporate-400"} />
-                              <span className={isUsernameLengthValid ? "text-corporate-200" : "text-corporate-400"}>{t('validation.fourChars')}</span>
+                              <CheckCircle2 size={12} className={isUsernameLengthValid ? "text-green-500" : "text-corporate-500 dark:text-corporate-400"} />
+                              <span className={isUsernameLengthValid ? "text-corporate-900 dark:text-corporate-200" : "text-corporate-500 dark:text-corporate-400"}>{t('validation.fourChars')}</span>
                             </div>
                             <div className="flex items-center gap-1.5 text-[11px]">
-                              <CheckCircle2 size={12} className={isUsernameNumberValid ? "text-green-500" : "text-corporate-400"} />
-                              <span className={isUsernameNumberValid ? "text-corporate-200" : "text-corporate-400"}>{t('validation.oneNumber')}</span>
+                              <CheckCircle2 size={12} className={isUsernameNumberValid ? "text-green-500" : "text-corporate-500 dark:text-corporate-400"} />
+                              <span className={isUsernameNumberValid ? "text-corporate-900 dark:text-corporate-200" : "text-corporate-500 dark:text-corporate-400"}>{t('validation.oneNumber')}</span>
                             </div>
                           </div>
                         </motion.div>
@@ -142,16 +143,16 @@ export default function Register() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder={t('common.passwordPlaceholder')}
-                        className="peer w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-16 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium tracking-widest transition-all"
+                        className="peer w-full bg-white dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl pl-10 pr-16 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-corporate-900 dark:text-white placeholder:text-corporate-500 dark:placeholder:text-corporate-400 font-medium tracking-widest transition-all"
                       />
-                      <Lock className="absolute left-3 top-3.5 text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
+                      <Lock className="absolute left-3 top-3.5 text-corporate-400 dark:text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
                       {isPasswordValid && (
                         <CheckCircle2 className="absolute right-3 top-3.5 text-green-500" size={18} />
                       )}
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-10 top-3.5 text-corporate-400 hover:text-white transition-colors peer-autofill:text-corporate-900 peer-autofill:hover:text-corporate-900"
+                        className="absolute right-10 top-3.5 text-corporate-500 dark:text-corporate-400 hover:text-corporate-900 dark:hover:text-white transition-colors peer-autofill:text-corporate-900 peer-autofill:hover:text-corporate-900"
                         tabIndex={-1}
                       >
                         {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
@@ -168,20 +169,20 @@ export default function Register() {
                         >
                           <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
                             <div className="flex items-center gap-1.5 text-[11px]">
-                              <CheckCircle2 size={12} className={isPasswordLengthValid ? "text-green-500" : "text-corporate-400"} />
-                              <span className={isPasswordLengthValid ? "text-corporate-200" : "text-corporate-400"}>{t('validation.eightChars')}</span>
+                              <CheckCircle2 size={12} className={isPasswordLengthValid ? "text-green-500" : "text-corporate-500 dark:text-corporate-400"} />
+                              <span className={isPasswordLengthValid ? "text-corporate-900 dark:text-corporate-200" : "text-corporate-500 dark:text-corporate-400"}>{t('validation.eightChars')}</span>
                             </div>
                             <div className="flex items-center gap-1.5 text-[11px]">
-                              <CheckCircle2 size={12} className={isPasswordNumberValid ? "text-green-500" : "text-corporate-400"} />
-                              <span className={isPasswordNumberValid ? "text-corporate-200" : "text-corporate-400"}>{t('validation.oneNumber')}</span>
+                              <CheckCircle2 size={12} className={isPasswordNumberValid ? "text-green-500" : "text-corporate-500 dark:text-corporate-400"} />
+                              <span className={isPasswordNumberValid ? "text-corporate-900 dark:text-corporate-200" : "text-corporate-500 dark:text-corporate-400"}>{t('validation.oneNumber')}</span>
                             </div>
                             <div className="flex items-center gap-1.5 text-[11px]">
-                              <CheckCircle2 size={12} className={isPasswordUppercaseValid ? "text-green-500" : "text-corporate-400"} />
-                              <span className={isPasswordUppercaseValid ? "text-corporate-200" : "text-corporate-400"}>{t('validation.oneUppercase')}</span>
+                              <CheckCircle2 size={12} className={isPasswordUppercaseValid ? "text-green-500" : "text-corporate-500 dark:text-corporate-400"} />
+                              <span className={isPasswordUppercaseValid ? "text-corporate-900 dark:text-corporate-200" : "text-corporate-500 dark:text-corporate-400"}>{t('validation.oneUppercase')}</span>
                             </div>
                             <div className="flex items-center gap-1.5 text-[11px]">
-                              <CheckCircle2 size={12} className={isPasswordSpecialValid ? "text-green-500" : "text-corporate-400"} />
-                              <span className={isPasswordSpecialValid ? "text-corporate-200" : "text-corporate-400"}>{t('validation.oneSymbol')}</span>
+                              <CheckCircle2 size={12} className={isPasswordSpecialValid ? "text-green-500" : "text-corporate-500 dark:text-corporate-400"} />
+                              <span className={isPasswordSpecialValid ? "text-corporate-900 dark:text-corporate-200" : "text-corporate-500 dark:text-corporate-400"}>{t('validation.oneSymbol')}</span>
                             </div>
                           </div>
                         </motion.div>
@@ -193,7 +194,7 @@ export default function Register() {
                 <button 
                   type="submit" 
                   disabled={!isFormValid}
-                  className={`w-full py-3.5 rounded-xl font-bold transition-all duration-300 flex items-center justify-center space-x-2 ${isFormValid ? 'bg-[linear-gradient(360deg,#226214,#43cc25)] hover:brightness-110 text-white cursor-pointer' : 'bg-white/5 text-corporate-400 cursor-not-allowed opacity-70'}`}
+                  className={`w-full py-3.5 rounded-xl font-bold transition-all duration-300 flex items-center justify-center space-x-2 ${isFormValid ? 'bg-[linear-gradient(360deg,#226214,#43cc25)] hover:brightness-110 text-white cursor-pointer' : 'bg-black/5 dark:bg-white/5 text-corporate-500 dark:text-corporate-400 cursor-not-allowed opacity-70'}`}
                 >
                   <span>{t('common.continue')}</span>
                   <ArrowRight size={18} />
@@ -206,8 +207,8 @@ export default function Register() {
                 )}
 
                 <div className="text-center mt-4">
-                  <Link to="/login" className="text-sm text-corporate-300 hover:text-white transition-colors">
-                    {t('register.alreadyHaveAccount')} <span className="font-bold text-white">{t('register.loginHere')}</span>
+                  <Link to="/login" className="text-sm text-corporate-600 dark:text-corporate-300 hover:text-corporate-900 dark:hover:text-white transition-colors">
+                    {t('register.alreadyHaveAccount')} <span className="font-bold text-corporate-900 dark:text-white">{t('register.loginHere')}</span>
                   </Link>
                 </div>
 
@@ -231,8 +232,8 @@ export default function Register() {
                   className="w-16 h-16 border-4 border-white/10 border-t-accent-blue rounded-full"
                 />
                 <div className="text-center space-y-2">
-                  <p className="text-sm font-bold tracking-widest text-white uppercase">{t('login.derivingKeys')}</p>
-                  <p className="text-xs text-corporate-400 font-mono">{t('login.runningPBKDF2')}</p>
+                  <p className="text-sm font-bold tracking-widest text-corporate-900 dark:text-white uppercase">{t('login.derivingKeys')}</p>
+                  <p className="text-xs text-corporate-600 dark:text-corporate-400 font-mono">{t('login.runningPBKDF2')}</p>
                 </div>
               </motion.div>
             )}
@@ -246,8 +247,8 @@ export default function Register() {
                 className="flex flex-col items-center justify-center py-8 space-y-4 text-center h-full"
               >
                 <CheckCircle2 className="text-green-400 h-16 w-16 mb-2" />
-                <h2 className="text-xl font-bold text-white tracking-wide">{t('register.identitySecured')}</h2>
-                <p className="text-sm font-medium text-corporate-300">
+                <h2 className="text-xl font-bold text-corporate-900 dark:text-white tracking-wide">{t('register.identitySecured')}</h2>
+                <p className="text-sm font-medium text-corporate-600 dark:text-corporate-300">
                   {t('register.redirecting')}
                 </p>
               </motion.div>
@@ -255,8 +256,8 @@ export default function Register() {
           </AnimatePresence>
         </div>
 
-        <div className="mt-8 text-center text-[13px] text-corporate-300">
-          <span className="font-bold text-white">FORTISMail:</span> {t('common.tagline')}
+        <div className="mt-8 text-center text-[13px] text-corporate-600 dark:text-corporate-300">
+          <span className="font-bold text-corporate-900 dark:text-white">FORTISMail:</span> {t('common.tagline')}
         </div>
       </div>
     </div>

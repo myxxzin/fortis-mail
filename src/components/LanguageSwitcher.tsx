@@ -1,14 +1,29 @@
 import React from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Globe } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
+import { Globe, Moon, Sun } from 'lucide-react';
 
 export const LanguageSwitcher: React.FC = () => {
   const { language, setLanguage } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
 
   return (
-    <div className="absolute top-6 right-8 z-50 flex items-center gap-3 bg-white/5 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full shadow-lg transition-all hover:bg-white/10">
-      <Globe size={16} className="text-corporate-300" />
+    <div className="absolute top-6 right-8 z-50 flex items-center gap-4 bg-white/5 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full shadow-lg transition-all hover:bg-white/10">
+      
+      {/* Theme Toggle */}
+      <button 
+        onClick={toggleTheme} 
+        className="flex items-center justify-center text-corporate-300 hover:text-white transition-colors"
+        title="Toggle Light/Dark Theme"
+      >
+        {theme === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
+      </button>
+
+      <div className="w-[1px] h-4 bg-white/20"></div>
+
+      {/* Language */}
       <div className="flex items-center gap-2 text-xs font-bold tracking-wider">
+        <Globe size={16} className="text-corporate-300 mr-1" />
         <button
           onClick={() => setLanguage('vi')}
           className={`${language === 'vi' ? 'text-white' : 'text-corporate-500 hover:text-corporate-300'} transition-colors`}

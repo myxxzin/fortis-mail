@@ -44,7 +44,7 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#020617] text-white relative overflow-hidden flex-col items-center justify-center p-6">
+    <div className="flex min-h-screen bg-[#eef2f7] dark:bg-[#020617] text-corporate-900 dark:text-white relative overflow-hidden flex-col items-center justify-center p-6 transition-colors duration-300">
       <LanguageSwitcher />
       <div className="relative z-10 w-full max-w-md">
         <div className="text-center mb-10 flex flex-col items-center">
@@ -54,11 +54,12 @@ export default function Login() {
           </div>
           <div className="flex items-center justify-center gap-2.5 mt-6 w-full">
             <h1 className="text-3xl font-bold font-['Inter'] tracking-tight whitespace-nowrap pb-1">{t('common.welcomeTo')}</h1>
-            <img src="/ten.light.png" alt="FORTISMail" className="h-[22px] object-contain" />
+            <img src="/ten.light.png" alt="FORTISMail" className="h-[22px] object-contain hidden dark:block" />
+            <img src="/ten.lightmode.png" alt="FORTISMail" className="h-[22px] object-contain block dark:hidden" />
           </div>
         </div>
 
-        <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl min-h-[400px] flex flex-col justify-center">
+        <div className="bg-white/60 dark:bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-black/5 dark:border-white/20 shadow-2xl min-h-[400px] flex flex-col justify-center transition-colors duration-300">
           <AnimatePresence mode="wait">
             {status === 'idle' && (
               <motion.form
@@ -77,9 +78,9 @@ export default function Login() {
                       value={identityId}
                       onChange={(e) => setIdentityId(e.target.value)}
                       placeholder={t('common.usernamePlaceholder')}
-                      className="peer w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium transition-all"
+                      className="peer w-full bg-white dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-corporate-900 dark:text-white placeholder:text-corporate-500 dark:placeholder:text-corporate-400 font-medium transition-all"
                     />
-                    <UserIcon className="absolute left-3 top-3.5 text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
+                    <UserIcon className="absolute left-3 top-3.5 text-corporate-400 dark:text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
                   </div>
                   <div className="relative">
                     <input
@@ -88,13 +89,13 @@ export default function Login() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder={t('common.passwordPlaceholder')}
-                      className="peer w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium tracking-widest transition-all"
+                      className="peer w-full bg-white dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl pl-10 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-corporate-900 dark:text-white placeholder:text-corporate-500 dark:placeholder:text-corporate-400 font-medium tracking-widest transition-all"
                     />
-                    <Lock className="absolute left-3 top-3.5 text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
+                    <Lock className="absolute left-3 top-3.5 text-corporate-400 dark:text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-3.5 text-corporate-400 hover:text-white transition-colors peer-autofill:text-corporate-900 peer-autofill:hover:text-corporate-900"
+                      className="absolute right-4 top-3.5 text-corporate-500 dark:text-corporate-400 hover:text-corporate-900 dark:hover:text-white transition-colors peer-autofill:text-corporate-900 peer-autofill:hover:text-corporate-900"
                       tabIndex={-1}
                     >
                       {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
@@ -115,8 +116,8 @@ export default function Login() {
                 )}
 
                 <div className="text-center mt-4">
-                  <Link to="/register" className="text-sm text-corporate-300 hover:text-white transition-colors">
-                    {t('login.noAccount')} <span className="font-bold text-white">{t('login.createOne')}</span>
+                  <Link to="/register" className="text-sm text-corporate-600 dark:text-corporate-300 hover:text-corporate-900 dark:hover:text-white transition-colors">
+                    {t('login.noAccount')} <span className="font-bold text-corporate-900 dark:text-white">{t('login.createOne')}</span>
                   </Link>
                 </div>
 
@@ -140,15 +141,15 @@ export default function Login() {
                   className="w-16 h-16 border-4 border-white/10 border-t-accent-blue rounded-full"
                 />
                 <div className="text-center space-y-2">
-                  <p className="text-sm font-bold tracking-widest text-white uppercase">{t('login.derivingKeys')}</p>
-                  <p className="text-xs text-corporate-400 font-mono">{t('login.runningPBKDF2')}</p>
+                  <p className="text-sm font-bold tracking-widest text-corporate-900 dark:text-white uppercase">{t('login.derivingKeys')}</p>
+                  <p className="text-xs text-corporate-600 dark:text-corporate-400 font-mono">{t('login.runningPBKDF2')}</p>
                 </div>
               </motion.div>
             )}          </AnimatePresence>
         </div>
 
-        <div className="mt-8 text-center text-[13px] text-corporate-300">
-          <span className="font-bold text-white">FORTISMail:</span> {t('common.tagline')}
+        <div className="mt-8 text-center text-[13px] text-corporate-600 dark:text-corporate-300">
+          <span className="font-bold text-corporate-900 dark:text-white">FORTISMail:</span> {t('common.tagline')}
         </div>
       </div>
     </div>
