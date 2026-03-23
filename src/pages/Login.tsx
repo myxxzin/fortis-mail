@@ -41,16 +41,17 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen bg-corporate-900 text-white relative overflow-hidden flex-col items-center justify-center p-6">
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-20">
-        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-accent-blue blur-[120px]"></div>
-        <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full bg-blue-400 blur-[150px] opacity-30"></div>
-      </div>
-
+    <div className="flex min-h-screen bg-[#020617] text-white relative overflow-hidden flex-col items-center justify-center p-6">
       <div className="relative z-10 w-full max-w-md">
-        <div className="text-center mb-8 flex flex-col items-center">
-          <img src="/logo.png" alt="FortisMail" className="h-[80px] object-contain mb-2" />
-          <h1 className="text-3xl font-bold tracking-tight mt-6">Welcome to Fortis Mail!</h1>
+        <div className="text-center mb-10 flex flex-col items-center">
+          <div className="flex items-center justify-center gap-4 mb-3">
+            <img src="/hub.png" alt="HUB Logo" className="h-[55px] object-contain" />
+            <img src="/ds.png" alt="Data Science Logo" className="h-[55px] object-contain" />
+          </div>
+          <div className="flex items-center justify-center gap-2.5 mt-6 w-full overflow-hidden">
+            <h1 className="text-3xl font-bold tracking-tight leading-none whitespace-nowrap">Welcome to</h1>
+            <img src="/ten.png" alt="FORTISMail" className="h-[22px] object-contain" />
+          </div>
         </div>
 
         <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-2xl min-h-[400px] flex flex-col justify-center">
@@ -62,7 +63,7 @@ export default function Login() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0, x: -20 }}
                 onSubmit={handleLogin}
-                className="space-y-5"
+                className="space-y-5 pt-5"
               >
                 <div className="space-y-4">
                   <div className="relative">
@@ -97,7 +98,7 @@ export default function Login() {
                   </div>
                 </div>
 
-                <button type="submit" className="w-full bg-accent-blue hover:bg-accent-blue-hover text-white py-3.5 rounded-xl font-bold transition-colors shadow-[0_0_20px_rgba(37,99,235,0.4)] flex items-center justify-center space-x-2">
+                <button type="submit" className="w-full bg-[linear-gradient(360deg,#226214,#43cc25)] hover:brightness-110 text-white py-3.5 rounded-xl font-bold transition-all duration-300 shadow-[0_0_20px_rgba(67,204,37,0.4)] hover:shadow-[0_0_30px_rgba(67,204,37,0.6)] flex items-center justify-center space-x-2">
                   <span>Login to Fortis Mail</span>
                   <ArrowRight size={18} />
                 </button>
@@ -113,6 +114,10 @@ export default function Login() {
                   <Link to="/register" className="text-sm text-corporate-300 hover:text-white transition-colors">
                     Don't have an account? <span className="font-bold text-white">Create account</span>
                   </Link>
+                </div>
+
+                <div className="pt-3 pb-0 flex justify-center items-center opacity-90 hover:opacity-100 transition-opacity mt-2">
+                  <img src="/logo.png" alt="Fortis Shield" className="h-[75px] object-contain drop-shadow-[0_0_15px_rgba(67,204,37,0.3)]" />
                 </div>
               </motion.form>
             )}

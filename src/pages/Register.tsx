@@ -67,15 +67,13 @@ export default function Register() {
   };
 
   return (
-    <div className="flex min-h-screen bg-corporate-900 text-white relative overflow-hidden flex-col items-center justify-center p-6">
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-20">
-        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-accent-blue blur-[120px]"></div>
-        <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] rounded-full bg-blue-400 blur-[150px] opacity-30"></div>
-      </div>
-
+    <div className="flex min-h-screen bg-[#020617] text-white relative overflow-hidden flex-col items-center justify-center p-6">
       <div className="relative z-10 w-full max-w-lg">
         <div className="text-center mb-8 space-y-4 flex flex-col items-center">
-          <img src="/logo.png" alt="FortisMail" className="h-[80px] object-contain mb-2" />
+          <div className="flex items-center justify-center gap-4 mb-3">
+            <img src="/hub.png" alt="HUB Logo" className="h-[55px] object-contain" />
+            <img src="/ds.png" alt="Data Science Logo" className="h-[55px] object-contain" />
+          </div>
           <h1 className="text-2xl font-bold tracking-tight">Create Cryptographic Identity</h1>
           <p className="text-corporate-300 text-sm font-medium">Zero-Knowledge Enterprise Environment.</p>
         </div>
@@ -156,7 +154,7 @@ export default function Register() {
                   </div>
                 </div>
 
-                <button type="submit" className="w-full bg-accent-blue hover:bg-accent-blue-hover text-white py-3.5 rounded-xl font-bold transition-colors shadow-[0_0_20px_rgba(37,99,235,0.4)] hover:shadow-[0_0_30px_rgba(37,99,235,0.6)] flex items-center justify-center space-x-2">
+                <button type="submit" className="w-full bg-[linear-gradient(360deg,#226214,#43cc25)] hover:brightness-110 text-white py-3.5 rounded-xl font-bold transition-all duration-300 shadow-[0_0_20px_rgba(67,204,37,0.4)] hover:shadow-[0_0_30px_rgba(67,204,37,0.6)] flex items-center justify-center space-x-2">
                   <span>Continue</span>
                   <ArrowRight size={18} />
                 </button>
