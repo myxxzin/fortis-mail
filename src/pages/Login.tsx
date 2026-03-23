@@ -98,7 +98,7 @@ export default function Login() {
                   </div>
                 </div>
 
-                <button type="submit" className="w-full bg-[linear-gradient(360deg,#226214,#43cc25)] hover:brightness-110 text-white py-3.5 rounded-xl font-bold transition-all duration-300 shadow-[0_0_20px_rgba(67,204,37,0.4)] hover:shadow-[0_0_30px_rgba(67,204,37,0.6)] flex items-center justify-center space-x-2">
+                <button type="submit" className="w-full bg-[linear-gradient(360deg,#226214,#43cc25)] hover:brightness-110 text-white py-3.5 rounded-xl font-bold transition-all duration-300 flex items-center justify-center space-x-2">
                   <span>Login to Fortis Mail</span>
                   <ArrowRight size={18} />
                 </button>
