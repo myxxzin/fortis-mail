@@ -7,6 +7,7 @@ import { storage } from '../config/firebase';
 import { useAuth } from '../context/AuthContext';
 import { useMail } from '../context/MailContext';
 import { useContacts } from '../context/ContactContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 import { encryptMessageHybrid, packHybridPayload, encryptFile } from '../utils/cryptoAuth';
 import { toast } from 'react-hot-toast';
@@ -20,6 +21,7 @@ export default function Compose() {
   const draftId = searchParams.get('draftId');
   const draftLoaded = useRef(false);
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
@@ -218,29 +220,29 @@ export default function Compose() {
       isDiscardingOrSending.current = false;
       setIsEncrypting(false);
       setStep('compose');
-      toast.error('Failed to send message: ' + (error as Error).message);
+      toast.error(`${t('compose.errSend')} ${(error as Error).message}`);
     }
   };
 
   return (
-    <div className="flex flex-col p-4 md:p-6 lg:p-8 w-full mb-10">
+    <div className="flex flex-col p-4 md:p-6 lg:p-8 w-full mb-10 transition-colors duration-300">
       <button
         type="button"
         onClick={() => navigate('/inbox')}
-        className="flex items-center space-x-2 text-corporate-500 hover:text-corporate-900 mb-6 transition-colors w-max shrink-0 font-sans"
+        className="flex items-center space-x-2 text-corporate-500 hover:text-corporate-900 dark:text-white dark:hover:text-white mb-6 transition-colors w-max shrink-0 font-sans"
       >
         <ArrowLeft size={16} />
-        <span className="text-sm font-medium">Back to Inbox</span>
+        <span className="text-sm font-medium">{t('compose.backToInbox')}</span>
       </button>
 
-      <div className="bg-surface rounded-2xl shadow-sm border border-corporate-200 flex flex-col relative w-full max-w-4xl mx-auto overflow-hidden">
-        <div className="px-6 py-5 border-b border-corporate-100 flex items-center justify-between bg-white shrink-0">
-          <h1 className="text-2xl font-bold text-corporate-900 tracking-tight flex items-center">
+      <div className="bg-surface dark:bg-[#020617] rounded-2xl shadow-sm border border-corporate-200 dark:border-white/10 flex flex-col relative w-full max-w-4xl mx-auto overflow-hidden transition-colors duration-300">
+        <div className="px-6 py-5 border-b border-corporate-100 dark:border-white/10 flex items-center justify-between bg-white dark:bg-[#020617] shrink-0 transition-colors duration-300">
+          <h1 className="text-2xl font-bold text-corporate-900 dark:text-white tracking-tight flex items-center">
             <img src="/logo.png" alt="FortisMail" className="h-8 object-contain mr-3" />
-            Compose
+            {t('compose.title')}
           </h1>
-          <div className="text-xs font-bold uppercase tracking-widest text-corporate-400 bg-corporate-50 px-3 py-1.5 rounded-lg border border-corporate-100">
-            Encrypted
+          <div className="text-xs font-bold uppercase tracking-widest text-corporate-400 dark:text-white bg-corporate-50 dark:bg-white/5 px-3 py-1.5 rounded-lg border border-corporate-100 dark:border-white/10">
+            {t('compose.encryptedBadge')}
           </div>
         </div>
 
@@ -251,16 +253,16 @@ export default function Compose() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="flex flex-col items-center justify-center space-y-4 flex-1 min-h-[400px] bg-corporate-900 p-12 rounded-b-2xl"
+              className="flex flex-col items-center justify-center space-y-4 flex-1 min-h-[400px] bg-white dark:bg-[#020617] p-12 rounded-b-2xl border-t border-corporate-200 dark:border-slate-800"
             >
               <div className="flex flex-col items-center">
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-                  className="w-16 h-16 border-4 border-corporate-700 border-t-accent-blue rounded-full mb-6"
+                  className="w-16 h-16 border-4 border-corporate-700 dark:border-slate-800 border-t-accent-blue rounded-full mb-6"
                 />
-                <h2 className="text-xl font-bold text-white font-mono tracking-widest leading-relaxed">ENCRYPTING PAYLOAD...</h2>
-                <p className="text-sm text-white font-mono mt-2">Applying AES-256-GCM symmetric session keys</p>
+                <h2 className="text-xl font-bold text-corporate-900 dark:text-white font-mono tracking-widest leading-relaxed uppercase">{t('compose.encrypting')}</h2>
+                <p className="text-sm text-corporate-500 dark:text-white font-mono mt-2">{t('compose.encryptingDesc')}</p>
               </div>
             </motion.div>
           )}
@@ -275,26 +277,26 @@ export default function Compose() {
             >
               <form onSubmit={handleSend} className="flex flex-col relative">
                 {/* Form Body */}
-                <div className="p-6 md:p-8 space-y-6 bg-corporate-50/10">
+                <div className="p-6 md:p-8 space-y-6 bg-corporate-50/10 dark:bg-transparent">
                   <div className="flex flex-col md:grid md:grid-cols-[150px_1fr] md:items-center gap-1 md:gap-4">
-                    <label className="text-xs font-semibold uppercase text-corporate-500 tracking-wider text-left md:text-right pl-1 md:pl-0">From</label>
+                    <label className="text-xs font-semibold uppercase text-corporate-500 dark:text-white tracking-wider text-left md:text-right pl-1 md:pl-0">{t('compose.from')}</label>
                     <div className="relative">
-                      <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-corporate-400" size={16} />
+                      <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-corporate-400 dark:text-white" size={16} />
                       <input
                         type="text"
                         value={senderDisplay}
                         onChange={e => setSenderDisplay(e.target.value)}
-                        placeholder="e.g. John Doe (CEO) or Anonymous"
-                        className="w-full bg-white text-corporate-900 border border-corporate-200 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent-blue transition-all font-medium"
+                        placeholder={t('compose.fromPlaceholder')}
+                        className="w-full bg-white dark:bg-slate-800 text-corporate-900 dark:text-white border border-corporate-200 dark:border-slate-700 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent-blue transition-all font-medium"
                       />
                     </div>
                   </div>
 
                   <div className="flex flex-col md:grid md:grid-cols-[150px_1fr] md:items-center gap-1 md:gap-4 relative">
-                    <label className="text-xs font-semibold uppercase text-corporate-500 tracking-wider text-left md:text-right pl-1 md:pl-0">Demand Public Key</label>
+                    <label className="text-xs font-semibold uppercase text-corporate-500 dark:text-white tracking-wider text-left md:text-right pl-1 md:pl-0">{t('compose.to')}</label>
                     <div className="relative">
                       <div className="absolute right-0 bottom-full mb-1 flex justify-end md:justify-between items-end w-full pointer-events-none z-10">
-                        <span className="hidden md:block text-[10px] text-corporate-400 font-medium h-4 text-left pointer-events-auto">{recipientAlias && `Contact: ${recipientAlias}`}</span>
+                        <span className="hidden md:block text-[10px] text-corporate-400 dark:text-white font-medium h-4 text-left pointer-events-auto">{recipientAlias && `${t('compose.contactPrefix')} ${recipientAlias}`}</span>
                         <div className="flex items-center space-x-2 pointer-events-auto">
                           {pasteError && <span className="text-[10px] text-red-500 font-medium">{pasteError}</span>}
                           <button type="button" onClick={async () => {
@@ -305,10 +307,10 @@ export default function Compose() {
                               setPasteError('');
                             } catch (err) {
                               console.error("Paste failed", err);
-                              setPasteError('Browser blocked paste. Please press Ctrl+V directly.');
+                              setPasteError(t('compose.pasteBlocked'));
                             }
-                          }} className="text-[10px] bg-blue-50 text-accent-blue hover:bg-blue-100 font-bold px-2 py-1 rounded transition-colors flex items-center">
-                            <ClipboardList size={12} className="mr-1" /> Paste
+                          }} className="text-[10px] bg-blue-50 dark:bg-accent-blue/10 text-accent-blue hover:bg-blue-100 dark:hover:bg-accent-blue/20 font-bold px-2 py-1 rounded transition-colors flex items-center">
+                            <ClipboardList size={12} className="mr-1" /> {t('compose.paste')}
                           </button>
                         </div>
                       </div>
@@ -321,8 +323,8 @@ export default function Compose() {
                           onFocus={() => setShowContactDropdown(true)}
                           onBlur={() => setTimeout(() => setShowContactDropdown(false), 200)}
                           rows={2}
-                          placeholder="-----BEGIN PUBLIC KEY-----..."
-                          className="w-full bg-white border border-corporate-200 rounded-lg pr-3 pl-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-accent-blue transition-all font-mono resize-none"
+                          placeholder={t('compose.toPlaceholder')}
+                          className="w-full bg-white dark:bg-slate-800 text-corporate-900 dark:text-white border border-corporate-200 dark:border-slate-700 rounded-lg pr-3 pl-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-accent-blue transition-all font-mono resize-none"
                         />
 
                         {/* Contact Dropdown overlay directly on Public Key */}
@@ -332,10 +334,10 @@ export default function Compose() {
                               initial={{ opacity: 0, y: 5 }}
                               animate={{ opacity: 1, y: 0 }}
                               exit={{ opacity: 0, y: 5 }}
-                              className="absolute z-50 mt-1 w-full bg-white border border-corporate-200 rounded-xl shadow-xl overflow-hidden max-h-48 overflow-y-auto"
+                              className="absolute z-50 mt-1 w-full bg-white dark:bg-[#020617] border border-corporate-200 dark:border-slate-800 rounded-xl shadow-xl overflow-hidden max-h-48 overflow-y-auto"
                             >
-                              <div className="px-3 py-2 bg-corporate-50 border-b border-corporate-100 text-[10px] uppercase font-bold text-corporate-400 tracking-wider">
-                                Choose from Address Book
+                              <div className="px-3 py-2 bg-corporate-50 dark:bg-white/5 border-b border-corporate-100 dark:border-white/5 text-[10px] uppercase font-bold text-corporate-400 dark:text-white tracking-wider">
+                                {t('compose.chooseContact')}
                               </div>
                               {contacts.map(contact => (
                                 <button
@@ -346,13 +348,13 @@ export default function Compose() {
                                     setRecipientAlias(contact.alias);
                                     setShowContactDropdown(false);
                                   }}
-                                  className="w-full text-left px-3 py-2 hover:bg-blue-50 border-b border-corporate-50 last:border-0 transition-colors flex items-center justify-between group"
+                                  className="w-full text-left px-3 py-2 hover:bg-blue-50 dark:hover:bg-white/5 border-b border-corporate-50 dark:border-transparent last:border-0 transition-colors flex items-center justify-between group"
                                 >
                                   <div className="flex flex-col min-w-0 pr-4">
-                                    <span className="text-sm font-semibold text-corporate-900 truncate group-hover:text-accent-blue">{contact.alias}</span>
-                                    <span className="text-xs text-corporate-500 font-mono truncate">{contact.publicKey.substring(0, 32)}...</span>
+                                    <span className="text-sm font-semibold text-corporate-900 dark:text-white truncate group-hover:text-accent-blue">{contact.alias}</span>
+                                    <span className="text-xs text-corporate-500 dark:text-white font-mono truncate">{contact.publicKey.substring(0, 32)}...</span>
                                   </div>
-                                  <div className="shrink-0 w-6 h-6 rounded-full bg-corporate-100 flex items-center justify-center text-corporate-400 group-hover:bg-accent-blue group-hover:text-white transition-colors">
+                                  <div className="shrink-0 w-6 h-6 rounded-full bg-corporate-100 dark:bg-white/10 flex items-center justify-center text-corporate-400 dark:text-white group-hover:bg-accent-blue group-hover:text-white transition-colors">
                                     <UserIcon size={12} />
                                   </div>
                                 </button>
@@ -365,26 +367,26 @@ export default function Compose() {
                   </div>
 
                   <div className="flex flex-col md:grid md:grid-cols-[150px_1fr] md:items-center gap-1 md:gap-4">
-                    <label className="text-xs font-semibold uppercase text-corporate-500 tracking-wider text-left md:text-right pl-1 md:pl-0">Subject</label>
+                    <label className="text-xs font-semibold uppercase text-corporate-500 dark:text-white tracking-wider text-left md:text-right pl-1 md:pl-0">{t('compose.subject')}</label>
                     <div className="relative">
-                      <FileText className="absolute left-3 top-1/2 -translate-y-1/2 text-corporate-400" size={16} />
-                      <input type="text" required value={subject} onChange={e => setSubject(e.target.value)} placeholder="Encrypted Message Subject" className="w-full bg-white border border-corporate-200 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent-blue transition-all font-medium" />
+                      <FileText className="absolute left-3 top-1/2 -translate-y-1/2 text-corporate-400 dark:text-white" size={16} />
+                      <input type="text" required value={subject} onChange={e => setSubject(e.target.value)} placeholder={t('compose.subjectPlaceholder')} className="w-full bg-white dark:bg-slate-800 text-corporate-900 dark:text-white border border-corporate-200 dark:border-slate-700 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent-blue transition-all font-medium" />
                     </div>
                   </div>
 
                   {/* Message Body - Scrolls naturally with the rest of the form */}
                   <div className="pt-2">
                     <div className="flex items-center justify-between mb-2">
-                      <label className="text-xs font-semibold uppercase text-corporate-500 tracking-wider">Message Body</label>
-                      <span className="text-xs text-corporate-400 font-medium bg-corporate-100 px-2 py-0.5 rounded">Markdown Supported</span>
+                      <label className="text-xs font-semibold uppercase text-corporate-500 dark:text-white tracking-wider">{t('compose.body')}</label>
+                      <span className="text-xs text-corporate-400 dark:text-white font-medium bg-corporate-100 dark:bg-white/10 px-2 py-0.5 rounded">{t('compose.markdown')}</span>
                     </div>
-                    <textarea required value={body} onChange={e => setBody(e.target.value)} placeholder="Enter your secret message here..." className="w-full min-h-[200px] h-48 bg-white border border-corporate-200 hover:border-corporate-300 rounded-xl px-5 py-4 text-sm focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-blue-50 transition-all resize-y shadow-sm font-sans leading-relaxed text-corporate-900"></textarea>
+                    <textarea required value={body} onChange={e => setBody(e.target.value)} placeholder={t('compose.bodyPlaceholder')} className="w-full min-h-[200px] h-48 bg-white dark:bg-slate-800 text-corporate-900 dark:text-white border border-corporate-200 dark:border-slate-700 hover:border-corporate-300 dark:hover:border-slate-600 rounded-xl px-5 py-4 text-sm focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-blue-50 dark:focus:ring-accent-blue/10 transition-all resize-y shadow-sm font-sans leading-relaxed"></textarea>
                   </div>
 
                   {/* Attachments Section */}
-                  <div className="pt-2 border-t border-corporate-100">
-                    <div className="flex items-center justify-between mb-4">
-                      <label className="text-xs font-semibold uppercase text-corporate-500 tracking-wider">Attachments</label>
+                  <div className="pt-2 border-t border-corporate-100 dark:border-white/5">
+                    <div className="flex items-center justify-between mb-4 mt-2">
+                      <label className="text-xs font-semibold uppercase text-corporate-500 dark:text-white tracking-wider">{t('compose.attachments')}</label>
                       <div>
                         <input
                           id="file-upload"
@@ -400,8 +402,8 @@ export default function Compose() {
                             e.target.value = '';
                           }}
                         />
-                        <label htmlFor="file-upload" className="cursor-pointer text-xs bg-corporate-100 hover:bg-corporate-200 text-corporate-700 font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center">
-                          <Paperclip size={14} className="mr-1.5" /> Attach Files
+                        <label htmlFor="file-upload" className="cursor-pointer text-xs bg-corporate-100 dark:bg-white/10 hover:bg-corporate-200 dark:hover:bg-white/20 text-corporate-700 dark:text-white font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center">
+                          <Paperclip size={14} className="mr-1.5" /> {t('compose.attachFiles')}
                         </label>
                       </div>
                     </div>
@@ -409,20 +411,20 @@ export default function Compose() {
                     {files.length > 0 && (
                       <div className="space-y-2">
                         {files.map((file, index) => (
-                          <div key={index} className="flex items-center justify-between bg-white border border-corporate-200 rounded-lg p-3 shadow-sm">
+                          <div key={index} className="flex items-center justify-between bg-white dark:bg-slate-800 border border-corporate-200 dark:border-slate-700 rounded-lg p-3 shadow-sm">
                             <div className="flex items-center space-x-3 overflow-hidden">
-                              <div className="w-8 h-8 rounded bg-blue-50 text-accent-blue flex items-center justify-center shrink-0">
+                              <div className="w-8 h-8 rounded bg-blue-50 dark:bg-accent-blue/10 text-accent-blue flex items-center justify-center shrink-0">
                                 <FileText size={16} />
                               </div>
                               <div className="flex flex-col min-w-0">
-                                <span className="text-sm font-semibold text-corporate-900 truncate">{file.name}</span>
-                                <span className="text-xs text-corporate-500">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                                <span className="text-sm font-semibold text-corporate-900 dark:text-white truncate">{file.name}</span>
+                                <span className="text-xs text-corporate-500 dark:text-white">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
                               </div>
                             </div>
                             <button
                               type="button"
                               onClick={() => setFiles(files.filter((_, i) => i !== index))}
-                              className="w-8 h-8 flex items-center justify-center text-corporate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+                              className="w-8 h-8 flex items-center justify-center text-corporate-400 dark:text-white hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors shrink-0"
                             >
                               <X size={16} />
                             </button>
@@ -434,13 +436,13 @@ export default function Compose() {
                 </div>
 
                 {/* Bottom Bar - Pinned */}
-                <div className="shrink-0 p-6 border-t border-corporate-100 bg-corporate-50">
+                <div className="shrink-0 p-6 border-t border-corporate-100 dark:border-white/10 bg-corporate-50 dark:bg-transparent">
                   <div className="w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div className="p-3 bg-green-50/50 rounded-xl border border-green-100 flex items-start space-x-3 flex-1 min-w-0">
-                      <Lock className="text-green-600 mt-0.5 shrink-0" size={16} />
+                    <div className="p-3 bg-green-50/50 dark:bg-green-500/5 rounded-xl border border-green-100 dark:border-green-500/10 flex items-start space-x-3 flex-1 min-w-0">
+                      <Lock className="text-green-600 dark:text-green-500 mt-0.5 shrink-0" size={16} />
                       <div className="flex-1 w-full flex flex-col justify-center">
-                        <p className="text-xs font-semibold text-corporate-900 mb-0.5">Asymmetric Encryption Active</p>
-                        <p className="text-[10px] text-corporate-500 font-medium"></p>
+                         <p className="text-xs font-semibold text-corporate-900 dark:text-white mb-0.5">{t('compose.activeEncryption')}</p>
+                         <p className="text-[10px] text-corporate-500 font-medium"></p>
                       </div>
                     </div>
 
@@ -462,10 +464,10 @@ export default function Compose() {
                           setFiles([]);
                           navigate('/inbox');
                         }}
-                        className="px-4 py-2.5 border border-corporate-200 rounded-xl text-sm font-semibold text-corporate-700 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors shadow-sm flex items-center space-x-2"
+                        className="px-4 py-2.5 border border-corporate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-corporate-700 dark:text-white hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-500/30 transition-colors shadow-sm flex items-center space-x-2"
                       >
                         <Trash2 size={16} />
-                        <span className="hidden sm:inline">Discard</span>
+                        <span className="hidden sm:inline">{t('compose.discard')}</span>
                       </button>
 
                       <button
@@ -482,15 +484,15 @@ export default function Compose() {
                           }, currentDraftId.current || undefined);
                           navigate('/drafts');
                         }}
-                        className="px-4 py-2.5 border border-corporate-200 rounded-xl text-sm font-semibold text-corporate-700 hover:bg-blue-50 hover:text-accent-blue hover:border-blue-200 transition-colors shadow-sm flex items-center space-x-2"
+                        className="px-4 py-2.5 border border-corporate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-corporate-700 dark:text-white hover:bg-blue-50 dark:hover:bg-accent-blue/10 hover:text-accent-blue dark:hover:text-accent-blue hover:border-blue-200 dark:hover:border-accent-blue/30 transition-colors shadow-sm flex items-center space-x-2"
                       >
                         <Save size={16} />
-                        <span className="hidden sm:inline">Save Draft</span>
+                        <span className="hidden sm:inline">{t('compose.saveDraft')}</span>
                       </button>
 
-                      <button type="submit" className="px-6 py-2.5 bg-corporate-900 rounded-xl text-sm font-semibold text-white hover:bg-corporate-800 transition-colors shadow-[0_4px_14px_0_rgba(15,23,42,0.15)] hover:shadow-[0_6px_20px_rgba(15,23,42,0.2)] flex items-center space-x-2">
+                      <button type="submit" className="px-6 py-2.5 bg-white border border-corporate-200 text-corporate-900 dark:bg-white/10 rounded-xl text-sm font-semibold dark:text-white hover:bg-corporate-50 dark:hover:bg-white/20 transition-colors shadow-sm flex items-center space-x-2">
                         <Lock size={16} />
-                        <span>Encrypt & Send</span>
+                        <span>{t('compose.encryptAndSend')}</span>
                       </button>
                     </div>
                   </div>
@@ -504,7 +506,7 @@ export default function Compose() {
               key="success"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex flex-col items-center justify-center space-y-4 flex-1 min-h-[400px] bg-white p-12 rounded-b-2xl border-t border-green-100"
+              className="flex flex-col items-center justify-center space-y-4 flex-1 min-h-[400px] bg-white dark:bg-[#020617] p-12 rounded-b-2xl border-t border-green-100 dark:border-green-500/20"
             >
               <motion.div
                 initial={{ scale: 0 }}
@@ -513,8 +515,8 @@ export default function Compose() {
               >
                 <CheckCircle2 className="text-green-500" size={64} />
               </motion.div>
-              <h2 className="text-2xl font-bold text-corporate-900 tracking-tight">Message Secured & Sent</h2>
-              <p className="text-corporate-500 text-sm">Redirecting to Sent Items...</p>
+              <h2 className="text-2xl font-bold text-corporate-900 dark:text-white tracking-tight">{t('compose.successTitle')}</h2>
+              <p className="text-corporate-500 dark:text-white text-sm">{t('compose.successDesc')}</p>
             </motion.div>
           )}
 
@@ -523,14 +525,14 @@ export default function Compose() {
               key="sent"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex flex-col items-center justify-center space-y-6 flex-1 min-h-[400px] bg-white p-12"
+              className="flex flex-col items-center justify-center space-y-6 flex-1 min-h-[400px] bg-white dark:bg-[#020617] p-12"
             >
-              <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-2">
+              <div className="w-20 h-20 bg-green-50 dark:bg-green-500/10 rounded-full flex items-center justify-center mb-2">
                 <CheckCircle2 size={40} className="text-green-500" />
               </div>
-              <h2 className="text-2xl font-bold text-corporate-900 tracking-tight">Transmission Secured</h2>
-              <p className="text-corporate-500 max-w-sm text-center text-sm leading-relaxed mb-4">
-                Your message was encrypted locally and routed through the secure network to the specified recipient.
+              <h2 className="text-2xl font-bold text-corporate-900 dark:text-white tracking-tight">{t('compose.encryptSuccess')}</h2>
+              <p className="text-corporate-500 dark:text-white max-w-sm text-center text-sm leading-relaxed mb-4">
+                {t('compose.encryptSuccessDesc')}
               </p>
               <button
                 onClick={() => {
@@ -541,9 +543,9 @@ export default function Compose() {
                   setRecipientPubKey('');
                   setFiles([]);
                 }}
-                className="px-8 py-3 bg-corporate-900 hover:bg-black text-white rounded-xl transition-all shadow-[0_4px_14px_0_rgba(15,23,42,0.39)] hover:shadow-[0_6px_20px_rgba(15,23,42,0.23)] font-medium mt-4"
+                className="px-8 py-3 bg-white border border-corporate-200 text-corporate-900 dark:bg-white/10 hover:bg-corporate-50 dark:hover:bg-white/20 dark:text-white rounded-xl transition-all shadow-sm font-medium mt-4"
               >
-                Compose Another
+                {t('compose.composeAnother')}
               </button>
             </motion.div>
           )}

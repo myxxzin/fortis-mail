@@ -3,11 +3,16 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-corporate-900: #0f172a;
-  --color-corporate-800: #1e293b;
-  --color-corporate-700: #334155;
-  --color-corporate-100: #f1f5f9;
-  --color-corporate-50: #f8fafc;
+  --color-corporate-50: #eef2f7;
+  --color-corporate-100: #e2e8f0;
+  --color-corporate-200: #cdd6e4;
+  --color-corporate-300: #94a3b8;
+  --color-corporate-400: #64748b;
+  --color-corporate-500: #475569;
+  --color-corporate-600: #334155;
+  --color-corporate-700: #1e293b;
+  --color-corporate-800: #0f172a;
+  --color-corporate-900: #020617;
 
   --color-accent-blue: #2563eb;
   --color-accent-blue-hover: #1d4ed8;
@@ -21,7 +26,7 @@
 
 @layer base {
   body {
-    @apply bg-corporate-50 text-corporate-900 font-sans antialiased;
+    @apply bg-corporate-50 dark:bg-black text-corporate-900 dark:text-corporate-100 font-sans antialiased;
   }
 }
 

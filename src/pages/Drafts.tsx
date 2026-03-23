@@ -4,11 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FileEdit, Trash2, Edit2 } from 'lucide-react';
 import { useMail } from '../context/MailContext';
 import { useContacts } from '../context/ContactContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Link } from 'react-router-dom';
 
 export default function Drafts() {
   const { drafts, deleteDraft } = useMail();
   const { contacts } = useContacts();
+  const { t } = useLanguage();
   const [draftToDelete, setDraftToDelete] = useState<string | null>(null);
 
   const resolveAlias = (pubKey: string) => {
@@ -18,7 +20,7 @@ export default function Drafts() {
   };
 
   return (
-    <div className="bg-surface rounded-2xl shadow-sm border border-corporate-200 flex flex-col h-full overflow-hidden relative">
+    <div className="bg-surface dark:bg-[#020617] rounded-2xl shadow-sm border border-corporate-200 dark:border-white/10 flex flex-col h-full overflow-hidden relative transition-colors duration-300">
       {/* Delete Confirmation Modal */}
       {createPortal(
         <AnimatePresence>
@@ -28,29 +30,29 @@ export default function Drafts() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-corporate-900/40 backdrop-blur-sm"
+                className="absolute inset-0 bg-corporate-900/40 dark:bg-black/60 backdrop-blur-sm"
                 onClick={() => setDraftToDelete(null)}
               />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="bg-white rounded-2xl shadow-xl w-full max-w-sm relative z-10 overflow-hidden border border-corporate-100"
+              className="bg-white dark:bg-[#020617] rounded-2xl shadow-xl w-full max-w-sm relative z-10 overflow-hidden border border-corporate-100 dark:border-slate-700"
             >
               <div className="p-6">
-                <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
+                <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center mb-4">
                   <Trash2 className="text-red-500" size={24} />
                 </div>
-                <h3 className="text-xl font-bold text-corporate-900 mb-2 tracking-tight">Delete Draft</h3>
-                <p className="text-sm text-corporate-500 mb-6 leading-relaxed">
-                  Are you sure you want to discard this draft permanently? This action cannot be undone.
+                <h3 className="text-xl font-bold text-corporate-900 dark:text-white mb-2 tracking-tight">{t('mail.deleteDraft')}</h3>
+                <p className="text-sm text-corporate-500 dark:text-white mb-6 leading-relaxed">
+                  {t('mail.discardConfirm')}
                 </p>
                 <div className="flex items-center space-x-3">
                   <button
                     onClick={() => setDraftToDelete(null)}
-                    className="flex-1 py-2.5 px-4 bg-white border border-corporate-200 hover:bg-corporate-50 rounded-xl text-sm font-semibold text-corporate-700 transition-colors shadow-sm"
+                    className="flex-1 py-2.5 px-4 bg-white dark:bg-slate-800 border border-corporate-200 dark:border-slate-700 hover:bg-corporate-50 dark:hover:bg-slate-700 rounded-xl text-sm font-semibold text-corporate-700 dark:text-white transition-colors shadow-sm"
                   >
-                    Cancel
+                    {t('mail.cancel')}
                   </button>
                   <button
                     onClick={() => {
@@ -61,7 +63,7 @@ export default function Drafts() {
                     }}
                     className="flex-1 py-2.5 px-4 bg-red-500 hover:bg-red-600 rounded-xl text-sm font-semibold text-white transition-colors shadow-sm"
                   >
-                    Yes, Delete
+                    {t('mail.yesDelete')}
                   </button>
                 </div>
               </div>
@@ -72,52 +74,52 @@ export default function Drafts() {
         document.body
       )}
 
-      <div className="p-6 border-b border-corporate-100 flex items-center justify-between bg-white shrink-0">
-        <h1 className="text-2xl font-bold text-corporate-900 tracking-tight">Drafts</h1>
-        <span className="text-sm font-medium px-3 py-1 bg-corporate-100 text-corporate-600 rounded-full">{drafts?.length || 0} Saved</span>
+      <div className="p-6 border-b border-corporate-100 dark:border-white/10 flex items-center justify-between bg-white dark:bg-[#020617] shrink-0 transition-colors duration-300">
+        <h1 className="text-2xl font-bold text-corporate-900 dark:text-white tracking-tight">{t('sidebar.drafts')}</h1>
+        <span className="text-sm font-medium px-3 py-1 bg-corporate-100 dark:bg-white/10 text-corporate-600 dark:text-white rounded-full">{drafts?.length || 0} Saved</span>
       </div>
 
       {(!drafts || drafts.length === 0) ? (
-        <div className="flex-1 overflow-auto flex flex-col items-center justify-center p-12 text-center h-64">
-          <div className="w-16 h-16 bg-corporate-50 rounded-full flex items-center justify-center mb-4 text-corporate-300">
+        <div className="flex-1 overflow-auto flex flex-col items-center justify-center p-12 text-center h-64 bg-corporate-50/20 dark:bg-transparent transition-colors duration-300">
+          <div className="w-16 h-16 bg-corporate-50 dark:bg-white/5 border border-corporate-200 dark:border-white/10 rounded-full flex items-center justify-center mb-4 text-corporate-300 dark:text-white">
             <FileEdit size={32} />
           </div>
-          <p className="text-corporate-900 font-medium">No saved drafts</p>
-          <p className="text-sm text-corporate-500 mt-1">Messages you save while composing will appear here.</p>
+          <p className="text-corporate-900 dark:text-white font-medium">{t('mail.emptyDrafts')}</p>
+          <p className="text-sm text-corporate-500 dark:text-white mt-1">{t('mail.emptyDraftsDesc')}</p>
         </div>
       ) : (
-        <div className="flex-1 overflow-auto bg-corporate-50/30">
+        <div className="flex-1 overflow-auto bg-corporate-50/30 dark:bg-transparent transition-colors duration-300">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-corporate-200 bg-corporate-50 text-xs uppercase tracking-wider text-corporate-500 font-semibold">
-                <th className="px-6 py-4 font-semibold text-corporate-500 w-1/4">Recipient</th>
-                <th className="px-6 py-4 font-semibold text-corporate-500 w-1/2">Subject</th>
-                <th className="px-6 py-4 font-semibold text-corporate-500 w-1/4">Saved On</th>
-                <th className="px-6 py-4 font-semibold text-corporate-500 text-right">Actions</th>
+              <tr className="border-b border-corporate-200 dark:border-white/10 bg-corporate-50 dark:bg-white/5 text-xs uppercase tracking-wider text-corporate-500 font-semibold transition-colors duration-300">
+                <th className="px-6 py-4 font-semibold text-corporate-500 dark:text-white w-1/4">{t('mail.recipient')}</th>
+                <th className="px-6 py-4 font-semibold text-corporate-500 dark:text-white w-1/2">{t('mail.subject')}</th>
+                <th className="px-6 py-4 font-semibold text-corporate-500 dark:text-white w-1/4">{t('mail.savedOn')}</th>
+                <th className="px-6 py-4 font-semibold text-corporate-500 dark:text-white text-right">{t('mail.operations')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-corporate-100 bg-white">
+            <tbody className="divide-y divide-corporate-100 dark:divide-white/5 bg-white dark:bg-transparent">
               {drafts.map(draft => (
-                <tr key={draft.id} className="hover:bg-blue-50/30 transition-colors group">
-                  <td className="px-6 py-4">
-                    <span className="text-sm font-medium text-corporate-700 block truncate w-48">
+                <tr key={draft.id} className="hover:bg-blue-50/30 dark:hover:bg-white/5 transition-colors group">
+                  <td className="px-6 py-4 w-1/4">
+                    <span className="text-sm font-medium text-corporate-700 dark:text-white block truncate">
                       {resolveAlias(draft.recipientPubKey)}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
-                    <span className="text-sm font-medium text-corporate-900 block truncate lg:w-96 md:w-64">
-                      {draft.subject || '(No subject)'}
+                  <td className="px-6 py-4 w-1/2">
+                    <span className={`text-sm font-medium block truncate ${draft.subject ? 'text-corporate-900 dark:text-white' : 'text-corporate-400 dark:text-white italic'}`}>
+                      {draft.subject || t('mail.noSubject')}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-corporate-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-corporate-500 dark:text-white w-1/4">
                     {draft.date}
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end space-x-2">
-                       <Link to={`/compose?draftId=${draft.id}`} className="p-2 text-corporate-400 hover:text-accent-blue hover:bg-blue-50 rounded-lg transition-colors inline-block">
+                       <Link to={`/compose?draftId=${draft.id}`} className="p-2 text-corporate-400 dark:text-white hover:text-accent-blue hover:bg-blue-50 dark:hover:bg-accent-blue/10 rounded-lg transition-colors inline-block">
                          <Edit2 size={16} />
                        </Link>
-                       <button onClick={() => setDraftToDelete(draft.id)} className="p-2 text-corporate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors inline-block">
+                       <button onClick={() => setDraftToDelete(draft.id)} className="p-2 text-corporate-400 dark:text-white hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/20 rounded-lg transition-colors inline-block">
                          <Trash2 size={16} />
                        </button>
                     </div>

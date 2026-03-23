@@ -78,7 +78,7 @@ export default function Login() {
                       value={identityId}
                       onChange={(e) => setIdentityId(e.target.value)}
                       placeholder={t('common.usernamePlaceholder')}
-                      className="peer w-full bg-white dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-corporate-900 dark:text-white placeholder:text-corporate-500 dark:placeholder:text-corporate-400 font-medium transition-all"
+                      className="peer w-full bg-white dark:bg-[#020617]/20 border border-black/10 dark:border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-corporate-900 dark:text-white placeholder:text-corporate-500 dark:placeholder:text-corporate-400 font-medium transition-all"
                     />
                     <UserIcon className="absolute left-3 top-3.5 text-corporate-400 dark:text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
                   </div>
@@ -89,7 +89,7 @@ export default function Login() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder={t('common.passwordPlaceholder')}
-                      className="peer w-full bg-white dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl pl-10 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-corporate-900 dark:text-white placeholder:text-corporate-500 dark:placeholder:text-corporate-400 font-medium tracking-widest transition-all"
+                      className="peer w-full bg-white dark:bg-[#020617]/20 border border-black/10 dark:border-white/10 rounded-xl pl-10 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-corporate-900 dark:text-white placeholder:text-corporate-500 dark:placeholder:text-corporate-400 font-medium tracking-widest transition-all"
                     />
                     <Lock className="absolute left-3 top-3.5 text-corporate-400 dark:text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
                     <button
