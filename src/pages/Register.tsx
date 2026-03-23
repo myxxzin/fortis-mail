@@ -4,10 +4,13 @@ import { useAuth } from '../context/AuthContext';
 import { Lock, User as UserIcon, CheckCircle2, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { generateECCSignKeyPair, generateECCEncryptKeyPair, exportPublicKey, exportPrivateKey } from '../utils/cryptoAuth';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function Register() {
   const navigate = useNavigate();
   const { register } = useAuth();
+  const { t } = useLanguage();
 
   const [step, setStep] = useState<'setup' | 'generating' | 'success'>('setup');
 
@@ -58,21 +61,22 @@ export default function Register() {
       }, 2500);
     } catch (err: any) {
       console.error("DEBUG: Registration failed", err);
-      setErrorMsg(err.message || "Failed to create identity.");
+      setErrorMsg(err.message || t('register.errorExists'));
       setStep('setup');
     }
   };
 
   return (
     <div className="flex min-h-screen bg-[#020617] text-white relative overflow-hidden flex-col items-center justify-center p-6">
+      <LanguageSwitcher />
       <div className="relative z-10 w-full max-w-lg">
         <div className="text-center mb-10 flex flex-col items-center">
           <div className="flex items-center justify-center gap-4 mb-3">
             <img src="/hub.png" alt="HUB Logo" className="h-[55px] object-contain" />
             <img src="/ds.png" alt="Data Science Logo" className="h-[55px] object-contain" />
           </div>
-          <div className="flex items-center justify-center gap-2.5 mt-6 w-full overflow-hidden">
-            <h1 className="text-3xl font-bold tracking-tight leading-none whitespace-nowrap">Welcome to</h1>
+          <div className="flex items-center justify-center gap-2.5 mt-6 w-full">
+            <h1 className="text-3xl font-bold font-['Inter'] tracking-tight whitespace-nowrap pb-1">{t('common.welcomeTo')}</h1>
             <img src="/ten.light.png" alt="FORTISMail" className="h-[22px] object-contain" />
           </div>
         </div>
@@ -98,7 +102,7 @@ export default function Register() {
                         required
                         value={identityId}
                         onChange={(e) => setIdentityId(e.target.value)}
-                        placeholder="Username (e.g. john_doe)"
+                        placeholder={t('common.usernamePlaceholder')}
                         className="peer w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium transition-all"
                       />
                       <UserIcon className="absolute left-3 top-3.5 text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
@@ -118,11 +122,11 @@ export default function Register() {
                           <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
                             <div className="flex items-center gap-1.5 text-[11px]">
                               <CheckCircle2 size={12} className={isUsernameLengthValid ? "text-green-500" : "text-corporate-400"} />
-                              <span className={isUsernameLengthValid ? "text-corporate-200" : "text-corporate-400"}>4+ chars</span>
+                              <span className={isUsernameLengthValid ? "text-corporate-200" : "text-corporate-400"}>{t('validation.fourChars')}</span>
                             </div>
                             <div className="flex items-center gap-1.5 text-[11px]">
                               <CheckCircle2 size={12} className={isUsernameNumberValid ? "text-green-500" : "text-corporate-400"} />
-                              <span className={isUsernameNumberValid ? "text-corporate-200" : "text-corporate-400"}>1 number</span>
+                              <span className={isUsernameNumberValid ? "text-corporate-200" : "text-corporate-400"}>{t('validation.oneNumber')}</span>
                             </div>
                           </div>
                         </motion.div>
@@ -137,7 +141,7 @@ export default function Register() {
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Master Password"
+                        placeholder={t('common.passwordPlaceholder')}
                         className="peer w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-16 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium tracking-widest transition-all"
                       />
                       <Lock className="absolute left-3 top-3.5 text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
@@ -165,19 +169,19 @@ export default function Register() {
                           <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
                             <div className="flex items-center gap-1.5 text-[11px]">
                               <CheckCircle2 size={12} className={isPasswordLengthValid ? "text-green-500" : "text-corporate-400"} />
-                              <span className={isPasswordLengthValid ? "text-corporate-200" : "text-corporate-400"}>8+ chars</span>
+                              <span className={isPasswordLengthValid ? "text-corporate-200" : "text-corporate-400"}>{t('validation.eightChars')}</span>
                             </div>
                             <div className="flex items-center gap-1.5 text-[11px]">
                               <CheckCircle2 size={12} className={isPasswordNumberValid ? "text-green-500" : "text-corporate-400"} />
-                              <span className={isPasswordNumberValid ? "text-corporate-200" : "text-corporate-400"}>1 number</span>
+                              <span className={isPasswordNumberValid ? "text-corporate-200" : "text-corporate-400"}>{t('validation.oneNumber')}</span>
                             </div>
                             <div className="flex items-center gap-1.5 text-[11px]">
                               <CheckCircle2 size={12} className={isPasswordUppercaseValid ? "text-green-500" : "text-corporate-400"} />
-                              <span className={isPasswordUppercaseValid ? "text-corporate-200" : "text-corporate-400"}>1 uppercase</span>
+                              <span className={isPasswordUppercaseValid ? "text-corporate-200" : "text-corporate-400"}>{t('validation.oneUppercase')}</span>
                             </div>
                             <div className="flex items-center gap-1.5 text-[11px]">
                               <CheckCircle2 size={12} className={isPasswordSpecialValid ? "text-green-500" : "text-corporate-400"} />
-                              <span className={isPasswordSpecialValid ? "text-corporate-200" : "text-corporate-400"}>1 symbol</span>
+                              <span className={isPasswordSpecialValid ? "text-corporate-200" : "text-corporate-400"}>{t('validation.oneSymbol')}</span>
                             </div>
                           </div>
                         </motion.div>
@@ -191,7 +195,7 @@ export default function Register() {
                   disabled={!isFormValid}
                   className={`w-full py-3.5 rounded-xl font-bold transition-all duration-300 flex items-center justify-center space-x-2 ${isFormValid ? 'bg-[linear-gradient(360deg,#226214,#43cc25)] hover:brightness-110 text-white cursor-pointer' : 'bg-white/5 text-corporate-400 cursor-not-allowed opacity-70'}`}
                 >
-                  <span>Continue</span>
+                  <span>{t('common.continue')}</span>
                   <ArrowRight size={18} />
                 </button>
 
@@ -203,7 +207,7 @@ export default function Register() {
 
                 <div className="text-center mt-4">
                   <Link to="/login" className="text-sm text-corporate-300 hover:text-white transition-colors">
-                    Already have an account? <span className="font-bold text-white">Login here</span>
+                    {t('register.alreadyHaveAccount')} <span className="font-bold text-white">{t('register.loginHere')}</span>
                   </Link>
                 </div>
 
@@ -227,8 +231,8 @@ export default function Register() {
                   className="w-16 h-16 border-4 border-white/10 border-t-accent-blue rounded-full"
                 />
                 <div className="text-center space-y-2">
-                  <p className="text-sm font-bold tracking-widest text-white uppercase">Deriving Keys</p>
-                  <p className="text-xs text-corporate-400 font-mono">Running PBKDF2... Encrypting Enclave...</p>
+                  <p className="text-sm font-bold tracking-widest text-white uppercase">{t('login.derivingKeys')}</p>
+                  <p className="text-xs text-corporate-400 font-mono">{t('login.runningPBKDF2')}</p>
                 </div>
               </motion.div>
             )}
@@ -242,9 +246,9 @@ export default function Register() {
                 className="flex flex-col items-center justify-center py-8 space-y-4 text-center h-full"
               >
                 <CheckCircle2 className="text-green-400 h-16 w-16 mb-2" />
-                <h2 className="text-xl font-bold text-white tracking-wide">Identity Secured</h2>
+                <h2 className="text-xl font-bold text-white tracking-wide">{t('register.identitySecured')}</h2>
                 <p className="text-sm font-medium text-corporate-300">
-                  Your cryptographic keys are safely derived. Redirecting to Login...
+                  {t('register.redirecting')}
                 </p>
               </motion.div>
             )}
@@ -252,7 +256,7 @@ export default function Register() {
         </div>
 
         <div className="mt-8 text-center text-[13px] text-corporate-300">
-          <span className="font-bold text-white">FORTISMail:</span> Secure, High-Performance Email for Businesses and Individuals.
+          <span className="font-bold text-white">FORTISMail:</span> {t('common.tagline')}
         </div>
       </div>
     </div>

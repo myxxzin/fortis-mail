@@ -3,10 +3,13 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { User as UserIcon, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function Login() {
   const navigate = useNavigate();
   const { login, user } = useAuth();
+  const { t } = useLanguage();
 
   const [identityId, setIdentityId] = useState('');
   const [password, setPassword] = useState('');
@@ -35,21 +38,22 @@ export default function Login() {
       // Wait for useEffect to navigate once user state propagates
     } catch (err: any) {
       console.error(err);
-      setErrorMsg(err.message || 'Authentication failed. Incorrect Username or Password.');
+      setErrorMsg(err.message || t('login.errorInvalid'));
       setStatus('idle');
     }
   };
 
   return (
     <div className="flex min-h-screen bg-[#020617] text-white relative overflow-hidden flex-col items-center justify-center p-6">
+      <LanguageSwitcher />
       <div className="relative z-10 w-full max-w-md">
         <div className="text-center mb-10 flex flex-col items-center">
           <div className="flex items-center justify-center gap-4 mb-3">
             <img src="/hub.png" alt="HUB Logo" className="h-[55px] object-contain" />
             <img src="/ds.png" alt="Data Science Logo" className="h-[55px] object-contain" />
           </div>
-          <div className="flex items-center justify-center gap-2.5 mt-6 w-full overflow-hidden">
-            <h1 className="text-3xl font-bold tracking-tight leading-none whitespace-nowrap">Welcome to</h1>
+          <div className="flex items-center justify-center gap-2.5 mt-6 w-full">
+            <h1 className="text-3xl font-bold font-['Inter'] tracking-tight whitespace-nowrap pb-1">{t('common.welcomeTo')}</h1>
             <img src="/ten.light.png" alt="FORTISMail" className="h-[22px] object-contain" />
           </div>
         </div>
@@ -72,7 +76,7 @@ export default function Login() {
                       required
                       value={identityId}
                       onChange={(e) => setIdentityId(e.target.value)}
-                      placeholder="Username (e.g. john_doe)"
+                      placeholder={t('common.usernamePlaceholder')}
                       className="peer w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium transition-all"
                     />
                     <UserIcon className="absolute left-3 top-3.5 text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
@@ -83,7 +87,7 @@ export default function Login() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Master Password"
+                      placeholder={t('common.passwordPlaceholder')}
                       className="peer w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue text-white placeholder:text-corporate-400 font-medium tracking-widest transition-all"
                     />
                     <Lock className="absolute left-3 top-3.5 text-corporate-300 peer-autofill:text-corporate-900 pointer-events-none transition-colors" size={18} />
@@ -99,7 +103,7 @@ export default function Login() {
                 </div>
 
                 <button type="submit" className="w-full bg-[linear-gradient(360deg,#226214,#43cc25)] hover:brightness-110 text-white py-3.5 rounded-xl font-bold transition-all duration-300 flex items-center justify-center space-x-2">
-                  <span>Login to Fortis Mail</span>
+                  <span>{t('login.loginBtn')}</span>
                   <ArrowRight size={18} />
                 </button>
 
@@ -112,7 +116,7 @@ export default function Login() {
 
                 <div className="text-center mt-4">
                   <Link to="/register" className="text-sm text-corporate-300 hover:text-white transition-colors">
-                    Don't have an account? <span className="font-bold text-white">Create account</span>
+                    {t('login.noAccount')} <span className="font-bold text-white">{t('login.createOne')}</span>
                   </Link>
                 </div>
 
@@ -136,15 +140,15 @@ export default function Login() {
                   className="w-16 h-16 border-4 border-white/10 border-t-accent-blue rounded-full"
                 />
                 <div className="text-center space-y-2">
-                  <p className="text-sm font-bold tracking-widest text-white uppercase">Deriving Keys</p>
-                  <p className="text-xs text-corporate-400 font-mono">Running PBKDF2... Decrypting Enclave...</p>
+                  <p className="text-sm font-bold tracking-widest text-white uppercase">{t('login.derivingKeys')}</p>
+                  <p className="text-xs text-corporate-400 font-mono">{t('login.runningPBKDF2')}</p>
                 </div>
               </motion.div>
             )}          </AnimatePresence>
         </div>
 
         <div className="mt-8 text-center text-[13px] text-corporate-300">
-          <span className="font-bold text-white">FORTISMail:</span> Secure, High-Performance Email for Businesses and Individuals.
+          <span className="font-bold text-white">FORTISMail:</span> {t('common.tagline')}
         </div>
       </div>
     </div>

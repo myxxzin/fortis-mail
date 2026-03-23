@@ -12,10 +12,12 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import { ContactProvider } from './context/ContactContext';
 import { Toaster } from 'react-hot-toast';
+import { LanguageProvider } from './contexts/LanguageContext';
 
 function App() {
   return (
-    <AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
       <MailProvider>
         <ContactProvider>
           <BrowserRouter>
@@ -42,7 +44,8 @@ function App() {
           />
         </ContactProvider>
       </MailProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }
 
