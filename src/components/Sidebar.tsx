@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Inbox, Send, FileEdit, Settings, ShieldAlert, Users } from 'lucide-react';
+import { Inbox, Send, FileEdit, Settings, ShieldAlert, Users, Info } from 'lucide-react';
 import { useMail } from '../context/MailContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -12,8 +12,10 @@ export default function Sidebar({ onOpenSettings, onMobileClose }: { onOpenSetti
   return (
     <div className="w-full md:w-64 bg-white dark:bg-[#020617] border-r border-corporate-200 dark:border-white/10 h-full flex flex-col shrink-0 transition-colors duration-300">
       <div className="h-20 flex px-6 border-b border-corporate-100 dark:border-white/10 bg-white dark:bg-[#020617] shrink-0 transition-colors duration-300">
-        <Link to="/inbox" onClick={onMobileClose} className="flex items-center w-full group">
-          <img src="/logo.png" alt="FortisMail" className="h-8 object-contain group-hover:scale-105 transition-transform" />
+        <Link to="/inbox" onClick={onMobileClose} className="flex items-center w-full group space-x-3">
+          <img src="/logo.png" alt="FortisMail Logo" className="h-8 object-contain group-hover:scale-105 transition-transform" />
+          <img src="/ten.lightmode.png" alt="FortisMail Text" className="h-[18px] object-contain dark:hidden" />
+          <img src="/ten.light.png" alt="FortisMail Text" className="h-4 object-contain hidden dark:block" />
         </Link>
       </div>
 
@@ -31,6 +33,7 @@ export default function Sidebar({ onOpenSettings, onMobileClose }: { onOpenSetti
           { icon: Send, label: t('sidebar.sent'), path: '/sent' },
           { icon: FileEdit, label: t('sidebar.drafts'), path: '/drafts' },
           { icon: Users, label: t('sidebar.contacts'), path: '/contacts' },
+          { icon: Info, label: t('sidebar.aboutUs'), path: '/about' },
         ].map((item) => (
           <Link
             key={item.label}

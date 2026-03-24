@@ -37,6 +37,7 @@ export const en = {
   'sidebar.sent': 'Sent',
   'sidebar.drafts': 'Drafts',
   'sidebar.contacts': 'Contacts',
+  'sidebar.aboutUs': 'About Us',
   'sidebar.securitySettings': 'Security Settings',
 
   // Inbox & Mail general
@@ -200,8 +201,12 @@ export const en = {
   'settings.pinTitle': 'Security PIN',
   'settings.changePin': 'Change PIN',
   'settings.pinSetDesc': 'A 6-digit PIN is set to quickly unlock emails.',
-  'settings.pinNotSetDesc': 'You have not set a security PIN.',
+  'settings.pinNotSetDesc': 'You have not set up a security PIN.',
   'settings.enabled': 'Enabled',
+  'settings.currentPin': 'Current PIN',
+  'settings.errCurrentPin': 'Current PIN is incorrect',
+  'settings.changePinTitle': 'Change PIN',
+  'settings.changePinSubtitle': 'Please verify your account to proceed.',
   'settings.newPin': 'New PIN (6 digits)',
   'settings.confirmPin': 'Confirm PIN',
   'settings.pinNotMatch': 'PIN does not match',

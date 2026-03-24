@@ -10,8 +10,8 @@ interface PinInputProps {
   onChange: (val: string) => void;
   disabled?: boolean;
   autoFocus?: boolean;
-  onComplete?: () => void;
-  onEnter?: () => void;
+  onComplete?: (val: string) => void;
+  onEnter?: (val: string) => void;
 }
 
 const PinInput = forwardRef<PinInputHandle, PinInputProps>(({ 
@@ -59,7 +59,7 @@ const PinInput = forwardRef<PinInputHandle, PinInputProps>(({
        const nextIndex = Math.min(index + digits.length, length - 1);
        inputRefs.current[nextIndex]?.focus();
        if (finalString.length === length && onComplete) {
-           onComplete();
+           onComplete(finalString);
        }
        return;
     }
@@ -73,7 +73,7 @@ const PinInput = forwardRef<PinInputHandle, PinInputProps>(({
       inputRefs.current[index + 1]?.focus();
     } else {
       if (finalVal.length === length && onComplete) {
-         onComplete();
+         onComplete(finalVal);
       }
     }
   };
@@ -94,8 +94,8 @@ const PinInput = forwardRef<PinInputHandle, PinInputProps>(({
     } else if (e.key === 'ArrowRight' && index < length - 1) {
       inputRefs.current[index + 1]?.focus();
     } else if (e.key === 'Enter') {
-      if (onEnter) onEnter();
-      else if (onComplete && value.length === length) onComplete();
+      if (onEnter) onEnter(value);
+      else if (onComplete && value.length === length) onComplete(value);
     }
   };
 

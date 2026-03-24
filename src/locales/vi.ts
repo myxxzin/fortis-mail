@@ -37,6 +37,7 @@ export const vi = {
   'sidebar.sent': 'Đã gửi',
   'sidebar.drafts': 'Bản nháp',
   'sidebar.contacts': 'Danh bạ',
+  'sidebar.aboutUs': 'Về chúng tôi',
   'sidebar.securitySettings': 'Cài đặt Bảo mật',
 
   // Inbox & Mail general
@@ -202,6 +203,10 @@ export const vi = {
   'settings.pinSetDesc': 'Mã PIN 6 số đã được thiết lập để mở khóa thư nhanh.',
   'settings.pinNotSetDesc': 'Bạn chưa thiết lập mã PIN bảo mật.',
   'settings.enabled': 'Đã bật',
+  'settings.currentPin': 'Mã PIN hiện tại',
+  'settings.errCurrentPin': 'Mã PIN hiện tại không chính xác',
+  'settings.changePinTitle': 'Đổi Mã PIN',
+  'settings.changePinSubtitle': 'Vui lòng xác thực tài khoản để đổi mã PIN mới.',
   'settings.newPin': 'Mã PIN Mới (6 số)',
   'settings.confirmPin': 'Xác nhận mã PIN',
   'settings.pinNotMatch': 'Mã PIN không khớp',
