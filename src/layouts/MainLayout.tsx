@@ -2,11 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
+import OnboardingModal from '../components/OnboardingModal';
+import PinInput from '../components/PinInput';
+import type { PinInputHandle } from '../components/PinInput';
 import { useAuth } from '../context/AuthContext';
 import { useMail } from '../context/MailContext';
 import { useContacts } from '../context/ContactContext';
 import { decryptMessageHybrid, unpackHybridPayload, type EncryptedMessagePayload } from '../utils/cryptoAuth';
-import { X, Key, Fingerprint, ShieldCheck, Edit2, Save, User as UserIcon } from 'lucide-react';
+import { X, Key, Fingerprint, ShieldCheck, Edit2, Save, User as UserIcon, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -18,9 +21,14 @@ export default function MainLayout() {
    
    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
    const [isEditingProfile, setIsEditingProfile] = useState(false);
+   const [isChangingPin, setIsChangingPin] = useState(false);
+   const [showOnboarding, setShowOnboarding] = useState(false);
    const [copiedPubKey, setCopiedPubKey] = useState(false);
    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+   const [pinForm, setPinForm] = useState({ newPin: '', confirmPin: '' });
    
+   const confirmPinRef = useRef<PinInputHandle>(null);
+
    // Track ACKs that have already triggered a Toast
    const processedAcksRef = useRef<Set<string>>(new Set());
 
@@ -34,6 +42,13 @@ export default function MainLayout() {
          setEditForm({
             name: user.name || ''
          });
+         const isAliasSet = user.name !== user.identityId && !!user.name;
+         const isPinSet = !!user.pinHash;
+         if (!isAliasSet || !isPinSet) {
+            setShowOnboarding(true);
+         } else {
+            setShowOnboarding(false);
+         }
       }
    }, [user, isEditingProfile]);
 
@@ -98,6 +113,24 @@ export default function MainLayout() {
       setIsEditingProfile(false);
    };
 
+   const handleSavePin = async () => {
+      if (pinForm.newPin.length !== 6 || !/^\d+$/.test(pinForm.newPin)) {
+         return;
+      }
+      if (pinForm.newPin !== pinForm.confirmPin) {
+         return;
+      }
+      const enc = new TextEncoder();
+      const pinData = enc.encode(pinForm.newPin + (user?.identityId || ''));
+      const hashBuffer = await window.crypto.subtle.digest('SHA-256', pinData);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const pinHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+      await updateProfile({ pinHash });
+      setIsChangingPin(false);
+      setPinForm({ newPin: '', confirmPin: '' });
+   };
+
    if (loading) {
       return (
          <div className="flex h-screen items-center justify-center bg-white dark:bg-black transition-colors duration-300">
@@ -157,6 +190,13 @@ export default function MainLayout() {
             </main>
          </div>
 
+         {/* Onboarding Modal */}
+         <AnimatePresence>
+            {showOnboarding && (
+               <OnboardingModal onComplete={() => setShowOnboarding(false)} />
+            )}
+         </AnimatePresence>
+
          {/* Settings Modal - Used to display Profile & Keys */}
          <AnimatePresence>
             {isSettingsOpen && (
@@ -172,7 +212,7 @@ export default function MainLayout() {
                            <ShieldCheck className="text-accent-blue" size={24} />
                            <h2 className="text-xl font-bold text-corporate-900 dark:text-white">{t('settings.title')}</h2>
                         </div>
-                        <button onClick={() => { setIsSettingsOpen(false); setIsEditingProfile(false); }} className="text-corporate-400 dark:text-white hover:text-corporate-900 dark:hover:text-white rounded-lg p-1 hover:bg-corporate-50 dark:hover:bg-white/10 transition-colors">
+                        <button onClick={() => { setIsSettingsOpen(false); setIsEditingProfile(false); setIsChangingPin(false); }} className="text-corporate-400 dark:text-white hover:text-corporate-900 dark:hover:text-white rounded-lg p-1 hover:bg-corporate-50 dark:hover:bg-white/10 transition-colors">
                            <X size={20} />
                         </button>
                      </div>
@@ -224,6 +264,59 @@ export default function MainLayout() {
                                           <UserIcon className="absolute left-3 top-2.5 text-corporate-400 dark:text-white" size={14} />
                                           <input type="text" disabled value={user.identityId} className="w-full bg-corporate-100 dark:bg-slate-800 text-corporate-500 dark:text-white border border-corporate-200 dark:border-slate-700 rounded-lg pl-9 pr-3 py-2 text-sm cursor-not-allowed" />
                                        </div>
+                                    </div>
+                                 </div>
+                              )}
+                           </div>
+                        </div>
+
+                        {/* PIN Settings Section */}
+                        <div>
+                           <div className="flex items-center justify-between mb-4">
+                              <h3 className="text-sm uppercase tracking-wider font-semibold text-corporate-500 dark:text-white flex items-center"><Lock size={16} className="mr-2" /> {t('settings.pinTitle')}</h3>
+                              {!isChangingPin ? (
+                                 <button onClick={() => setIsChangingPin(true)} className="flex items-center text-xs text-accent-blue hover:text-accent-blue-hover font-medium bg-blue-50 dark:bg-accent-blue/10 px-3 py-1.5 rounded-lg transition-colors">
+                                    <Edit2 size={14} className="mr-1" /> {t('settings.changePin')}
+                                 </button>
+                              ) : (
+                                 <div className="flex space-x-2">
+                                    <button onClick={() => { setIsChangingPin(false); setPinForm({ newPin: '', confirmPin: '' }); }} className="text-xs text-corporate-500 dark:text-white hover:text-corporate-900 dark:hover:text-white px-3 py-1.5 font-medium transition-colors">{t('settings.cancel')}</button>
+                                    <button onClick={handleSavePin} className="flex items-center text-xs text-white bg-accent-blue hover:bg-accent-blue-hover px-4 py-1.5 rounded-lg shadow-sm font-medium transition-all">
+                                       <Save size={14} className="mr-1" /> {t('settings.save')}
+                                    </button>
+                                 </div>
+                              )}
+                           </div>
+                           
+                           <div className="bg-corporate-50 dark:bg-white/5 p-5 rounded-xl border border-corporate-100 dark:border-transparent">
+                              {!isChangingPin ? (
+                                 <div className="flex items-center justify-between">
+                                    <p className="text-sm text-corporate-600 dark:text-gray-300">
+                                       {user.pinHash ? t('settings.pinSetDesc') : t('settings.pinNotSetDesc')}
+                                    </p>
+                                    {user.pinHash && <span className="flex items-center text-xs text-green-600 bg-green-50 px-2 py-1 rounded border border-green-200 dark:bg-green-900/20 dark:border-green-800"><ShieldCheck size={12} className="mr-1"/> {t('settings.enabled')}</span>}
+                                 </div>
+                              ) : (
+                                 <div className="flex flex-col space-y-6">
+                                    <div className="space-y-3">
+                                       <label className="block text-sm font-medium text-corporate-700 dark:text-gray-300 text-center">{t('settings.newPin')}</label>
+                                       <PinInput 
+                                          value={pinForm.newPin} 
+                                          onChange={(val) => setPinForm({ ...pinForm, newPin: val })} 
+                                          autoFocus={true} 
+                                          onComplete={() => confirmPinRef.current?.focus()}
+                                          onEnter={() => confirmPinRef.current?.focus()}
+                                       />
+                                    </div>
+                                    <div className="space-y-3">
+                                       <label className="block text-sm font-medium text-corporate-700 dark:text-gray-300 text-center">{t('settings.confirmPin')}</label>
+                                       <PinInput 
+                                          ref={confirmPinRef}
+                                          value={pinForm.confirmPin} 
+                                          onChange={(val) => setPinForm({ ...pinForm, confirmPin: val })} 
+                                          onEnter={handleSavePin}
+                                       />
+                                       {pinForm.newPin && pinForm.confirmPin && pinForm.newPin !== pinForm.confirmPin && <p className="text-xs text-red-500 mt-3 text-center">{t('settings.pinNotMatch')}</p>}
                                     </div>
                                  </div>
                               )}

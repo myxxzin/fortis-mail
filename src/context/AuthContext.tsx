@@ -13,6 +13,7 @@ interface User {
   alias?: string;
   publicKey: string;
   privateKey?: string; // Kept in memory only, not persisted normally by onAuthStateChanged
+  pinHash?: string;
 }
 
 interface AuthContextType {
@@ -101,7 +102,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: data.email,
       name: data.alias || data.identityId,
       publicKey: data.publicKey.trim(),
-      privateKey: decryptedPrivateKey.trim()
+      privateKey: decryptedPrivateKey.trim(),
+      pinHash: data.pinHash
     });
   };
 
@@ -129,7 +131,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       publicKey: publicKey.trim(),
       encryptedPrivateKey,
       verifierHash,
-      saltBase64
+      saltBase64,
+      pinHash: null
     };
 
     try {

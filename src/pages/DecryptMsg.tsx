@@ -10,6 +10,7 @@ import { auth } from '../config/firebase';
 import { EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import { decryptMessageHybrid, unpackHybridPayload, decryptFile, encryptMessageHybrid, packHybridPayload, type EncryptedMessagePayload } from '../utils/cryptoAuth';
 import { toast } from 'react-hot-toast';
+import PinInput from '../components/PinInput';
 
 const TRUE_MSG = "Hello team,\n\nThe Q3 financial records are attached and verified. We have successfully secured the new investments without any leakage of company secrets.\n\nPlease keep this information strictly within the leadership circle.\n\nBest Regards,\nHR & Finance";
 
@@ -118,9 +119,21 @@ export default function DecryptMsg() {
     setDecryptionState('password-entered');
 
     try {
-      if (!auth.currentUser) throw new Error("No active session");
-      const credential = EmailAuthProvider.credential(user.email, password);
-      await reauthenticateWithCredential(auth.currentUser, credential);
+      if (user?.pinHash) {
+         const enc = new TextEncoder();
+         const pinData = enc.encode(password + (user?.identityId || ''));
+         const hashBuffer = await window.crypto.subtle.digest('SHA-256', pinData);
+         const hashArray = Array.from(new Uint8Array(hashBuffer));
+         const enteredHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+         
+         if (enteredHash !== user.pinHash) {
+            throw new Error(t('decrypt.invalidPass'));
+         }
+      } else {
+         if (!auth.currentUser) throw new Error("No active session");
+         const credential = EmailAuthProvider.credential(user.email, password);
+         await reauthenticateWithCredential(auth.currentUser, credential);
+      }
 
       let finalPlaintext = mailDetails.content;
       try {
@@ -379,24 +392,28 @@ export default function DecryptMsg() {
                         <Lock size={20} />
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold text-corporate-900 dark:text-white">Encrypted Payload</h3>
-                        <p className="text-sm text-corporate-500 dark:text-white">{t('decrypt.provideMaster')}</p>
+                        <h3 className="text-lg font-bold text-corporate-900 dark:text-white">{user?.pinHash ? t('decrypt.encryptedBoxTitle') : 'Encrypted Payload'}</h3>
+                        <p className="text-sm text-corporate-500 dark:text-white">{user?.pinHash ? t('decrypt.pinProvide') : t('decrypt.provideMaster')}</p>
                       </div>
                     </div>
 
-                    <form onSubmit={handleDecrypt} className="flex flex-col sm:flex-row gap-4">
-                      <div className="flex-1">
-                        <input
-                          autoFocus
-                          required
-                          type="password"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          placeholder={t('decrypt.passPlaceholder')}
-                          className="w-full bg-corporate-50 dark:bg-slate-800 border border-corporate-200 dark:border-slate-700 text-corporate-900 dark:text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue transition-all font-mono text-sm"
-                        />
+                    <form onSubmit={handleDecrypt} className="flex flex-col sm:flex-row gap-4 items-center">
+                      <div className="flex-1 w-full flex justify-center sm:justify-start">
+                         {user?.pinHash ? (
+                            <PinInput value={password} onChange={setPassword} autoFocus={true} />
+                         ) : (
+                            <input
+                              autoFocus
+                              required
+                              type="password"
+                              value={password}
+                              onChange={(e) => setPassword(e.target.value)}
+                              placeholder={t('decrypt.passPlaceholder')}
+                              className="w-full bg-corporate-50 dark:bg-slate-800 border border-corporate-200 dark:border-slate-700 text-corporate-900 dark:text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-blue transition-all text-sm"
+                            />
+                         )}
                       </div>
-                      <button type="submit" disabled={decryptionState === 'password-entered'} className="bg-white border border-corporate-200 text-corporate-900 dark:bg-white/10 hover:bg-corporate-50 dark:hover:bg-white/20 disabled:border-corporate-100 disabled:text-corporate-400 dark:disabled:bg-slate-700 dark:text-white px-8 py-3 rounded-lg font-medium transition-colors shadow-sm whitespace-nowrap">
+                      <button type="submit" disabled={decryptionState === 'password-entered'} className="w-full sm:w-auto bg-white border border-corporate-200 text-corporate-900 dark:bg-white/10 hover:bg-corporate-50 dark:hover:bg-white/20 disabled:border-corporate-100 disabled:text-corporate-400 dark:disabled:bg-slate-700 dark:text-white px-8 py-3 rounded-lg flex-shrink-0 font-medium transition-colors shadow-sm whitespace-nowrap">
                         {decryptionState === 'password-entered' ? t('decrypt.btnVerifying') : t('decrypt.btnDecrypt')}
                       </button>
                     </form>
