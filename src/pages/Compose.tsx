@@ -154,27 +154,41 @@ export default function Compose() {
       const uploadedFiles = [];
       const attachmentKeys: { id: string, fileKeyBase64: string, ivBase64: string }[] = [];
       if (user && files.length > 0) {
-        for (const file of files) {
+        const uploadPromises = files.map(async (file) => {
           const uniqueId = Math.random().toString(36).substring(2, 15);
           const fileRef = ref(storage, `attachments/${user.uid}/${Date.now()}-${uniqueId}-${file.name}`);
 
           const { ciphertextBlob, fileKeyBase64, ivBase64 } = await encryptFile(file);
 
-          const snapshot = await uploadBytes(fileRef, ciphertextBlob);
+          // Nếu cấu hình Firebase Storage sai hoặc chưa bật trên Console,
+          // SDK sẽ tự động retry và gây treo vô hạn. Ta dùng timeout 15 giây để ngắt mạch.
+          const uploadPromise = uploadBytes(fileRef, ciphertextBlob);
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error("Lỗi tải lên Firebase: Quá thời gian. Vui lòng kiểm tra lại xem bạn đã bật Firebase Storage chưa hoặc kết nối mạng bị giới hạn.")), 15000)
+          );
+          
+          const snapshot = await Promise.race([uploadPromise, timeoutPromise]) as any;
           const downloadUrl = await getDownloadURL(snapshot.ref);
 
-          uploadedFiles.push({
-            name: file.name,
-            url: downloadUrl,
-            size: file.size,
-            type: file.type
-          });
+          return {
+            fileData: {
+              name: file.name,
+              url: downloadUrl,
+              size: file.size,
+              type: file.type
+            },
+            keyData: {
+              id: downloadUrl,
+              fileKeyBase64,
+              ivBase64
+            }
+          };
+        });
 
-          attachmentKeys.push({
-            id: downloadUrl,
-            fileKeyBase64,
-            ivBase64
-          });
+        const results = await Promise.all(uploadPromises);
+        for (const res of results) {
+          uploadedFiles.push(res.fileData);
+          attachmentKeys.push(res.keyData);
         }
       }
 
@@ -262,7 +276,6 @@ export default function Compose() {
                   className="w-16 h-16 border-4 border-corporate-700 dark:border-slate-800 border-t-accent-blue rounded-full mb-6"
                 />
                 <h2 className="text-xl font-bold text-corporate-900 dark:text-white font-mono tracking-widest leading-relaxed uppercase">{t('compose.encrypting')}</h2>
-                <p className="text-sm text-corporate-500 dark:text-white font-mono mt-2">{t('compose.encryptingDesc')}</p>
               </div>
             </motion.div>
           )}

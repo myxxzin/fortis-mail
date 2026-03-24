@@ -52,3 +52,49 @@ input::-ms-reveal,
 input::-ms-clear {
   display: none;
 }
+
+/* Custom Driver.js Theme */
+.driver-popover.fortis-tour-theme {
+  @apply rounded-2xl p-6 shadow-2xl border border-corporate-200 dark:border-slate-800 bg-white dark:bg-slate-900 font-sans;
+  max-width: 320px;
+}
+
+.driver-popover.fortis-tour-theme .driver-popover-title {
+  @apply text-xl font-bold text-corporate-900 dark:text-white mb-2 leading-tight;
+}
+
+.driver-popover.fortis-tour-theme .driver-popover-description {
+  @apply text-sm text-corporate-600 dark:text-slate-300 leading-relaxed;
+}
+
+.driver-popover.fortis-tour-theme .driver-popover-footer {
+  @apply mt-6 flex flex-row items-center justify-between;
+}
+
+.driver-popover.fortis-tour-theme .driver-popover-navigation-btns {
+  @apply flex items-center gap-2;
+}
+
+.driver-popover.fortis-tour-theme .driver-popover-progress-text {
+  @apply text-xs font-semibold tracking-wider uppercase text-corporate-400 dark:text-slate-500;
+}
+
+.driver-popover.fortis-tour-theme .driver-popover-navigation-btns button {
+  @apply rounded-xl text-sm font-semibold px-4 py-2 transition-all shadow-sm flex items-center justify-center m-0;
+  text-shadow: none;
+}
+
+.driver-popover.fortis-tour-theme .driver-popover-prev-btn {
+  @apply bg-corporate-100 dark:bg-white/10 text-corporate-700 dark:text-white hover:bg-corporate-200 dark:hover:bg-white/20 !border-none;
+}
+
+.driver-popover.fortis-tour-theme .driver-popover-next-btn,
+.driver-popover.fortis-tour-theme .driver-popover-done-btn {
+  @apply bg-accent-blue hover:bg-accent-blue-hover text-white !border-none;
+}
+
+.driver-popover.fortis-tour-theme .driver-popover-close-btn {
+  @apply absolute top-4 right-4 text-corporate-400 hover:text-red-500 transition-colors bg-transparent border-none p-1 rounded-full shadow-none hover:bg-corporate-50 dark:hover:bg-slate-800 flex items-center justify-center text-xl leading-none;
+  width: 28px;
+  height: 28px;
+}

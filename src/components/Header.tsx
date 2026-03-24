@@ -63,6 +63,7 @@ export default function Header({ onToggleMenu }: { onToggleMenu?: () => void }) 
             <div className="flex items-center space-x-5 border-r border-corporate-200 dark:border-white/10 pr-5">
                {/* Theme Toggle */}
                <button 
+                 id="tour-theme"
                  onClick={toggleTheme} 
                  className="flex items-center justify-center hover:text-corporate-900 dark:hover:text-white transition-colors"
                  title="Toggle Light/Dark Theme"
@@ -71,7 +72,7 @@ export default function Header({ onToggleMenu }: { onToggleMenu?: () => void }) 
                </button>
 
                {/* Language Toggle */}
-               <div className="flex items-center gap-1.5 text-xs font-bold tracking-wider">
+               <div id="tour-language" className="flex items-center gap-1.5 text-xs font-bold tracking-wider">
                  <Globe size={16} className="text-corporate-400 dark:text-white mr-0.5" />
                  <button
                    onClick={() => setLanguage('vi')}

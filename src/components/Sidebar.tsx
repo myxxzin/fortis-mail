@@ -20,7 +20,7 @@ export default function Sidebar({ onOpenSettings, onMobileClose }: { onOpenSetti
       </div>
 
       <div className="px-4 mb-6 mt-6 shrink-0">
-        <Link to="/compose" onClick={onMobileClose} className="w-full bg-corporate-900 border border-transparent dark:bg-white hover:bg-black dark:hover:bg-corporate-100 text-white dark:text-corporate-900 flex items-center justify-center space-x-2 py-3 rounded-xl transition-all shadow-md font-bold">
+        <Link id="tour-compose" to="/compose" onClick={onMobileClose} className="w-full bg-corporate-900 border border-transparent dark:bg-white hover:bg-black dark:hover:bg-corporate-100 text-white dark:text-corporate-900 flex items-center justify-center space-x-2 py-3 rounded-xl transition-all shadow-md font-bold">
           <FileEdit size={18} />
           <span>{t('sidebar.compose')}</span>
         </Link>
@@ -37,6 +37,7 @@ export default function Sidebar({ onOpenSettings, onMobileClose }: { onOpenSetti
         ].map((item) => (
           <Link
             key={item.label}
+            id={`tour-${item.path.replace('/', '')}`}
             to={item.path}
             onClick={onMobileClose}
             className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-colors ${location.pathname === item.path
@@ -61,6 +62,7 @@ export default function Sidebar({ onOpenSettings, onMobileClose }: { onOpenSetti
       <div className="p-4 border-t border-corporate-200 dark:border-white/10 bg-corporate-50 dark:bg-[#020617] mt-auto transition-colors duration-300">
 
         <button
+          id="tour-settings"
           onClick={onOpenSettings}
           className="w-full flex items-center justify-between px-3 py-2.5 text-sm text-corporate-600 dark:text-white hover:bg-corporate-100 dark:hover:bg-white/10 hover:text-corporate-900 dark:hover:text-white rounded-xl transition-colors font-medium border border-transparent hover:border-corporate-200 dark:hover:border-white/10"
         >

@@ -4,11 +4,12 @@ import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import OnboardingModal from '../components/OnboardingModal';
 import ChangePinModal from '../components/ChangePinModal';
+import ProductTour, { replayProductTour } from '../components/ProductTour';
 import { useAuth } from '../context/AuthContext';
 import { useMail } from '../context/MailContext';
 import { useContacts } from '../context/ContactContext';
 import { decryptMessageHybrid, unpackHybridPayload, type EncryptedMessagePayload } from '../utils/cryptoAuth';
-import { X, Key, Fingerprint, ShieldCheck, Edit2, Save, User as UserIcon, Lock } from 'lucide-react';
+import { X, Key, Fingerprint, ShieldCheck, Edit2, Save, User as UserIcon, Lock, PlayCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../contexts/LanguageContext';
 import { toast } from 'react-hot-toast';
@@ -26,6 +27,8 @@ export default function MainLayout() {
    const [copiedPubKey, setCopiedPubKey] = useState(false);
    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
    
+   const isTourReady = !loading && !!user && !showOnboarding && !showChangePinModal;
+
    // Track ACKs that have already triggered a Toast
    const processedAcksRef = useRef<Set<string>>(new Set());
 
@@ -179,6 +182,9 @@ export default function MainLayout() {
             {showChangePinModal && <ChangePinModal onClose={() => setShowChangePinModal(false)} />}
          </AnimatePresence>
 
+         {/* Product Tour Overlay (Headless) */}
+         <ProductTour isReady={isTourReady} />
+
          {/* Settings Modal - Used to display Profile & Keys */}
          <AnimatePresence>
             {isSettingsOpen && (
@@ -268,6 +274,27 @@ export default function MainLayout() {
                                  </p>
                                  {user.pinHash && <span className="flex items-center text-xs text-green-600 bg-green-50 px-2 py-1 rounded border border-green-200 dark:bg-green-900/20 dark:border-green-800"><ShieldCheck size={12} className="mr-1"/> {t('settings.enabled')}</span>}
                               </div>
+                           </div>
+                        </div>
+
+                        {/* Product Tour Replay Section */}
+                        <div>
+                           <div className="flex items-center justify-between mb-4">
+                              <h3 className="text-sm uppercase tracking-wider font-semibold text-corporate-500 dark:text-white flex items-center"><PlayCircle size={16} className="mr-2" /> {t('settings.replayTourTitle')}</h3>
+                              <button 
+                                 onClick={() => {
+                                    setIsSettingsOpen(false);
+                                    setTimeout(() => replayProductTour(user.uid), 300);
+                                 }} 
+                                 className="flex items-center text-xs text-corporate-700 dark:text-white bg-corporate-100 dark:bg-white/10 hover:bg-corporate-200 dark:hover:bg-white/20 px-3 py-1.5 rounded-lg transition-colors font-medium">
+                                 <PlayCircle size={14} className="mr-1.5" /> {t('settings.replayTour')}
+                              </button>
+                           </div>
+                           
+                           <div className="bg-corporate-50 dark:bg-white/5 p-5 rounded-xl border border-corporate-100 dark:border-transparent">
+                              <p className="text-sm text-corporate-600 dark:text-gray-300">
+                                 {t('settings.replayTourDesc')}
+                              </p>
                            </div>
                         </div>
 
