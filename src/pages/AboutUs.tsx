@@ -11,16 +11,16 @@ export default function AboutUs() {
             {t('sidebar.aboutUs')}
           </h1>
           <p className="text-sm font-medium text-corporate-500 dark:text-corporate-400">
-            Thông tin giới thiệu về chúng tôi
+            {t('about.subtitle')}
           </p>
         </div>
       </div>
 
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-corporate-200 dark:border-slate-800 p-8 flex-1">
         <div className="prose dark:prose-invert max-w-4xl">
-          <h2 className="text-xl font-semibold mb-4 text-corporate-800 dark:text-white">Our Mission</h2>
+          <h2 className="text-xl font-semibold mb-4 text-corporate-800 dark:text-white">{t('about.ourMission')}</h2>
           <p className="text-corporate-600 dark:text-gray-300 mb-6 font-medium">
-            (Nội dung trang About Us sẽ được thêm vào sau theo yêu cầu...)
+            {t('about.bodyText')}
           </p>
         </div>
       </div>

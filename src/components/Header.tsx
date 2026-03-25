@@ -13,7 +13,7 @@ export default function Header({ onToggleMenu }: { onToggleMenu?: () => void }) 
    const { mails, unreadCount, markAsRead } = useMail();
    const { contacts } = useContacts();
    const navigate = useNavigate();
-   const { language, setLanguage } = useLanguage();
+   const { t, language, setLanguage } = useLanguage();
    const { theme, toggleTheme } = useTheme();
    const [showNotifications, setShowNotifications] = useState(false);
    const [showProfile, setShowProfile] = useState(false);
@@ -52,7 +52,7 @@ export default function Header({ onToggleMenu }: { onToggleMenu?: () => void }) 
                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-corporate-400 dark:text-white" size={18} />
                <input
                   type="text"
-                  placeholder="Search secure messages..."
+                  placeholder={t('header.searchPlaceholder')}
                   className="w-full bg-corporate-50 dark:bg-slate-800 border-none rounded-full py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-accent-blue focus:outline-none transition-shadow text-corporate-900 dark:text-white placeholder:text-corporate-400 dark:placeholder:text-corporate-500"
                />
             </div>

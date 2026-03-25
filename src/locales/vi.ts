@@ -242,4 +242,10 @@ export const vi = {
   'tour.next': 'Tiếp theo',
   'tour.prev': 'Quay lại',
   'tour.done': 'Hoàn tất',
+
+  // Header & About
+  'header.searchPlaceholder': 'Tìm kiếm tin nhắn bảo mật...',
+  'about.ourMission': 'Sứ mệnh của chúng tôi',
+  'about.subtitle': 'Thông tin giới thiệu về chúng tôi',
+  'about.bodyText': '(Nội dung trang About Us sẽ được thêm vào sau theo yêu cầu...)',
 };

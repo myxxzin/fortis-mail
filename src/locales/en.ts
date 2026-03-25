@@ -242,4 +242,10 @@ export const en = {
   'tour.next': 'Next',
   'tour.prev': 'Previous',
   'tour.done': 'Done',
+
+  // Header & About
+  'header.searchPlaceholder': 'Search secure messages...',
+  'about.ourMission': 'Our Mission',
+  'about.subtitle': 'Information about us',
+  'about.bodyText': '(The content of this About Us page will be added later upon request...)',
 };
