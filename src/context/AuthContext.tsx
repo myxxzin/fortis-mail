@@ -137,6 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       await setDoc(doc(db, 'users', cred.user.uid), newUserProfile);
+      localStorage.setItem(`fortis_pending_tour_${cred.user.uid}`, 'true');
     } catch (error) {
       console.error("Critical: Failed to build Identity Vault", error);
       throw new Error("Failed to construct the encrypted vault on the server.");

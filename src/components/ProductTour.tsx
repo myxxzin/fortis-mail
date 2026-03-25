@@ -23,8 +23,11 @@ export default function ProductTour({ isReady }: { isReady: boolean }) {
   useEffect(() => {
     if (!isReady || !user) return;
 
-    const tourKey = `fortis_tour_${user.uid}`;
-    if (localStorage.getItem(tourKey)) return;
+    const autoRunKey = `fortis_pending_tour_${user.uid}`;
+    const shouldAutoRun = localStorage.getItem(autoRunKey) === 'true';
+
+    // Return if it's not a manual replay AND not a new registration
+    if (runKey === 0 && !shouldAutoRun) return;
 
     const driverObj = driver({
       showProgress: true,
@@ -35,7 +38,7 @@ export default function ProductTour({ isReady }: { isReady: boolean }) {
       doneBtnText: t('tour.done'),
       allowClose: true,
       onDestroyed: () => {
-        localStorage.setItem(tourKey, 'completed');
+        if (shouldAutoRun) localStorage.removeItem(autoRunKey);
       },
       steps: [
         {
