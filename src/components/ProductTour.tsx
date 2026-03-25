@@ -92,6 +92,15 @@ export default function ProductTour({ isReady }: { isReady: boolean }) {
           }
         },
         {
+          element: '#tour-about',
+          popover: {
+            title: t('tour.about.title'),
+            description: t('tour.about.desc'),
+            side: "right",
+            align: 'start'
+          }
+        },
+        {
           element: '#tour-settings',
           popover: {
             title: t('tour.settings.title'),
@@ -119,12 +128,12 @@ export default function ProductTour({ isReady }: { isReady: boolean }) {
           }
         },
         {
-          element: '#tour-about',
+          element: '#tour-notifications',
           popover: {
-            title: t('tour.about.title'),
-            description: t('tour.about.desc'),
-            side: "right",
-            align: 'start'
+            title: t('tour.notifications.title'),
+            description: t('tour.notifications.desc'),
+            side: "bottom",
+            align: 'end'
           }
         }
       ]

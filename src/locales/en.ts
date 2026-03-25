@@ -239,6 +239,8 @@ export const en = {
   'tour.language.desc': 'Switch language between Vietnamese and English.',
   'tour.about.title': 'About Us',
   'tour.about.desc': 'Learn more about our secure platform.',
+  'tour.notifications.title': 'Notifications',
+  'tour.notifications.desc': 'View your delivery receipts and security alerts here.',
   'tour.next': 'Next',
   'tour.prev': 'Previous',
   'tour.done': 'Done',

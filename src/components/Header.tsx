@@ -92,6 +92,7 @@ export default function Header({ onToggleMenu }: { onToggleMenu?: () => void }) 
 
             <div className="relative">
                <button
+                  id="tour-notifications"
                   onClick={() => setShowNotifications(!showNotifications)}
                   className="hover:text-corporate-900 dark:hover:text-white transition-colors relative p-1"
                >

@@ -239,6 +239,8 @@ export const vi = {
   'tour.language.desc': 'Chuyển đổi ngôn ngữ Tiếng Việt / Tiếng Anh.',
   'tour.about.title': 'Về chúng tôi',
   'tour.about.desc': 'Tìm hiểu thêm về nền tảng bảo mật của chúng tôi.',
+  'tour.notifications.title': 'Thông báo',
+  'tour.notifications.desc': 'Xem biên nhận chuyển phát và cập nhật bảo mật tại đây.',
   'tour.next': 'Tiếp theo',
   'tour.prev': 'Quay lại',
   'tour.done': 'Hoàn tất',
