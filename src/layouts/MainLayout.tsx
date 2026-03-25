@@ -42,9 +42,8 @@ export default function MainLayout() {
          setEditForm({
             name: user.name || ''
          });
-         const isAliasSet = user.name !== user.identityId && !!user.name;
          const isPinSet = !!user.pinHash;
-         if (!isAliasSet || !isPinSet) {
+         if (!isPinSet) {
             setShowOnboarding(true);
          } else {
             setShowOnboarding(false);

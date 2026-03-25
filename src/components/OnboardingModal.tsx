@@ -18,7 +18,7 @@ export default function OnboardingModal({ onComplete }: { onComplete: () => void
 
   const confirmPinRef = useRef<PinInputHandle>(null);
 
-  const isAliasSet = user?.name !== user?.identityId && !!user?.name;
+  const isAliasSet = !!user?.name;
   const isPinSet = !!user?.pinHash;
 
   // Initialize step based on what's missing
