@@ -123,7 +123,7 @@ export default function Inbox() {
                       <div className={mail.isUnread ? "text-accent-blue" : "text-corporate-400 dark:text-white"}><Lock size={16} /></div>
                       <div className="flex flex-col min-w-0 max-w-[200px] xl:max-w-xs">
                         <span className={`text-sm truncate ${mail.isUnread ? 'font-bold text-corporate-900 dark:text-white' : 'font-medium text-corporate-700 dark:text-white'}`}>
-                            {mail.senderDisplay || 'Unknown'}
+                            {mail.senderDisplay || resolveAlias(mail.senderPubKey)}
                         </span>
                         <span className="text-xs text-corporate-400 dark:text-white truncate">({resolveAlias(mail.senderPubKey)})</span>
                       </div>

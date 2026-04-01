@@ -6,8 +6,9 @@ import { useMail } from '../context/MailContext';
 import { useContacts } from '../context/ContactContext';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import { auth } from '../config/firebase';
+import { auth, db } from '../config/firebase';
 import { EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { decryptMessageHybrid, unpackHybridPayload, decryptFile, encryptMessageHybrid, packHybridPayload, type EncryptedMessagePayload } from '../utils/cryptoAuth';
 import { toast } from 'react-hot-toast';
 import PinInput from '../components/PinInput';
@@ -35,6 +36,7 @@ export default function DecryptMsg() {
   const [ackStatus, setAckStatus] = useState<'pending' | 'verified' | 'failed'>('pending');
   const [ackError, setAckError] = useState<string>('');
 
+
   const currentMail = [...mails, ...sentMails].find(m => m.id === id);
 
   const resolveAlias = (pubKey: string) => {
@@ -59,6 +61,47 @@ export default function DecryptMsg() {
     isSystem: currentMail?.isSystem || false,
     content: currentMail?.content || TRUE_MSG,
     attachments: currentMail?.attachments || []
+  };
+
+  const [globalSenderName, setGlobalSenderName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchGlobalIdentity = async () => {
+      const pubKeyToSearch = trueSenderPubKey || (mailDetails.senderPubKey !== 'SEALED' ? mailDetails.senderPubKey : null);
+      if (!pubKeyToSearch || pubKeyToSearch === 'SEALED' || pubKeyToSearch === 'System Key') return;
+      
+      try {
+        const q = query(collection(db, 'users'), where('publicKey', '==', pubKeyToSearch));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          const udata = snap.docs[0].data();
+          setGlobalSenderName(udata.alias || udata.name || udata.identityId);
+        }
+      } catch (err) {
+         console.warn("Failed to fetch global identity", err);
+      }
+    };
+    
+    if (decryptionState === 'decrypted') {
+       fetchGlobalIdentity();
+    }
+  }, [trueSenderPubKey, mailDetails.senderPubKey, decryptionState]);
+
+  const getSenderDisplayName = () => {
+    const pubKey = trueSenderPubKey || mailDetails.senderPubKey;
+    if (!pubKey || pubKey === 'SEALED') return mailDetails.senderDisplay || t('decrypt.unknown');
+    
+    const localAlias = resolveAlias(pubKey);
+    const isTruncatedKey = localAlias === pubKey.substring(0, 24) + '...';
+    
+    if (isTruncatedKey && globalSenderName) {
+       return globalSenderName;
+    }
+    if (!isTruncatedKey) {
+       return localAlias;
+    }
+    
+    return mailDetails.senderDisplay === 'Anonymous' ? localAlias : (mailDetails.senderDisplay || localAlias);
   };
 
   useEffect(() => {
@@ -295,7 +338,7 @@ export default function DecryptMsg() {
               <span>{t('decrypt.message')} {mailDetails.subject}</span>
             </h1>
             <p className="text-sm text-corporate-500 dark:text-white">
-              {t('decrypt.from')} <span className="text-corporate-900 dark:text-white font-semibold">{mailDetails.senderDisplay || t('decrypt.unknown')}</span> <span className="text-xs font-mono text-corporate-400 dark:text-white ml-1">({resolveAlias(trueSenderPubKey || mailDetails.senderPubKey)})</span>
+              {t('decrypt.from')} <span className="text-corporate-900 dark:text-white font-semibold">{getSenderDisplayName()}</span> <span className="text-xs font-mono text-corporate-400 dark:text-white ml-1">({resolveAlias(trueSenderPubKey || mailDetails.senderPubKey)})</span>
             </p>
           </div>
           <div className="flex items-center space-x-2 text-sm text-corporate-500 dark:text-white bg-corporate-50 dark:bg-white/5 px-3 py-1.5 rounded-lg border border-corporate-200 dark:border-white/10">
@@ -444,7 +487,7 @@ export default function DecryptMsg() {
                   <div className="px-5 md:px-8 pt-6 md:pt-10 pb-6 text-sm text-corporate-500 dark:text-white flex flex-col space-y-3 md:space-y-4 font-sans">
                     <div className="flex flex-col md:grid md:grid-cols-[100px_1fr]">
                       <span className="opacity-70 text-xs md:text-sm mb-0.5 md:mb-0">{t('decrypt.from2')}</span>
-                      <span className="font-semibold text-corporate-900 dark:text-white break-words">{mailDetails.senderDisplay || t('decrypt.unknown')} <span className="text-[10px] font-normal opacity-50 ml-0 md:ml-2 block md:inline">({resolveAlias(trueSenderPubKey || mailDetails.senderPubKey)})</span></span>
+                      <span className="font-semibold text-corporate-900 dark:text-white break-words">{getSenderDisplayName()} <span className="text-[10px] font-normal opacity-50 ml-0 md:ml-2 block md:inline">({resolveAlias(trueSenderPubKey || mailDetails.senderPubKey)})</span></span>
                     </div>
                     <div className="flex flex-col md:grid md:grid-cols-[100px_1fr]">
                       <span className="opacity-70 text-xs md:text-sm mb-0.5 md:mb-0">{t('decrypt.to2')}</span>
