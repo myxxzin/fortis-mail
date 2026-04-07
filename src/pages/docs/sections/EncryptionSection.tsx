@@ -20,7 +20,7 @@ export default function EncryptionSection() {
   if (language === 'vi') {
     return (
       <div id="encryption" className="scroll-mt-24">
-        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-blue-400 dark:to-cyan-300 mb-6">
+        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#226214] to-[#43cc25] dark:from-[#43cc25] dark:to-[#8ff277] mb-6">
           Kiến Trúc Mật Mã Học
         </h1>
         
@@ -28,7 +28,7 @@ export default function EncryptionSection() {
           1. Luồng Hệ Thống (System Architecture)
         </h2>
         
-        <p className="text-lg text-slate-700 dark:text-slate-300 mb-8 border-l-4 border-blue-500 pl-4 py-1 bg-blue-50/50 dark:bg-blue-900/10 rounded-r-lg">
+        <p className="text-lg text-slate-700 dark:text-slate-300 mb-8 border-l-4 border-[#43cc25] pl-4 py-1 bg-[#43cc25]/10 dark:bg-[#43cc25]/20 rounded-r-lg">
           <strong>Mô hình hai lớp độc lập:</strong><br/>
           <strong>Tiền phương (Frontend):</strong> Đóng vai trò máy trạm Mã hóa (Web Crypto C++ Core).<br />
           <strong>Hậu phương (Backend):</strong> Máy chủ câm chuyển phát ngốc nghếch (Firebase routing).
@@ -79,7 +79,7 @@ export default function EncryptionSection() {
 
   return (
     <div id="encryption" className="scroll-mt-24">
-      <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-blue-400 dark:to-cyan-300 mb-6">
+      <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#226214] to-[#43cc25] dark:from-[#43cc25] dark:to-[#8ff277] mb-6">
         Cryptography Core
       </h1>
       
@@ -87,7 +87,7 @@ export default function EncryptionSection() {
         1. Two-Layer Architecture
       </h2>
 
-      <p className="text-lg text-slate-700 dark:text-slate-300 mb-8 border-l-4 border-blue-500 pl-4 py-1 bg-blue-50/50 dark:bg-blue-900/10 rounded-r-lg">
+      <p className="text-lg text-slate-700 dark:text-slate-300 mb-8 border-l-4 border-[#43cc25] pl-4 py-1 bg-[#43cc25]/10 dark:bg-[#43cc25]/20 rounded-r-lg">
         <strong>Dual Separation Model:</strong><br/>
         <strong>Frontend:</strong> C++ Web Crypto execution block carrying 100% of the hashing architecture.<br />
         <strong>Backend:</strong> Dumb Courier. Firebase blindly receiving opaque blobs sorting via UIDs.

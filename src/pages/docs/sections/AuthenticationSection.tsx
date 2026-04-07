@@ -20,10 +20,10 @@ export default function AuthenticationSection() {
   if (language === 'vi') {
     return (
       <div id="authentication" className="scroll-mt-24">
-        <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-semibold border border-blue-100 dark:border-blue-800">
+        <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#43cc25]/10 dark:bg-[#43cc25]/20 text-[#226214] dark:text-[#43cc25] text-sm font-semibold border border-[#43cc25]/20">
           <DatabaseZap className="w-4 h-4" /> Hệ Thống Bộ Nhớ Cốt Lõi
         </div>
-        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500 mb-6">
+        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#226214] to-[#43cc25] dark:from-[#43cc25] dark:to-[#8ff277] mb-6">
           Lưu Trữ & Sinh Mệnh Khóa
         </h1>
         
@@ -39,37 +39,37 @@ export default function AuthenticationSection() {
           
           <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-[#09090b]">
              <div className="bg-slate-50 dark:bg-slate-900 py-3 px-5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
-                <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-[#43cc25] shadow-[0_0_8px_rgba(67,204,37,0.5)]"></div>
                 <h4 className="font-bold text-slate-900 dark:text-white font-mono text-sm">/users/{`{uid}`}</h4>
              </div>
              <div className="p-5 font-mono text-sm leading-loose">
-               <div className="text-slate-600 dark:text-slate-400"><span className="text-blue-500 font-bold">alias:</span> string</div>
-               <div className="text-slate-600 dark:text-slate-400"><span className="text-blue-500 font-bold">publicKey:</span> jwk / pem</div>
-               <div className="text-slate-600 dark:text-slate-400"><span className="text-blue-500 font-bold">pinHash:</span> string</div>
+               <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">alias:</span> string</div>
+               <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">publicKey:</span> jwk / pem</div>
+               <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">pinHash:</span> string</div>
              </div>
           </div>
           
           <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-[#09090b]">
              <div className="bg-slate-50 dark:bg-slate-900 py-3 px-5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
-                <div className="w-2.5 h-2.5 rounded-full bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.5)]"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-[#43cc25] shadow-[0_0_8px_rgba(67,204,37,0.5)]"></div>
                 <h4 className="font-bold text-slate-900 dark:text-white font-mono text-sm">/mails/{`{mailId}`}</h4>
              </div>
              <div className="p-5 font-mono text-sm leading-loose">
-               <div className="text-slate-600 dark:text-slate-400"><span className="text-teal-500 font-bold">from / to:</span> refs</div>
-               <div className="text-slate-600 dark:text-slate-400"><span className="text-teal-500 font-bold">payload:</span> ciphertext</div>
-               <div className="text-slate-600 dark:text-slate-400"><span className="text-teal-500 font-bold">signature:</span> hex / b64</div>
+               <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">from / to:</span> refs</div>
+               <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">payload:</span> ciphertext</div>
+               <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">signature:</span> hex / b64</div>
              </div>
           </div>
           
           <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-[#09090b]">
              <div className="bg-slate-50 dark:bg-slate-900 py-3 px-5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
-                <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-[#43cc25] shadow-[0_0_8px_rgba(67,204,37,0.5)]"></div>
                 <h4 className="font-bold text-slate-900 dark:text-white font-mono text-sm">/drafts/{`{draftId}`}</h4>
              </div>
              <div className="p-5 font-mono text-sm leading-loose">
-               <div className="text-slate-600 dark:text-slate-400"><span className="text-amber-500 font-bold">ownerUID:</span> string</div>
-               <div className="text-slate-600 dark:text-slate-400"><span className="text-amber-500 font-bold">content:</span> ciphertext</div>
-               <div className="text-slate-600 dark:text-slate-400"><span className="text-amber-500 font-bold">lastSaved:</span> temp_ts</div>
+               <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">ownerUID:</span> string</div>
+               <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">content:</span> ciphertext</div>
+               <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">lastSaved:</span> temp_ts</div>
              </div>
           </div>
 
@@ -91,7 +91,7 @@ export default function AuthenticationSection() {
 
         <div className="grid md:grid-cols-2 gap-8 mb-8">
           <div>
-            <div className="flex items-center gap-3 mb-4 text-indigo-600 dark:text-indigo-400">
+            <div className="flex items-center gap-3 mb-4 text-[#43cc25] dark:text-[#43cc25]">
                <Network className="w-6 h-6" />
                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Kiên quyết Cấm Redux</h3>
             </div>
@@ -100,7 +100,7 @@ export default function AuthenticationSection() {
             </p>
           </div>
           <div>
-            <div className="flex items-center gap-3 mb-4 text-rose-600 dark:text-rose-400">
+            <div className="flex items-center gap-3 mb-4 text-[#43cc25] dark:text-[#43cc25]">
                <MonitorOff className="w-6 h-6" />
                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Sinh Ly Tử Biệt</h3>
             </div>
@@ -118,10 +118,10 @@ export default function AuthenticationSection() {
   // EN
   return (
     <div id="authentication" className="scroll-mt-24">
-      <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-semibold border border-blue-100 dark:border-blue-800">
+      <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#43cc25]/10 dark:bg-[#43cc25]/20 text-[#226214] dark:text-[#43cc25] text-sm font-semibold border border-[#43cc25]/20">
         <DatabaseZap className="w-4 h-4" /> Core State Machinery
       </div>
-      <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500 mb-6">
+      <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#226214] to-[#43cc25] dark:from-[#43cc25] dark:to-[#8ff277] mb-6">
         Storage Mechanics
       </h1>
       
@@ -136,19 +136,19 @@ export default function AuthenticationSection() {
       <div className="grid lg:grid-cols-3 gap-4 mb-12">
         <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-[#09090b]">
            <div className="bg-slate-50 dark:bg-slate-900 py-3 px-5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
+              <div className="w-2.5 h-2.5 rounded-full bg-[#43cc25] shadow-[0_0_8px_rgba(67,204,37,0.5)]"></div>
               <h4 className="font-bold text-slate-900 dark:text-white font-mono text-sm">/users/{`{uid}`}</h4>
            </div>
            <div className="p-5 font-mono text-sm leading-loose">
-             <div className="text-slate-600 dark:text-slate-400"><span className="text-blue-500 font-bold">alias:</span> string</div>
-             <div className="text-slate-600 dark:text-slate-400"><span className="text-blue-500 font-bold">publicKey:</span> crypto-jwk</div>
-             <div className="text-slate-600 dark:text-slate-400"><span className="text-blue-500 font-bold">pinHash:</span> sha-string</div>
+             <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">alias:</span> string</div>
+             <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">publicKey:</span> crypto-jwk</div>
+             <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">pinHash:</span> sha-string</div>
            </div>
         </div>
         
         <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-[#09090b]">
            <div className="bg-slate-50 dark:bg-slate-900 py-3 px-5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.5)]"></div>
+              <div className="w-2.5 h-2.5 rounded-full bg-[#43cc25] shadow-[0_0_8px_rgba(67,204,37,0.5)]"></div>
               <h4 className="font-bold text-slate-900 dark:text-white font-mono text-sm">/mails/{`{mailId}`}</h4>
            </div>
            <div className="p-5 font-mono text-sm leading-loose">
