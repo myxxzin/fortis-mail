@@ -1,5 +1,5 @@
 import { ArrowRight, ArrowDown } from 'lucide-react';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 interface FlowNode {
   id: string;

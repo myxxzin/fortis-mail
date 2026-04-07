@@ -1,5 +1,4 @@
 import { useLanguage } from '../../../contexts/LanguageContext';
-import CodeBlock from '../../../components/docs/CodeBlock';
 import FlowDiagram from '../../../components/docs/FlowDiagram';
 import { DatabaseZap, FileSymlink, Network, KeySquare, MonitorOff } from 'lucide-react';
 

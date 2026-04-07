@@ -1,5 +1,5 @@
 import { Info, AlertTriangle, CheckCircle } from 'lucide-react';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 type CalloutType = 'info' | 'warning' | 'success';
 

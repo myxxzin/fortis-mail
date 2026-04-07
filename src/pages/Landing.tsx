@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import type { Variants } from 'framer-motion';
 import { ShieldCheck, ArrowRight, Globe, Lock, Code, Cpu, Shield, KeyRound, Mail, Github, Send } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -8,12 +9,12 @@ export default function Landing() {
    const { t, language, setLanguage } = useLanguage();
    const { theme } = useTheme();
 
-   const containerVariant = {
+   const containerVariant: Variants = {
       hidden: { opacity: 0 },
       show: { opacity: 1, transition: { staggerChildren: 0.1 } }
    };
 
-   const itemVariant = {
+   const itemVariant: Variants = {
       hidden: { opacity: 0, y: 20 },
       show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } }
    };
