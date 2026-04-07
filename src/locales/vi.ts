@@ -72,7 +72,7 @@ export const vi = {
   'contacts.newIdentity': 'Danh tính bảo mật mới',
   'contacts.aliasName': 'Bí danh / Tên',
   'contacts.aliasPlaceholder': 'vd. John Doe (Tài chính)',
-  'contacts.publicKey': 'Khóa Công Khai RSA',
+  'contacts.publicKey': 'Khóa Công Khai ECC',
   'contacts.publicKeyPlaceholder': '-----BEGIN PUBLIC KEY-----...',
   'contacts.saveContact': 'Lưu Danh bạ',
   'contacts.noContacts': 'Chưa có liên hệ nào',
@@ -250,4 +250,82 @@ export const vi = {
   'about.ourMission': 'Sứ mệnh của chúng tôi',
   'about.subtitle': 'Thông tin giới thiệu về chúng tôi',
   'about.bodyText': '(Nội dung trang About Us sẽ được thêm vào sau theo yêu cầu...)',
+  
+  // Landing Page Redesign
+  'landing.nav.login': 'Đăng nhập',
+  'landing.nav.register': 'Bắt đầu sử dụng',
+  
+  'landing.hero.badge': 'Giải Pháp Bảo Mật Đỉnh Cao',
+  'landing.hero.title': 'Bảo mật Email\nTuyệt đối.',
+  'landing.hero.subtitle': 'FORTISMail được thiết kế với triết lý "Zero-Knowledge". Nền tảng giao tiếp không thu thập dữ liệu, tự động mã hóa End-to-End ngay trên thiết bị của bạn.',
+  'landing.hero.cta': 'Truy Cập Hộp Thư',
+  'landing.hero.explore': 'Tìm Hiểu Thêm',
+  
+  'landing.what.title': 'FORTISMail là gì?',
+  'landing.what.desc': "Các dịch vụ email truyền thống thường có thể xem toàn bộ nội dung hộp thư của bạn trên máy chủ để quảng cáo hoặc phân tích dữ liệu. FORTISMail loại trừ hoàn toàn lỗ hổng này thông qua mã hóa trực tiếp từ phía người dùng (client-side). Chúng tôi bảo đảm bằng nền tảng cốt lõi toán học rằng chỉ có bạn và người nhận nắm giữ chìa khóa đọc thư. Khi tin nhắn rời khỏi trình duyệt của bạn, nó đã biến thành những chuỗi ký tự mật mã vô nghĩa. Ngay cả chúng tôi cũng không thể giải mã được nội dung email dù có muốn.",
+  
+  'landing.tech.title': "Khám phá Lõi FORTISMail",
+  'landing.tech.desc': "Cái nhìn minh bạch về kiến trúc mật mã và các giao thức bảo mật vận hành nền tảng Zero-Knowledge độc quyền của chúng tôi.",
+  
+  'landing.tech.e2e.title': "Mã hóa End-to-End thực sự",
+  'landing.tech.e2e.desc': "Thư được mã hóa cục bộ ngay trên thiết bị trước khi gửi đi. Máy chủ không bao giờ nhìn thấy văn bản gốc — chỉ lưu trữ các tệp bị xáo trộn và bắt buộc phải có Khóa Cá Nhân của người nhận mới có thể giải mã.",
+  
+  'landing.tech.zeroKnowledge.title': "Máy chủ Zero-Knowledge",
+  'landing.tech.zeroKnowledge.desc': "Cơ sở dữ liệu của chúng tôi không lưu bất kỳ thông tin gốc nào về mật khẩu hay khóa cá nhân của bạn. Chúng tôi không thể truy cập, khôi phục hoặc can thiệp vào danh tính mật mã độc lập của hệ thống.",
+  
+  'landing.tech.eccAes.title': "Giao thức ECC & AES-GCM",
+  'landing.tech.eccAes.desc': "Sử dụng thuật toán AES-GCM 256-bit siêu tốc để mã hóa dữ liệu gốc, kết hợp với trao đổi khóa Elliptic-Curve (ECDH P-256) ngắn hạn và chữ ký số ECDSA để bảo mật thông tin tuyệt đối.",
+  
+  'landing.tech.pbkdf2.title': "Trích xuất Khóa PBKDF2",
+  'landing.tech.pbkdf2.desc': "Mật khẩu chủ của bạn được kéo dài và băm qua hàng chục nghìn vòng lặp bằng thuật toán PBKDF2, biến hệ thống khóa thành một lớp khiên bảo mật cực kỳ vững chãi trước các chiến dịch tấn công dò tìm mật mã.",
+  
+  'landing.tech.architecture.title': "Kiến trúc Client-Side",
+  'landing.tech.architecture.desc': "Khác biệt với email cổ điển, các quy trình phức tạp nhất về cấp quyền khóa, băm dữ liệu và phân tách E2EE nội bộ của FORTISMail được tiến hành hoàn toàn và kín kẽ ngay tại trình duyệt của bạn.",
+  
+  'landing.tech.pin.title': "Bảo vệ mã PIN Cục bộ",
+  'landing.tech.pin.desc': "Khóa riêng tư của bạn được mã hóa an toàn tại trình duyệt bằng mã PIN 6 số. Mang lại đường truyền siêu tốc và an ninh vào hộp thư mỗi lần mở máy tính mà không cần gõ lại mật khẩu chủ dày đặc.",
+  
+  'landing.guide.title': 'Bắt đầu siêu đơn giản',
+  'landing.guide.step1Title': '1. Danh Tính Ẩn Danh',
+  'landing.guide.step1Desc': 'Không cần số điện thoại. Chỉ cần chọn 1 Tên đăng nhập. Hệ thống sẽ tự trích xuất thành các cặp khóa bảo mật ECC cốt lõi cho bạn.',
+  'landing.guide.step2Title': '2. Kết Bạn Bằng Mã',
+  'landing.guide.step2Desc': 'Xin "Khóa Công Khai" của bạn bè và lưu vào Sổ địa chỉ để tạo lập các tham số mã hóa ECDH an toàn tuyệt đối.',
+  'landing.guide.step3Title': '3. Nhắn Tin Tuyệt Mật',
+  'landing.guide.step3Desc': 'Ngay khi bấm Gửi, thư của bạn lập tức thành các chuỗi kí tự vô nghĩa. Ngay cả hacker hay chính FORTISMail cũng hoàn toàn bó tay.',
+
+  'landing.team.title': 'Đội ngũ Phát triển',
+  'landing.team.desc': 'Dự án được nghiên cứu và phát triển bởi Đội ngũ Data Science mang khát vọng đảm bảo tính riêng tư toàn vẹn cho dữ liệu người dùng.',
+  'landing.team.member1': 'Võ Thành Đạt',
+  'landing.team.role1': 'Manager & Data Scientist',
+  'landing.team.member2': 'Đặng Quốc Huy',
+  'landing.team.role2': 'Cryptography Engineer',
+  'landing.team.member3': 'Phạm Xuân Minh Quân',
+  'landing.team.role3': 'Frontend & AI Integrations',
+  'landing.team.member4': 'Huỳnh Phú Quý',
+  'landing.team.role4': 'Backend & Architect',
+
+  // Footer Link Headers
+  'landing.footer.about': 'Về FORTISMail',
+  'landing.footer.features': 'Tính năng cốt lõi',
+  'landing.footer.privacy': 'Bảo mật & Hỗ trợ',
+  'landing.footer.contact': 'Liên hệ',
+  
+  // Footer Links
+  'landing.footer.intro': 'Giới thiệu',
+  'landing.footer.team': 'Đội ngũ phát triển',
+  'landing.footer.routing': 'Kiến trúc máy chủ',
+  'landing.footer.whitepaper': 'Báo cáo bạch',
+  'landing.footer.e2e': 'Mã hóa End-to-End',
+  'landing.footer.zeroQ': 'Zero-Knowledge',
+  'landing.footer.ecc': 'Giao thức ECC & AES-GCM',
+  'landing.footer.pbkdf': 'Trích xuất khóa PBKDF2',
+  'landing.footer.privacyPolicy': 'Chính sách bảo mật',
+  'landing.footer.terms': 'Điều khoản dịch vụ',
+  'landing.footer.guide': 'Hướng dẫn an toàn',
+  'landing.footer.faq': 'Câu hỏi thường gặp',
+
+  'landing.footer.hotline': 'Hotline: (024) 8888 9999 (Giờ hành chính)',
+  'landing.footer.email': 'Email: secure@fortismail.com',
+
+  'landing.footer': 'Bảo vệ quyền riêng tư của bạn. © 2026 FORTIS Project.',
 };

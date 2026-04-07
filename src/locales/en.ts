@@ -72,7 +72,7 @@ export const en = {
   'contacts.newIdentity': 'New Secure Identity',
   'contacts.aliasName': 'Alias / Name',
   'contacts.aliasPlaceholder': 'e.g. John Doe (Finance)',
-  'contacts.publicKey': 'RSA Public Key',
+  'contacts.publicKey': 'ECC Public Key',
   'contacts.publicKeyPlaceholder': '-----BEGIN PUBLIC KEY-----...',
   'contacts.saveContact': 'Save Contact',
   'contacts.noContacts': 'No contacts found',
@@ -250,4 +250,82 @@ export const en = {
   'about.ourMission': 'Our Mission',
   'about.subtitle': 'Information about us',
   'about.bodyText': '(The content of this About Us page will be added later upon request...)',
+
+  // Landing Page Redesign
+  'landing.nav.login': 'Login',
+  'landing.nav.register': 'Get Started',
+  
+  'landing.hero.badge': 'Ultimate Security Solution',
+  'landing.hero.title': 'Absolute\nEmail Security.',
+  'landing.hero.subtitle': 'FORTISMail is designed with a "Zero-Knowledge" philosophy. A communication platform that collects no data, automatically applying End-to-End Encryption right on your device.',
+  'landing.hero.cta': 'Access Mailbox',
+  'landing.hero.explore': 'Learn More',
+  
+  'landing.what.title': 'What is FORTISMail?',
+  'landing.what.desc': "Traditional email services maintain deep access to your inbox, routinely scanning contents for advertising or data mining. FORTISMail completely eliminates this vulnerability through client-side encryption. We don't just secure your data in transit; we mathematically guarantee that you and your recipient hold the exclusive keys to your communication. By the time your message leaves your browser, it is entirely indecipherable ciphertext. We couldn't read your emails even if we tried.",
+  
+  'landing.tech.title': "Inside FORTISMail Core",
+  'landing.tech.desc': "A transparent look at the cryptographic architecture and privacy protocols that power our Zero-Knowledge ecosystem.",
+  
+  'landing.tech.e2e.title': "True End-to-End Encryption",
+  'landing.tech.e2e.desc': "Messages are encrypted locally on your device before transmission. The server never sees your plaintext content—only scrambled data that requires the recipient's exact private key to unlock.",
+  
+  'landing.tech.zeroKnowledge.title': "Zero-Knowledge Server",
+  'landing.tech.zeroKnowledge.desc': "Our database stores zero plaintext metadata about your password or private key. We cannot access, recover, or reset your cryptographic identity. You are in absolute control.",
+  
+  'landing.tech.eccAes.title': "ECC & AES-GCM Protocol",
+  'landing.tech.eccAes.desc': "FORTISMail utilizes an ultra-fast AES-GCM symmetric key to encrypt payloads, then secures the communication channel using Ephemeral Elliptic-Curve Diffie-Hellman (ECDH P-256) and authenticates with ECDSA signatures.",
+  
+  'landing.tech.pbkdf2.title': "PBKDF2 Key Derivation",
+  'landing.tech.pbkdf2.desc': "Your Master Password is mathematically stretched using PBKDF2 with thousands of iterations. This exhaustive process effectively fortifies your local keys against brute-force infiltration.",
+  
+  'landing.tech.architecture.title': "Client-Side Processing",
+  'landing.tech.architecture.desc': "Unlike traditional webmail, most of our application's critical processing—from hashing to key generation and decryption—happens entirely within your browser environment.",
+  
+  'landing.tech.pin.title': "Local PIN Protection",
+  'landing.tech.pin.desc': "Your private key is locally encrypted within your browser session using a fast, 6-digit PIN. This grants you rapid, secure access to your inbox without re-typing complex passwords.",
+  
+  'landing.guide.title': 'Ridiculously Simple',
+  'landing.guide.step1Title': '1. Anonymous Identity',
+  'landing.guide.step1Desc': 'No phone number or personal email needed. Provide a Username and Master Password. The system automatically derives ECC cryptographic key pairs for you.',
+  'landing.guide.step2Title': '2. Key Exchange',
+  'landing.guide.step2Desc': 'Request your friend\'s "Public Key" and add it to your Address Book. This gives you the ephemeral ECDH components to secure your envelopes.',
+  'landing.guide.step3Title': '3. Top Secret Messaging',
+  'landing.guide.step3Desc': 'Upon hitting Send, your letter is immediately scrambled locally. Even hackers or FORTISMail engineers are completely powerless to decipher it.',
+
+  'landing.team.title': 'Our Development Team',
+  'landing.team.desc': 'Researched and built by a group of Data Science engineers with a burning desire to safeguard absolute data privacy for internet users.',
+  'landing.team.member1': 'Võ Thành Đạt',
+  'landing.team.role1': 'Manager & Data Scientist',
+  'landing.team.member2': 'Đặng Quốc Huy',
+  'landing.team.role2': 'Cryptography Engineer',
+  'landing.team.member3': 'Phạm Xuân Minh Quân',
+  'landing.team.role3': 'Frontend & AI Integrations',
+  'landing.team.member4': 'Huỳnh Phú Quý',
+  'landing.team.role4': 'Backend & Architect',
+
+  // Footer Link Headers
+  'landing.footer.about': 'About FORTISMail',
+  'landing.footer.features': 'Core Features',
+  'landing.footer.privacy': 'Privacy & Support',
+  'landing.footer.contact': 'Contact Us',
+  
+  // Footer Links
+  'landing.footer.intro': 'Introduction',
+  'landing.footer.team': 'Our Development Team',
+  'landing.footer.routing': 'Server Architecture',
+  'landing.footer.whitepaper': 'Whitepaper',
+  'landing.footer.e2e': 'End-to-End Encryption',
+  'landing.footer.zeroQ': 'Zero-Knowledge',
+  'landing.footer.ecc': 'ECC & AES-GCM Protocol',
+  'landing.footer.pbkdf': 'PBKDF2 Key Derivation',
+  'landing.footer.privacyPolicy': 'Privacy Policy',
+  'landing.footer.terms': 'Terms of Service',
+  'landing.footer.guide': 'Safety Guide',
+  'landing.footer.faq': 'FAQ',
+
+  'landing.footer.hotline': 'Hotline: (+84) 24 8888 9999 (Business hours)',
+  'landing.footer.email': 'Email: secure@fortismail.com',
+
+  'landing.footer': 'Protecting your privacy. © 2026 FORTIS Project.',
 };
