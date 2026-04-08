@@ -40,12 +40,18 @@ export default function Landing() {
                      { key: 'features', href: '#features' },
                      { key: 'how', href: '#how-it-works' },
                      { key: 'limitations', href: '#limitations' },
-                     { key: 'workflow', href: '#workflow' },
-                     { key: 'team', href: '#team' }
+                     { key: 'team', href: '#team' },
+                     { key: 'workflow', href: '/workflow' }
                   ].map((item) => (
-                     <a key={item.key} href={item.href} className="text-sm font-bold text-corporate-800 dark:text-corporate-200 hover:text-[#43cc25] dark:hover:text-[#43cc25] transition-colors">
-                        {t(`landing.nav.${item.key}`)}
-                     </a>
+                     item.href.startsWith('/') ? (
+                        <Link key={item.key} to={item.href} className="text-sm font-bold text-corporate-800 dark:text-corporate-200 hover:text-[#43cc25] dark:hover:text-[#43cc25] transition-colors">
+                           {t(`landing.nav.${item.key}`)}
+                        </Link>
+                     ) : (
+                        <a key={item.key} href={item.href} className="text-sm font-bold text-corporate-800 dark:text-corporate-200 hover:text-[#43cc25] dark:hover:text-[#43cc25] transition-colors">
+                           {t(`landing.nav.${item.key}`)}
+                        </a>
+                     )
                   ))}
                   <Link to="/docs" className="text-sm font-bold text-[#43cc25] dark:text-[#43cc25] hover:brightness-110 transition-colors">
                      {t('landing.nav.docs')}
@@ -181,13 +187,13 @@ export default function Landing() {
             </div>
 
             {/* 3. How It Works */}
-            <div id="how-it-works" className="w-full max-w-6xl mx-auto mb-32 scroll-mt-24">
-               <div className="text-center mb-16">
+            <div id="how-it-works" className="w-full mx-auto mb-32 scroll-mt-24">
+               <div className="max-w-6xl mx-auto text-center mb-16">
                   <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-corporate-900 dark:text-white mb-4">
                      {t('landing.how.title')}
                   </h2>
                </div>
-               <div className="grid md:grid-cols-3 gap-6 relative">
+               <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-6 relative">
                   <div className="hidden md:block absolute top-[45px] left-20 right-20 h-0.5 bg-gradient-to-r from-[#43cc25]/20 via-[#43cc25]/80 to-[#43cc25]/20 z-0" />
                   <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-white/60 dark:bg-white/5 backdrop-blur-md rounded-2xl p-8 border border-black/5 dark:border-white/10 z-10 hover:-translate-y-2 transition-transform duration-300">
                      <div className="w-14 h-14 bg-white dark:bg-[#020617] border-2 border-[#43cc25] rounded-full flex items-center justify-center font-bold text-[#43cc25] text-xl mx-auto mb-6"><KeyRound size={24} /></div>
@@ -204,6 +210,60 @@ export default function Landing() {
                      <h3 className="text-lg font-bold text-center mb-3">{t('landing.how.s3.title')}</h3>
                      <p className="text-sm text-corporate-600 dark:text-corporate-400 text-center leading-relaxed">{t('landing.how.s3.desc')}</p>
                   </motion.div>
+               </div>
+               
+               {/* Embedded Encryption Architecture relative to How It Works */}
+               <div className="max-w-[1300px] mx-auto mt-20 w-full relative">
+                  <div className="bg-white/80 dark:bg-white/5 border border-black/5 dark:border-white/10 backdrop-blur-xl rounded-[2.5rem] p-8 md:px-16 md:py-20 shadow-xl overflow-hidden relative">
+                     
+                     <div className="text-center mb-16 relative z-10">
+                        <p className="text-sm font-bold text-[#43cc25] uppercase tracking-widest mb-3">{t('landing.workflow.subheader')}</p>
+                        <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-corporate-900 dark:text-white mb-6">
+                           {t('landing.workflow.title')}
+                        </h2>
+                        <p className="text-corporate-600 dark:text-slate-300 max-w-2xl mx-auto text-lg leading-relaxed">
+                           {t('landing.workflow.desc')}
+                        </p>
+                     </div>
+                     
+                     <div className="w-full relative z-10 mb-20">
+                        <div className="bg-white dark:bg-[#020617] rounded-3xl py-10 px-6 md:py-14 md:px-10 border border-corporate-200 dark:border-white/5 shadow-inner overflow-x-auto">
+                           <div className="flex items-center gap-3 mb-8 min-w-max">
+                              <KeyRound className="text-[#43cc25] w-6 h-6 shrink-0" />
+                              <h3 className="text-corporate-900 dark:text-white font-bold text-xl">{t('landing.workflow.flowtitle')}</h3>
+                           </div>
+                           
+                           <div className="flex flex-nowrap items-center justify-between gap-3 md:gap-4 min-w-max pb-2">
+                              {['step1', 'step2', 'step3', 'step4', 'step5', 'step6'].map((step, idx) => (
+                                 <div key={step} className="flex items-center gap-2 md:gap-4 shrink-0">
+                                    {idx > 0 && (
+                                       <div className="text-corporate-400 dark:text-slate-500 px-1">
+                                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                                       </div>
+                                    )}
+                                    <div className="bg-corporate-50 dark:bg-[#1e293b] border border-corporate-200 dark:border-white/10 px-5 py-3.5 rounded-xl text-corporate-900 dark:text-white text-sm font-bold whitespace-nowrap shadow-sm shrink-0">
+                                       {t(`landing.workflow.${step}`)}
+                                    </div>
+                                 </div>
+                              ))}
+                           </div>
+                        </div>
+                     </div>
+
+                     <div className="text-center relative z-10 max-w-4xl mx-auto">
+                        <p className="text-xs font-bold text-corporate-500 dark:text-slate-400 uppercase tracking-widest mb-6">{t('landing.workflow.tech')}</p>
+                        <div className="flex flex-wrap justify-center items-center gap-3 md:gap-4 max-w-3xl mx-auto">
+                           {['React 19', 'TypeScript', 'Vite 8', 'TailwindCSS', 'Zustand', 'Web Crypto API', 'Gmail REST API', 'OAuth2 PKCE', 'Vitest', 'Vercel'].map((tech) => (
+                              <span key={tech} className="bg-white dark:bg-[#1e293b] border border-corporate-200/50 dark:border-white/10 text-corporate-700 dark:text-slate-300 px-5 py-2 rounded-full text-sm font-medium hover:bg-corporate-50 dark:hover:bg-white/10 transition-colors cursor-default">
+                                 {tech}
+                              </span>
+                           ))}
+                        </div>
+                     </div>
+
+                     <div className="absolute top-0 right-0 w-96 h-96 bg-[#43cc25]/10 rounded-full blur-[100px] pointer-events-none" />
+                     <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
+                  </div>
                </div>
             </div>
 
@@ -238,60 +298,7 @@ export default function Landing() {
                </p>
             </div>
 
-            {/* 5. Workflow */}
-            <div id="workflow" className="w-full max-w-[1300px] mx-auto mb-32 scroll-mt-24">
-               <div className="bg-white/80 dark:bg-white/5 border border-black/5 dark:border-white/10 backdrop-blur-xl rounded-[2.5rem] p-8 md:px-16 md:py-20 shadow-xl overflow-hidden relative">
-                  
-                  <div className="text-center mb-16 relative z-10">
-                     <p className="text-sm font-bold text-[#43cc25] uppercase tracking-widest mb-3">{t('landing.workflow.subheader')}</p>
-                     <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-corporate-900 dark:text-white mb-6">
-                        {t('landing.workflow.title')}
-                     </h2>
-                     <p className="text-corporate-600 dark:text-slate-300 max-w-2xl mx-auto text-lg leading-relaxed">
-                        {t('landing.workflow.desc')}
-                     </p>
-                  </div>
-                  
-                  <div className="w-full relative z-10 mb-20">
-                     <div className="bg-white dark:bg-[#020617] rounded-3xl py-10 px-6 md:py-14 md:px-10 border border-corporate-200 dark:border-white/5 shadow-inner overflow-x-auto">
-                        <div className="flex items-center gap-3 mb-8 min-w-max">
-                           <KeyRound className="text-[#43cc25] w-6 h-6 shrink-0" />
-                           <h3 className="text-corporate-900 dark:text-white font-bold text-xl">{t('landing.workflow.flowtitle')}</h3>
-                        </div>
-                        
-                        <div className="flex flex-nowrap items-center justify-between gap-3 md:gap-4 min-w-max pb-2">
-                           {['step1', 'step2', 'step3', 'step4', 'step5', 'step6'].map((step, idx) => (
-                              <div key={step} className="flex items-center gap-2 md:gap-4 shrink-0">
-                                 {idx > 0 && (
-                                    <div className="text-corporate-400 dark:text-slate-500 px-1">
-                                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                                    </div>
-                                 )}
-                                 <div className="bg-corporate-50 dark:bg-[#1e293b] border border-corporate-200 dark:border-white/10 px-5 py-3.5 rounded-xl text-corporate-900 dark:text-white text-sm font-bold whitespace-nowrap shadow-sm shrink-0">
-                                    {t(`landing.workflow.${step}`)}
-                                 </div>
-                              </div>
-                           ))}
-                        </div>
-                     </div>
-                  </div>
-
-                  <div className="text-center relative z-10 max-w-4xl mx-auto">
-                     <p className="text-xs font-bold text-corporate-500 dark:text-slate-400 uppercase tracking-widest mb-6">{t('landing.workflow.tech')}</p>
-                     <div className="flex flex-wrap justify-center items-center gap-3 md:gap-4 max-w-3xl mx-auto">
-                        {['React 19', 'TypeScript', 'Vite 8', 'TailwindCSS', 'Zustand', 'Web Crypto API', 'Gmail REST API', 'OAuth2 PKCE', 'Vitest', 'Vercel'].map((tech) => (
-                           <span key={tech} className="bg-white dark:bg-[#1e293b] border border-corporate-200/50 dark:border-white/10 text-corporate-700 dark:text-slate-300 px-5 py-2 rounded-full text-sm font-medium hover:bg-corporate-50 dark:hover:bg-white/10 transition-colors cursor-default">
-                              {tech}
-                           </span>
-                        ))}
-                     </div>
-                  </div>
-
-                  <div className="absolute top-0 right-0 w-96 h-96 bg-[#43cc25]/10 rounded-full blur-[100px] pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
-               </div>
-            </div>
-
+            {/* Section 5 was moved to sit after Section 6 */}
             {/* 6. Team */}
             <div id="team" className="w-full max-w-6xl mx-auto mb-32 scroll-mt-24">
                <div className="flex justify-center items-center gap-8 mb-12">

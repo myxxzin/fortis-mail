@@ -258,8 +258,8 @@ export const vi = {
   'landing.nav.features': 'Tính năng',
   'landing.nav.how': 'Cách hoạt động',
   'landing.nav.limitations': 'Hạn chế',
-  'landing.nav.workflow': 'Quy trình',
   'landing.nav.team': 'Đội ngũ',
+  'landing.nav.workflow': 'Quy trình',
   'landing.nav.docs': 'Tài liệu',
 
   'landing.hero.badge': 'Giải Pháp Bảo Mật Đỉnh Cao',
@@ -365,4 +365,46 @@ export const vi = {
   'landing.footer.email': 'Email: secure@fortismail.com',
 
   'landing.footer': 'Bảo vệ quyền riêng tư của bạn. © 2026 FORTIS Project.',
+
+  // Workflow Page
+  'workflow.title': 'Quy Trình & Kiến Trúc Hệ Thống',
+  'workflow.subtitle': 'Bóc tách chi tiết hệ thống Zero-Knowledge đằng sau FORTISMail.',
+  'workflow.s1.title': '1. Kiến Trúc Luồng Dữ Liệu',
+  'workflow.s1.desc': 'Mô hình 2 lớp: Trình duyệt là Máy mã hóa, Firebase chỉ là Cổng chuyển phát mù.',
+  'workflow.s1.step1': 'Người dùng mã hóa',
+  'workflow.s1.step2': 'Gói tin mã hóa',
+  'workflow.s1.step3': 'Firebase định tuyến',
+  'workflow.s1.step4': 'Dữ liệu vô nghĩa',
+  
+  'workflow.s2.title': '2. Đường Ống Mật Mã Lai',
+  'workflow.s2.desc': 'Sử dụng AES-256 cho tốc độ kết hợp ECDH sinh khóa tạm thời (Forward Secrecy).',
+  'workflow.s2.step1': 'Nội dung thư',
+  'workflow.s2.step2': 'Sinh Khóa AES',
+  'workflow.s2.step3': 'Khóa Tạm ECDH',
+  'workflow.s2.step4': 'Gói payload cuối',
+  
+  'workflow.s3.title': '3. Xử Lý Tệp Đính Kèm',
+  'workflow.s3.desc': 'Vượt qua giới hạn 1MB của Firestore bằng Cloud Storage và đường dẫn bảo vệ.',
+  'workflow.s3.step1': 'Tệp dữ liệu lớn',
+  'workflow.s3.step2': 'Mã hóa tệp gốc',
+  'workflow.s3.step3': 'Cloud Storage',
+  'workflow.s3.step4': 'Trả về URL & Khóa',
+  
+  'workflow.s4.title': '4. Bảo Mật UX & Quy Trình Lọc',
+  'workflow.s4.desc': 'Khóa RAM Context chống extension quét LocalStorage & ngăn Spike CPU.',
+  'workflow.s4.step1': 'RAM Context',
+  'workflow.s4.step2': 'Màn hình Khóa',
+  'workflow.s4.step3': 'Debounce 3 giây',
+  'workflow.s4.step4': 'Giảm tải CPU',
+  
+  'workflow.vibe.title': 'Vibe Coding: Cách Chúng Tôi Xây Dựng Dự Án',
+  'workflow.vibe.desc': 'Văn hóa và luồng phát triển đằng sau FORTISMail không chỉ là gõ code — đó là một trạng thái nhập tâm, nơi kỹ thuật mật mã giao thoa với nghệ thuật thiết kế UI.',
+  'workflow.vibe.card1.title': '1. Ám Ảnh Bảo Mật',
+  'workflow.vibe.card1.desc': 'Code với tâm thế "mọi máy chủ đều có thể bị xem trộm". Không tin tưởng backend, không tin tưởng local storage, chỉ tin vào Toán Học.',
+  'workflow.vibe.card2.title': '2. Deep Work Ban Đêm',
+  'workflow.vibe.card2.desc': 'Những đêm dài với Lo-fi playlist, tối ưu liên tục các thuật toán mã hóa phức tạp (AES, ECDH) để tạo ra phần lõi siêu nhẹ.',
+  'workflow.vibe.card3.title': '3. Thẩm Mỹ Trực Quan',
+  'workflow.vibe.card3.desc': 'Bảo mật không đồng nghĩa với nhàm chán. Áp dụng phong cách UI Glassmorphism để biến những chuỗi mã khó hiểu thành một trải nghiệm mượt mà.',
+  'workflow.vibe.card4.title': '4. Tối Ưu Khắc Nghiệt',
+  'workflow.vibe.card4.desc': 'Từng tác vụ đều bị bóc tách: Debounce phím gõ để giảm tải API, xoá rác trên RAM để đảm bảo CPU trình duyệt luôn mát mẻ.',
 };

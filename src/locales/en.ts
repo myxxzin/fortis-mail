@@ -258,8 +258,8 @@ export const en = {
   'landing.nav.features': 'Features',
   'landing.nav.how': 'How it works',
   'landing.nav.limitations': 'Limitations',
-  'landing.nav.workflow': 'Workflow',
   'landing.nav.team': 'Team',
+  'landing.nav.workflow': 'Workflow',
   'landing.nav.docs': 'Docs',
 
   'landing.hero.badge': 'Ultimate Security Solution',
@@ -365,4 +365,46 @@ export const en = {
   'landing.footer.email': 'Email: secure@fortismail.com',
 
   'landing.footer': 'Protecting your privacy. © 2026 FORTIS Project.',
+
+  // Workflow Page
+  'workflow.title': 'System Architecture & Workflow',
+  'workflow.subtitle': 'A detailed breakdown of the Zero-Knowledge mechanisms powering FORTISMail.',
+  'workflow.s1.title': '1. The Data Flow',
+  'workflow.s1.desc': 'A two-layer model: The browser serves as an Encryption Engine, while Firebase is simply a Blind Courier.',
+  'workflow.s1.step1': 'User Encrypts',
+  'workflow.s1.step2': 'Cipher Blob',
+  'workflow.s1.step3': 'Firebase Route',
+  'workflow.s1.step4': 'Opaque Storage',
+  
+  'workflow.s2.title': '2. Hybrid Cryptography Pipeline',
+  'workflow.s2.desc': 'Combining AES-256 for performance and ECDH ephemeral keys for Forward Secrecy.',
+  'workflow.s2.step1': 'Raw Content',
+  'workflow.s2.step2': 'Generate AES Key',
+  'workflow.s2.step3': 'ECDH Wrap',
+  'workflow.s2.step4': 'Final Payload',
+  
+  'workflow.s3.title': '3. Large Attachment Handling',
+  'workflow.s3.desc': 'Bypassing Firestore\'s 1MB limit using Cloud Storage and static URL key-passing.',
+  'workflow.s3.step1': 'Large File',
+  'workflow.s3.step2': 'Local Encrypt',
+  'workflow.s3.step3': 'Upload to Storage',
+  'workflow.s3.step4': 'Return URL & Key',
+  
+  'workflow.s4.title': '4. Security UX & Debounce',
+  'workflow.s4.desc': 'Using RAM Context to block LocalStorage sniffing and debouncing to prevent CPU spikes.',
+  'workflow.s4.step1': 'RAM Context',
+  'workflow.s4.step2': '6-digit PIN Lock',
+  'workflow.s4.step3': '3s Debounce',
+  'workflow.s4.step4': 'Optimized Writes',
+  
+  'workflow.vibe.title': 'Vibe Coding: The Making of FORTIS',
+  'workflow.vibe.desc': 'The development culture behind FORTISMail isn\'t just about typing syntax—it\'s about entering a flow state where cryptography meets functional art.',
+  'workflow.vibe.card1.title': '1. Strategic Paranoia',
+  'workflow.vibe.card1.desc': 'Coding with the mindset that "everything will be hacked." Trusting no servers, trusting no disk storage. Only trusting Mathematics.',
+  'workflow.vibe.card2.title': '2. Night Owl Flow',
+  'workflow.vibe.card2.desc': 'Long deep-work nights fueled by Lo-fi beats, breaking down complex cryptographic algorithms (AES-GCM, ECDH) to build an ultra-light embedded core.',
+  'workflow.vibe.card3.title': '3. Hacker Aesthetics',
+  'workflow.vibe.card3.desc': '"Security shouldn\'t be boring." Relying on Glassmorphism, animations, and brutal minimalism to make complex systems highly visual and gorgeous.',
+  'workflow.vibe.card4.title': '4. Ruthless Optimization',
+  'workflow.vibe.card4.desc': 'Debouncing system events, eliminating redundant Firestore writes. Writing code so the CPU runs silk-smooth, saving every byte of memory.',
 };

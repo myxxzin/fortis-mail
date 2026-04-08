@@ -13,6 +13,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Landing from './pages/Landing';
 import Docs from './pages/Docs';
+import Workflow from './pages/Workflow';
 import { ContactProvider } from './context/ContactContext';
 import { Toaster } from 'react-hot-toast';
 import { LanguageProvider } from './contexts/LanguageContext';
@@ -31,6 +32,7 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/" element={<Landing />} />
               <Route path="/docs" element={<Docs />} />
+              <Route path="/workflow" element={<Workflow />} />
               <Route element={<MainLayout />}>
                 <Route path="/inbox" element={<Inbox />} />
                 <Route path="/sent" element={<Sent />} />
