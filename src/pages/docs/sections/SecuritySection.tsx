@@ -1,6 +1,6 @@
 import { useLanguage } from '../../../contexts/LanguageContext';
 import CodeBlock from '../../../components/docs/CodeBlock';
-import { Lock, Timer, BugOff, Skull, ShieldBan, ShieldAlert, MonitorX } from 'lucide-react';
+
 
 export default function SecuritySection() {
   const { language } = useLanguage();
@@ -8,170 +8,212 @@ export default function SecuritySection() {
   if (language === 'vi') {
     return (
       <div id="security" className="scroll-mt-24">
-        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500 mb-6">
-          Bảo Mật UX & Quy Tắc
-        </h1>
-        
-        <h2 className="text-2xl font-bold mt-12 mb-8 text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
-          1. Trải nghiệm Bảo Mật (Security UX)
-        </h2>
-
-        <div className="grid md:grid-cols-2 gap-6 mb-16">
-          <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-            <Lock className="w-8 h-8 text-slate-700 dark:text-slate-300 mb-4" />
-            <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-slate-100">App-Level PIN Lock</h3>
-            <p className="text-slate-700 dark:text-slate-400 text-md leading-relaxed mb-4">
-              Ở lần đầu truy cập, người dùng thiết lập mã PIN nội bộ. Bất cứ khi tab bị thu nhỏ hoặc tải lại, <strong>Gatekeeper System</strong> sẽ phủ mờ che kín giao diện (UI) bắt buộc nhập PIN để truy xuất vùng nhớ RAM chứa khóa Private Key. 
-            </p>
-            <div className="text-sm font-semibold text-rose-600 dark:text-rose-400 bg-rose-100 dark:bg-rose-900/30 px-3 py-2 rounded-lg">Tuyệt đối không lưu UUID hay khóa mã vào LocalStorage.</div>
-          </div>
-          
-          <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-            <Timer className="w-8 h-8 text-slate-700 dark:text-slate-300 mb-4" />
-            <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-slate-100">Debounced Auto-Save Drafts</h3>
-            <p className="text-slate-700 dark:text-slate-400 text-md leading-relaxed mb-4">
-              Tiến trình mã hóa End-to-End (AES-GCM arraying + ECDSA Signatures) gây đốt CPU khủng khiếp. Tính năng lưu nháp (Draft) được áp dụng bộ đếm trễ <strong>Wait Interval 3000ms (Debounce)</strong>.
-            </p>
-            <div className="text-sm font-semibold text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-3 py-2 rounded-lg">Chống treo máy vì gõ phím nhanh và cháy hóa đơn Firestore Write.</div>
-          </div>
-        </div>
-
-        <h2 className="text-2xl font-bold mt-16 mb-8 text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2 border-t border-slate-200 dark:border-slate-800 pt-10">
-          2. The 5 Iron Laws (5 Quy Tắc Máu)
+        <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-12 mb-6 border-t border-slate-200 dark:border-slate-800 pt-10">
+          Chính sách bảo mật (Security Policy & UX)
         </h2>
         
-        <p className="text-lg text-slate-600 dark:text-slate-400 mb-8 border-l-4 border-red-500 pl-4 py-1">
-          Bảo mật E2E Zero-Knowledge rất nguyên khối. <strong>Vi phạm bất kỳ một quy tắc nào dưới đây dẫn đến dây chuyền vỡ trận hoàn toàn</strong> ngay từ Frontend.
+        <p className="text-slate-700 dark:text-slate-300 mb-8 leading-relaxed text-lg">
+          Zero-Knowledge E2E đòi hỏi một quy chuẩn kiểm soát tĩnh rất gắt gao. Bất kỳ sự chệch hướng nhỏ nào khỏi các nguyên tắc cốt lõi đều đe dọa sự toàn vẹn của bức thiết kế bảo mật phía Frontend.
         </p>
 
-        <div className="space-y-6">
-          <div className="flex gap-4 p-5 rounded-2xl border-l-4 border-l-red-500 border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#09090b] shadow-sm">
-             <BugOff className="w-6 h-6 text-red-500 shrink-0 mt-0.5" />
-             <div>
-                <h4 className="font-bold text-slate-900 dark:text-white text-lg mb-1">Luật 1: Không bao giờ log Key ra console</h4>
-                <p className="text-slate-700 dark:text-slate-300 mb-3">Các tiện ích Chromium (Extensions) độc hại thường xuyên chạy vòng lặp bắt Console Log (<code>window.console</code>) để rà dữ liệu mã hóa.</p>
-                <CodeBlock language="typescript" code={`// ❌ FORBIDDEN\nconsole.log({ privateKey });\n\n// ✅ CORRECT\nif (debugParams) console.warn("Executing key vault swap");`} />
-             </div>
-          </div>
+        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mt-10 mb-6">
+          1. Giải pháp Bảo mật Hành vi (Security UX Patterns)
+        </h3>
 
-          <div className="flex gap-4 p-5 rounded-2xl border-l-4 border-l-orange-500 border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#09090b] shadow-sm">
-             <ShieldAlert className="w-6 h-6 text-orange-500 shrink-0 mt-0.5" />
-             <div>
-                <h4 className="font-bold text-slate-900 dark:text-white text-lg mb-1">Luật 2: Không thay thế Native Crypto</h4>
-                <p className="text-slate-700 dark:text-slate-300">Cấm sử dụng <code>crypto-js</code> hoặc thư viện mã hóa NPM. Hacker thường xuyên tiêm mã độc vào file package NPM (NPM Supply Chain Attacks). Phải sử dụng hàm nguyên bản C++ <code>window.crypto.subtle</code> của trình duyệt vì không ai chèn lậu được vào đó.</p>
-             </div>
+        <div className="space-y-6 mb-12">
+          <div className="bg-white dark:bg-[#09090b] border border-slate-200 dark:border-slate-800 p-6 rounded-xl shadow-sm">
+            <h4 className="font-bold text-slate-800 dark:text-slate-200 text-lg mb-3">App-Level PIN Lock (Khoá PIN Phiên Trình Duyệt)</h4>
+            <p className="text-slate-600 dark:text-slate-400 mb-3">
+              Mỗi khi một email được mở ra, nếu người dùng rời khỏi tầm nhìn hiển thị của luồng thư (chuyển màn hình, tải lại), hệ thống <strong>Gatekeeper Shield</strong> sẽ lập tức phủ đen màn hình yêu cầu xác nhận vòng lặp 6 con số giao thức bí mật.
+            </p>
+            <ul className="list-inside list-disc space-y-1 text-slate-600 dark:text-slate-400 ml-2">
+              <li>Chỉ xác nhận chuỗi giá trị băm Hash (~10ms) đảm bảo phản hồi liền mạch.</li>
+              <li>Loại trừ trường hợp phải nhập lại mật khẩu tổng Master phức tạp.</li>
+              <li><strong>TUYỆT ĐỐI CẤM:</strong> Sử dụng hệ thống <code>localStorage</code> để cất giấu định danh. Tính năng phân giải hoạt động 100% nhờ React Context.</li>
+            </ul>
           </div>
-
-          <div className="flex gap-4 p-5 rounded-2xl border-l-4 border-l-rose-500 border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#09090b] shadow-sm">
-             <Skull className="w-6 h-6 text-rose-500 shrink-0 mt-0.5" />
-             <div>
-                <h4 className="font-bold text-slate-900 dark:text-white text-lg mb-1">Luật 3: Sanitize DOM tuyệt đối</h4>
-                <p className="text-slate-700 dark:text-slate-300">Dùng <code>dangerouslySetInnerHTML</code> chứa script bẩn (XSS Attack) có thể bẻ cong DOM. Thẻ <code>&lt;script&gt;</code> nếu chọt vô được, nó sẽ moi cạn Private Key lộ trên biến Javascript.</p>
-             </div>
-          </div>
-
-          <div className="flex gap-4 p-5 rounded-2xl border-l-4 border-l-amber-500 border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#09090b] shadow-sm">
-             <MonitorX className="w-6 h-6 text-amber-500 shrink-0 mt-0.5" />
-             <div>
-                <h4 className="font-bold text-slate-900 dark:text-white text-lg mb-1">Luật 4: Tẩy chay Tracking Analytics CSP</h4>
-                <p className="text-slate-700 dark:text-slate-300"><strong>Tuyệt đối không nhúng Google Tag Manager, Facebook Pixel hay Hotjar.</strong> Các scripts này liên tục đọc String/Text Dom thô trên màn hình. Nếu bạn vừa giải mã Email ra chữ "Báo cáo nội bộ", Google Pixel sẽ âm thầm hốt thẳng cụm đó gửi về server của nó, phá vỡ E2EE.</p>
-             </div>
-          </div>
-
-          <div className="flex gap-4 p-5 rounded-2xl border-l-4 border-l-yellow-500 border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#09090b] shadow-sm">
-             <ShieldBan className="w-6 h-6 text-yellow-500 shrink-0 mt-0.5" />
-             <div>
-                <h4 className="font-bold text-slate-900 dark:text-white text-lg mb-1">Luật 5: Biến dạng sau khi thao tác (Volatile RAM)</h4>
-                <p className="text-slate-700 dark:text-slate-300">Không bao giờ tồn dư dữ liệu đã cởi giáp. Bất kì thông điệp trần trụi tĩnh (Plain Text) nào cũng chỉ được gán trong thời gian tab mở qua React State context. Tat tab = bay hơi.</p>
-             </div>
+          <div className="bg-white dark:bg-[#09090b] border border-slate-200 dark:border-slate-800 p-6 rounded-xl shadow-sm">
+            <h4 className="font-bold text-slate-800 dark:text-slate-200 text-lg mb-3">Tự động lưu nháp mảng Debounced (Debounced Auto-Save)</h4>
+            <p className="text-slate-600 dark:text-slate-400 mb-3">
+              Việc thiết lập trạng thái gọi cơ chế E2E (AES keygen block, ECDSA validation, Base64 Stringify) liên  tục chiếm hữu sức mạnh khổng lồ trên máy tính của người sử dụng. Nếu không kiểm soát, mỗi luồng đánh máy có thể gây: 
+            </p>
+            <ul className="list-inside list-disc space-y-1 text-slate-600 dark:text-slate-400 ml-2 mb-3">
+              <li>Freeze (treo trình duyệt) vì CPU spike.</li>
+              <li>Tạo thành chuỗi vòng ghi (write loops) vô tận, đẩy hoá đơn Firebase Cloud billing lên mức khủng hoảng tài chính.</li>
+            </ul>
+            <div className="border border-amber-500/30 bg-amber-50 dark:bg-amber-900/10 p-3 rounded-lg text-amber-800 dark:text-amber-500 text-sm font-semibold">
+              Giải pháp: Dùng biến state chặn độ trễ 3000ms. Tiến trình chỉ gom dữ liệu thao tác và lưu đồng loạt thành file cục bộ lên Firestore sau 3 giây không có hoạt động.
+            </div>
           </div>
         </div>
+
+        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mt-10 mb-6">
+          2. The 5 Iron Laws (5 Đặc Lệnh Bất Di Bất Dịch)
+        </h3>
+        
+        <p className="text-slate-700 dark:text-slate-300 mb-6 text-lg border-l-4 border-red-500 pl-4 py-1">
+          Lưu ý quan trọng: Các quy tắc hiển thị bên dưới <strong>không áp dụng thỏa hiệp</strong>. Bất cứ vi phạm vi mô nào cũng có khả năng phá vỡ cơ cấu mã hoá E2E.
+        </p>
+
+        <ul className="space-y-6 text-slate-700 dark:text-slate-300">
+          <li>
+            <strong className="text-slate-900 dark:text-white">Quy tắc 1: Cấm Console Logging toàn thời gian.</strong> Các Extension lập trình độc hại (Malicious addons) được uỷ quyền sẽ lập trình các tập lệnh theo dõi cửa sổ `window.console` mọi định dạng.
+            <div className="mt-3 overflow-hidden rounded-xl bg-[#0f172a]">
+              <CodeBlock language="typescript" code={`// ❌ FORBIDDEN — Nghiêm cấm đặt trong mọi phiên bản development/production
+console.log(privateKey)
+console.log(decryptedContent)
+
+// ✅ CORRECT
+// Không xuất hoặc tham chiếu trực tiếp chuỗi Private Key thông qua chuỗi output tĩnh.`} />
+            </div>
+          </li>
+          
+          <li className="pt-2">
+            <strong className="text-slate-900 dark:text-white">Quy tắc 2: Không dùng thư viện cấu hình NPM.</strong> Các công nghệ tích hợp thường xuyên trở thành nạn nhân cho "Supply Chain Attack". FORTISMail chỉ có giấy phép vận hành trên mã nguồn `window.crypto.subtle`.
+            <div className="mt-3 overflow-hidden rounded-xl bg-[#0f172a]">
+              <CodeBlock language="typescript" code={`// ❌ FORBIDDEN
+import CryptoJS from 'crypto-js'   // Mã độc từ thư viện NPM sẽ cuỗm sạch thông tin
+import forge from 'node-forge'
+
+// ✅ CORRECT
+window.crypto.subtle.encrypt(...)  // Cấu trúc máy chủ mã C++ native từ hệ điều hành`} />
+            </div>
+          </li>
+          
+          <li className="pt-2">
+            <strong className="text-slate-900 dark:text-white">Quy tắc 3: Làm sạch hoàn toàn DOM Output (Sanitizing).</strong> Các rủi ro bảo mật về XSS xảy ra nếu nhà cung cấp sơ hở phân loại nội dung hiển thị thư. 
+            <div className="mt-3 overflow-hidden rounded-xl bg-[#0f172a]">
+              <CodeBlock language="typescript" code={`// ❌ FORBIDDEN
+element.innerHTML = userContent
+
+// ✅ CORRECT
+element.textContent = userContent   // Lọc hoặc dùng DOMPurify`} />
+            </div>
+          </li>
+          
+          <li className="pt-2">
+            <strong className="text-slate-900 dark:text-white">Quy tắc 4: Loại thải Tracking Network Analytics.</strong> Việc đặt những đoạn mã như Google Tag Manager, Facebook Pixel lên trang sẽ tự động copy thụ động mọi nội dung văn bản thư trên màn hình, báo cáo trực tiếp đến hệ thống đối tác thứ 3. Tuyệt đối không nhúng External Scripts vào ứng dụng E2E.
+          </li>
+          
+          <li className="pt-2">
+            <strong className="text-slate-900 dark:text-white">Quy tắc 5: Bảo mật thông tin tạm trú vĩnh viễn trên Context State.</strong> File thư tín sau khi giải mã không được phép bám trụ lâu dài trên thiết bị bộ nhớ thường trực.
+            <div className="mt-3 overflow-hidden rounded-xl bg-[#0f172a]">
+              <CodeBlock language="typescript" code={`// ❌ FORBIDDEN
+localStorage.setItem('privateKey', decryptedKey)
+sessionStorage.setItem('message', plaintext)
+
+// ✅ CORRECT
+// Toàn bộ dữ liệu nằm hoàn toàn ở RAM và React State nội bộ. Sẽ bay sạch khi Tab tắt.`} />
+            </div>
+          </li>
+        </ul>
 
       </div>
     );
   }
 
-  // English
+  // EN
   return (
     <div id="security" className="scroll-mt-24">
-      <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500 mb-6">
-        Security Tactics & Enforcement
-      </h1>
-      
-      <h2 className="text-2xl font-bold mt-12 mb-8 text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
-        1. User Security Operations (UX)
-      </h2>
-
-      <div className="grid md:grid-cols-2 gap-6 mb-16">
-        <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-          <Lock className="w-8 h-8 text-slate-700 dark:text-slate-300 mb-4" />
-          <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-slate-100">Intra-app PIN Locks</h3>
-          <p className="text-slate-700 dark:text-slate-400 text-md leading-relaxed mb-4">
-            Upon establishing an account, users deploy strict 6-digit numeric configurations. Whenever interface interaction dwindles, heavy <strong>Gatekeeper Shields</strong> obscure DOM visual ranges physically mandating PIN entries opening volatile RAM caches holding valid session keys.
-          </p>
-          <div className="text-sm font-semibold text-rose-600 dark:text-rose-400 bg-rose-100 dark:bg-rose-900/30 px-3 py-2 rounded-lg">Never stash Vault Keys within localStorage containers.</div>
-        </div>
-        
-        <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-          <Timer className="w-8 h-8 text-slate-700 dark:text-slate-300 mb-4" />
-          <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-slate-100">Execution Debouncing</h3>
-          <p className="text-slate-700 dark:text-slate-400 text-md leading-relaxed mb-4">
-            Total End-to-End Cryptography computations (AES chunking + strict ECDSA Signing) incinerate frontend processing budgets instantly. Implementing rigorous <strong>3000ms delay debounces</strong> resolves extreme battery drain bottlenecks effectively.
-          </p>
-          <div className="text-sm font-semibold text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-3 py-2 rounded-lg">Protects CPUs from violent overheating during draft writing.</div>
-        </div>
-      </div>
-
-      <h2 className="text-2xl font-bold mt-16 mb-8 text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2 border-t border-slate-200 dark:border-slate-800 pt-10">
-        2. The Core 5 Iron Laws
+      <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-12 mb-6 border-t border-slate-200 dark:border-slate-800 pt-10">
+        Security Operations
       </h2>
       
-      <p className="text-lg text-slate-600 dark:text-slate-400 mb-8 border-l-4 border-red-500 pl-4 py-1">
-        Foundational E2E Zero-Knowledge is extremely brittle mechanically. <strong>Infracting upon practically any rule directly fractures complete system confidentiality</strong> starting directly across frontends.
+      <p className="text-slate-700 dark:text-slate-300 mb-8 leading-relaxed text-lg">
+        Valid Zero-Knowledge boundaries inherently demand perfectly disciplined functional parameters structurally. Minor logical divergence introduces massive systemic encryption risk cascades efficiently across endpoints natively.
       </p>
 
-      <div className="space-y-6">
-        <div className="flex gap-4 p-5 rounded-2xl border-l-4 border-l-red-500 border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#09090b] shadow-sm">
-           <BugOff className="w-6 h-6 text-red-500 shrink-0 mt-0.5" />
-           <div>
-              <h4 className="font-bold text-slate-900 dark:text-white text-lg mb-1">Law 1: Discard Console Key Dumps</h4>
-              <p className="text-slate-700 dark:text-slate-300 mb-3">Hostile Chromium plugins constantly execute loop scrapers hunting through loaded <code>window.console</code> values looking specifically for serialized crypto objects.</p>
-              <CodeBlock language="typescript" code={`// ❌ FORBIDDEN\nconsole.log({ privateKey });\n\n// ✅ CORRECT\nif (debugParams) console.warn("Executing key vault swap");`} />
-           </div>
-        </div>
+      <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mt-10 mb-6">
+        1. User Security Operations (UX Restrictions)
+      </h3>
 
-        <div className="flex gap-4 p-5 rounded-2xl border-l-4 border-l-orange-500 border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#09090b] shadow-sm">
-           <ShieldAlert className="w-6 h-6 text-orange-500 shrink-0 mt-0.5" />
-           <div>
-              <h4 className="font-bold text-slate-900 dark:text-white text-lg mb-1">Law 2: Strictly C++ Native Engine Only</h4>
-              <p className="text-slate-700 dark:text-slate-300">Banming all <code>crypto-js</code> and external crypto NPM packages. Adulterated NPM dependencies launch catastrophic Supply Chain Attacks. Leverage purely native OS-level baked browser <code>window.crypto.subtle</code> functions remaining virtually inviolable.</p>
-           </div>
+      <div className="space-y-6 mb-12">
+        <div className="bg-white dark:bg-[#09090b] border border-slate-200 dark:border-slate-800 p-6 rounded-xl shadow-sm">
+          <h4 className="font-bold text-slate-800 dark:text-slate-200 text-lg mb-3">Hardware PIN Obfuscation Layer</h4>
+          <p className="text-slate-600 dark:text-slate-400 mb-3">
+            Whenever active viewports lose targeted user interaction variables (switching backgrounds inherently), <strong>Gatekeeper Systems</strong> enforce explicit physical screen locking metrics requesting secondary 6-digit numeric combinations instantly.
+          </p>
+          <ul className="list-inside list-disc space-y-1 text-slate-600 dark:text-slate-400 ml-2">
+            <li>Rapid resolution speeds evaluating hash verifications successfully.</li>
+            <li>Maintains convenience eliminating frustrating heavy Master Key repetitions completely.</li>
+            <li><strong>ABSOLUTE DISALLOWANCE:</strong> Storing variables structurally via insecure native <code>localStorage</code> caches. Variables depend implicitly utilizing RAM hooks safely.</li>
+          </ul>
         </div>
-
-        <div className="flex gap-4 p-5 rounded-2xl border-l-4 border-l-rose-500 border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#09090b] shadow-sm">
-           <Skull className="w-6 h-6 text-rose-500 shrink-0 mt-0.5" />
-           <div>
-              <h4 className="font-bold text-slate-900 dark:text-white text-lg mb-1">Law 3: Ruthless XSS Sanitization</h4>
-              <p className="text-slate-700 dark:text-slate-300">Invoking <code>dangerouslySetInnerHTML</code> rendering unfiltered strings violently warps DOM trees enabling rogue script execution immediately looting private key arrays completely naked within variable states.</p>
-           </div>
-        </div>
-
-        <div className="flex gap-4 p-5 rounded-2xl border-l-4 border-l-amber-500 border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#09090b] shadow-sm">
-           <MonitorX className="w-6 h-6 text-amber-500 shrink-0 mt-0.5" />
-           <div>
-              <h4 className="font-bold text-slate-900 dark:text-white text-lg mb-1">Law 4: Trackers Violate E2E Sanctions</h4>
-              <p className="text-slate-700 dark:text-slate-300"><strong>Zero tolerance for Google Analytics, Pixel or Hotjar implants.</strong> Third-party analytic scripts silently scrape visible raw DOM text constantly generating heatmap data directly exposing decrypted plain-text email letters straight back off-site completely shattering internal network shielding arrays.</p>
-           </div>
-        </div>
-
-        <div className="flex gap-4 p-5 rounded-2xl border-l-4 border-l-yellow-500 border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#09090b] shadow-sm">
-           <ShieldBan className="w-6 h-6 text-yellow-500 shrink-0 mt-0.5" />
-           <div>
-              <h4 className="font-bold text-slate-900 dark:text-white text-lg mb-1">Law 5: Retain Heavy Volatility State</h4>
-              <p className="text-slate-700 dark:text-slate-300">Resist dumping decrypted letter blocks strictly onto unencrypted disk caches. Everything must disintegrate operating dynamically within volatile React states entirely vaporizing immediately whenever exit interactions fire.</p>
-           </div>
+        <div className="bg-white dark:bg-[#09090b] border border-slate-200 dark:border-slate-800 p-6 rounded-xl shadow-sm">
+          <h4 className="font-bold text-slate-800 dark:text-slate-200 text-lg mb-3">Computational Debounced Write Pipelines</h4>
+          <p className="text-slate-600 dark:text-slate-400 mb-3">
+            Continuous E2EE mathematical functions executing instantly directly tax primary operational system threads substantially logically. Non-regulated iterations force extreme conditions generating:
+          </p>
+          <ul className="list-inside list-disc space-y-1 text-slate-600 dark:text-slate-400 ml-2 mb-3">
+            <li>Heavy application freezing constraints interrupting operations completely.</li>
+            <li>Aggressive automated Firebase billing expansion costs through continuous excessive writing configurations effectively.</li>
+          </ul>
+          <div className="border border-amber-500/30 bg-amber-50 dark:bg-amber-900/10 p-3 rounded-lg text-amber-800 dark:text-amber-500 text-sm font-semibold">
+            Mechanism: Incorporating strict 3000ms delay debounces batch processing execution arrays entirely generating optimal operational intervals properly.
+          </div>
         </div>
       </div>
+
+      <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mt-10 mb-6">
+        2. Foundation Guidelines (The 5 Iron Laws)
+      </h3>
+      
+      <p className="text-slate-700 dark:text-slate-300 mb-6 text-lg border-l-4 border-red-500 pl-4 py-1">
+        Warning parameters: Highlighted rules require <strong>zero logical negotiations universally</strong>. Adherence validates structural security requirements permanently natively.
+      </p>
+
+      <ul className="space-y-6 text-slate-700 dark:text-slate-300">
+        <li>
+          <strong className="text-slate-900 dark:text-white">Law 1: Expunge Output Logging.</strong> Unauthorized plugin scrapers actively identify raw operational arrays processing specifically looking explicitly for visible <code>window.console</code> metrics dynamically.
+          <div className="mt-3 overflow-hidden rounded-xl bg-[#0f172a]">
+            <CodeBlock language="typescript" code={`// ❌ FORBIDDEN — in ANY environment natively
+console.log(privateKey)
+console.log(decryptedContent)
+
+// ✅ CORRECT
+// Use opaque logic referencing. Avoid explicit literal extractions strictly.`} />
+          </div>
+        </li>
+        
+        <li className="pt-2">
+          <strong className="text-slate-900 dark:text-white">Law 2: Abolish NPM Cryptographic Arrays.</strong> Dependent external libraries introduce extreme underlying "Supply Chain" insertion exploitations actively continuously. Adhere stringently applying exact <code>window.crypto.subtle</code> arrays exclusively seamlessly.
+          <div className="mt-3 overflow-hidden rounded-xl bg-[#0f172a]">
+            <CodeBlock language="typescript" code={`// ❌ FORBIDDEN
+import CryptoJS from 'crypto-js'   // Massive Supply chain attack vector
+import forge from 'node-forge'
+
+// ✅ CORRECT
+window.crypto.subtle.encrypt(...)  // Pure safe native compiled browser C++ binaries`} />
+          </div>
+        </li>
+        
+        <li className="pt-2">
+          <strong className="text-slate-900 dark:text-white">Law 3: Comprehensive DOM Content Sanitization.</strong> Bypassing security checks injects malicious payload streams straight performing silent RAM variable extraction easily effectively.
+          <div className="mt-3 overflow-hidden rounded-xl bg-[#0f172a]">
+            <CodeBlock language="typescript" code={`// ❌ FORBIDDEN
+element.innerHTML = userContent
+
+// ✅ CORRECT
+element.textContent = userContent   // Or systematically utilize DOMPurify architectures`} />
+          </div>
+        </li>
+        
+        <li className="pt-2">
+          <strong className="text-slate-900 dark:text-white">Law 4: Decline Persistent Tracking Systems.</strong> Applying Google Tag algorithms copies user plain-text renders inherently delivering confidential exposed material to arbitrary third party systems fundamentally shattering explicit verification requirements correctly.
+        </li>
+        
+        <li className="pt-2">
+          <strong className="text-slate-900 dark:text-white">Law 5: Retain Volatile Disposability Integrations.</strong> Physical arrays remaining completely isolated prevent rogue system software reads automatically effectively natively preserving parameters locally successfully.
+          <div className="mt-3 overflow-hidden rounded-xl bg-[#0f172a]">
+            <CodeBlock language="typescript" code={`// ❌ FORBIDDEN
+localStorage.setItem('privateKey', decryptedKey)
+sessionStorage.setItem('message', plaintext)
+
+// ✅ CORRECT
+// All decrypted elements exist safely held isolated strictly avoiding physical presence.`} />
+          </div>
+        </li>
+      </ul>
 
     </div>
   );

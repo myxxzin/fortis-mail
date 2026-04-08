@@ -1,114 +1,116 @@
 import { useLanguage } from '../../../contexts/LanguageContext';
-import FlowDiagram from '../../../components/docs/FlowDiagram';
-import { DatabaseZap, FileSymlink, Network, KeySquare, MonitorOff } from 'lucide-react';
+import CodeBlock from '../../../components/docs/CodeBlock';
+import Callout from '../../../components/docs/Callout';
 
 export default function AuthenticationSection() {
   const { language } = useLanguage();
 
-  const flowAttachmentVI = [
-    { id: '1', title: 'Tạo AES-File-Key (1 Lần)', description: 'Trình duyệt cấp phát khóa AES-256 ngẫu nhiên bọc mã toàn bộ Byte Array của File. Khóa File chưa rời máy.', icon: <KeySquare /> },
-    { id: '2', title: 'Tải Blob lên Firebase Storage', description: 'Gói Blob (10MB+) đẩy lên Storage Cloud lấy tĩnh một tham chiếu [URL]. Bản thân Storage chỉ chứa mớ nén vô hồn.', icon: <DatabaseZap /> },
-    { id: '3', title: 'Package Firebase Firestore', description: 'Gói chung tham chiếu [URL] và [AES-File-Key] cho chui vào luồng ECDH bọc mã E2E chích thẳng vô lõi /mails db cực nhẹ.', icon: <FileSymlink />, isSecondary: true },
-  ];
-
-  const flowAttachmentEN = [
-    { id: '1', title: 'AES-File-Key Transient Gen', description: 'Browser strictly spawns an untracked RNG AES-256 local key enveloping the raw Byte Arrays parsing the attachment natively.', icon: <KeySquare /> },
-    { id: '2', title: 'Storage Node Uploads', description: 'Transfers 10MB+ Ciphertext Blob clusters extracting a permanent raw pointer [URL]. Storage retains pure chaotic byte dust.', icon: <DatabaseZap /> },
-    { id: '3', title: 'Firestore Package Execution', description: 'Fuses [URL] alongside transient [AES-File-Key] shoving everything collectively inside standard E2EE pipeline evading limits heavily.', icon: <FileSymlink />, isSecondary: true },
-  ];
-
   if (language === 'vi') {
     return (
       <div id="authentication" className="scroll-mt-24">
-        <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#43cc25]/10 dark:bg-[#43cc25]/20 text-[#226214] dark:text-[#43cc25] text-sm font-semibold border border-[#43cc25]/20">
-          <DatabaseZap className="w-4 h-4" /> Hệ Thống Bộ Nhớ Cốt Lõi
-        </div>
-        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#226214] to-[#43cc25] dark:from-[#43cc25] dark:to-[#8ff277] mb-6">
-          Lưu Trữ & Sinh Mệnh Khóa
-        </h1>
-        
-        <h2 className="text-2xl font-bold mt-12 mb-8 text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
-          1. Kiến Trúc Lưu Trữ (Data Storage Design)
+        <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-12 mb-6 border-t border-slate-200 dark:border-slate-800 pt-10">
+          Thiết Kế Cơ sở Lưu trữ (Data Storage Design)
         </h2>
-        <p className="text-lg text-slate-700 dark:text-slate-300 mb-6">
-          Hệ thống Firestore sử dụng ba collection hoàn toàn độc lập, <strong>không tồn tại JOIN key vật lý</strong> nhằm tăng tốc độ truy vấn NoSQL cao nhất và giảm triệt để bề mặt rò rỉ.
-        </p>
         
-        {/* DB Schema Cards */}
-        <div className="grid lg:grid-cols-3 gap-4 mb-12">
-          
-          <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-[#09090b]">
-             <div className="bg-slate-50 dark:bg-slate-900 py-3 px-5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
-                <div className="w-2.5 h-2.5 rounded-full bg-[#43cc25] shadow-[0_0_8px_rgba(67,204,37,0.5)]"></div>
-                <h4 className="font-bold text-slate-900 dark:text-white font-mono text-sm">/users/{`{uid}`}</h4>
-             </div>
-             <div className="p-5 font-mono text-sm leading-loose">
-               <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">alias:</span> string</div>
-               <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">publicKey:</span> jwk / pem</div>
-               <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">pinHash:</span> string</div>
-             </div>
-          </div>
-          
-          <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-[#09090b]">
-             <div className="bg-slate-50 dark:bg-slate-900 py-3 px-5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
-                <div className="w-2.5 h-2.5 rounded-full bg-[#43cc25] shadow-[0_0_8px_rgba(67,204,37,0.5)]"></div>
-                <h4 className="font-bold text-slate-900 dark:text-white font-mono text-sm">/mails/{`{mailId}`}</h4>
-             </div>
-             <div className="p-5 font-mono text-sm leading-loose">
-               <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">from / to:</span> refs</div>
-               <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">payload:</span> ciphertext</div>
-               <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">signature:</span> hex / b64</div>
-             </div>
-          </div>
-          
-          <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-[#09090b]">
-             <div className="bg-slate-50 dark:bg-slate-900 py-3 px-5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
-                <div className="w-2.5 h-2.5 rounded-full bg-[#43cc25] shadow-[0_0_8px_rgba(67,204,37,0.5)]"></div>
-                <h4 className="font-bold text-slate-900 dark:text-white font-mono text-sm">/drafts/{`{draftId}`}</h4>
-             </div>
-             <div className="p-5 font-mono text-sm leading-loose">
-               <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">ownerUID:</span> string</div>
-               <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">content:</span> ciphertext</div>
-               <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">lastSaved:</span> temp_ts</div>
-             </div>
-          </div>
+        <p className="text-slate-700 dark:text-slate-300 mb-8 leading-relaxed text-lg">
+          Lược đồ hạ tầng được tổ chức thành ba collection chuyên biệt hoàn toàn độc lập. Lịch trình định tuyến <strong>thiết kế không hỗ trợ các khóa ngoại (JOIN keys vật lý)</strong>. Phương pháp phi cấu trúc (Flattened) này tối ưu hóa quyền truy cập, giảm độ trễ truy vấn NoSQL và ngăn chặn nguy cơ rò rỉ dữ liệu liên đới.
+        </p>
 
-        </div>
-
-        <h3 className="text-xl font-bold mt-8 mb-4 text-slate-900 dark:text-slate-100 flex items-center gap-2">
-          Bypass Giới Hạn 1MB (Cloud Attachment Pipeline)
+        <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-10 mb-4">
+          1. Firestore Collections (Kiến trúc CSDL)
         </h3>
-        <p className="text-lg text-slate-700 dark:text-slate-300 mb-6">
-          Do Firestore chặn cứng giới hạn 1MB/document. Cơ chế File Đính kèm hoạt động qua mô hình kết hợp (Hybrid Split):
-        </p>
-        <div className="p-6 bg-slate-50 dark:bg-[#0b1120] border border-slate-200 dark:border-slate-800 rounded-3xl mb-12">
-          <FlowDiagram nodes={flowAttachmentVI} direction="vertical" />
+
+        <div className="mb-8 overflow-hidden rounded-xl bg-[#0f172a]">
+          <CodeBlock language="typescript" code={`Firestore Database
+├── /users/{uid}
+│   ├── alias          (Tên người hiển thị public)
+│   ├── publicKey      (Khóa công khai dùng để mã hóa từ phía đối tác)
+│   └── pinHash        (Mã băm của PIN thiết bị — tuyệt đối không lưu dạng text gốc)
+│
+├── /mails/{mailId}
+│   ├── to             (Chuỗi UID người nhận)
+│   ├── from           (Chuỗi UID người gửi)
+│   ├── encryptedPayload  (Bản mã nội dung chuẩn ASCII Armored)
+│   ├── encryptedKey      (Khóa AES giải mã do ECDH gói lại)
+│   ├── signature         (Chữ ký chống giả mạo ECDSA)
+│   └── timestamp
+│
+└── /drafts/{draftId}
+    ├── ownerUID
+    ├── encryptedContent
+    └── lastSaved`} />
         </div>
 
-        <h2 className="text-2xl font-bold mt-16 mb-8 text-slate-900 dark:text-slate-100 tracking-tight border-t border-slate-200 dark:border-slate-800 pt-10">
-          2. Vòng Đời Trạng Thái (State Lifecycle)
+        <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-12 mb-4">
+          2. Vượt Quá Giới Hạn 1MB (Large Files By-pass Pipeline)
+        </h3>
+
+        <p className="text-slate-700 dark:text-slate-300 mb-4">
+          Cơ chế Firestore thiết lập cứng giới hạn Data Document dưới mức 1MB/bản ghi. Về lý thuyết không thể nhồi tệp đính kèm lớn thẳng vào JSON mảng. FORTISMail xử lý thông qua cơ chế chẻ lớp (split-layer):
+        </p>
+
+        <div className="mb-10 overflow-hidden rounded-xl bg-[#0f172a]">
+          <CodeBlock language="typescript" code={`ATTACHMENT PIPELINE:
+────────────────────────────────────────────────────────
+1. Client tự động sinh chuỗi khóa AES-File-Key vô danh.
+2. Binary Array của tệp tài liệu được AES bọc mã độc lập.
+3. Chuyển Blob mã hóa lên Cloud Storage → Storage trả về {URL}.
+4. Client nhận {URL} và {AES-File-Key}.
+   └──▶ Nạp cả hai vào cùng 1 lõi Payload JSON của Email (Dung lượng siêu nhỏ).
+5. Cuối cùng, thực hiện quy trình mã hóa luồng E2E cho lõi Payload JSON đó.
+6. Đẩy lõi siêu nhẹ này lên Firestore Database.
+────────────────────────────────────────────────────────`} />
+        </div>
+
+        <div className="mb-12">
+          <Callout type="info" title="Kết quả đầu ra">
+            Cloud Storage sẽ đảm nhiệm chứa các tệp rác khổng lồ không thể giải nghĩa. Trong khi đó Firestore chỉ giữ các con trỏ logic nhỏ có khả năng định tuyến mạnh mẽ. Hai hệ thống hợp tác tạo ra luồng E2EE không biên giới.
+          </Callout>
+        </div>
+
+        <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-12 mb-6 border-t border-slate-200 dark:border-slate-800 pt-10">
+          Chính Sách Bộ Nhớ Bức Tường (State Barrier)
         </h2>
 
-        <div className="grid md:grid-cols-2 gap-8 mb-8">
-          <div>
-            <div className="flex items-center gap-3 mb-4 text-[#43cc25] dark:text-[#43cc25]">
-               <Network className="w-6 h-6" />
-               <h3 className="text-xl font-bold text-slate-900 dark:text-white">Kiên quyết Cấm Redux</h3>
-            </div>
-            <p className="text-slate-700 dark:text-slate-300 text-lg leading-relaxed mb-4">
-              Tuyệt đối không lưu Private key nội phủ trên Redux Store. Mọi Chrome Extension chứa script mã độc quét <code>window.__REDUX_STORE__</code> đều bắt được toàn bộ. Thay vào đó, gán vĩnh viễn khóa trên <strong>React Context Local RAM</strong> - bảo vệ triệt để rò rỉ bộ nhớ.
-            </p>
-          </div>
-          <div>
-            <div className="flex items-center gap-3 mb-4 text-[#43cc25] dark:text-[#43cc25]">
-               <MonitorOff className="w-6 h-6" />
-               <h3 className="text-xl font-bold text-slate-900 dark:text-white">Sinh Ly Tử Biệt</h3>
-            </div>
-            <p className="text-slate-700 dark:text-slate-300 text-lg leading-relaxed mb-4">
-              <strong>KHÔNG có hệ thống cứu trợ "Quên Mật Khẩu"</strong>.
-              Master Key được derive ra nhờ tính toán toán học từ chuỗi Mật khẩu. Mất mật khẩu = bay màu giải mã khóa, mọi di sản email chìm ngập hoàn toàn thành đống rác ngẫu nhiên. Đây là luật để chặn đứng Zero-Day.
-            </p>
-          </div>
+        <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-8 mb-4">
+          1. React Context VS Redux Toolkits
+        </h3>
+        <p className="text-slate-700 dark:text-slate-300 mb-6">
+          Khóa Private Key (bí mật) bắt buộc phải nằm trên hệ thực thể RAM. Nếu bảo quản sai chỗ, toàn bộ phương pháp mã hóa tiền đề đều phá sản nặng nề. Do đó, FORTISMail <strong>KHÔNG DÙNG Redux</strong>.
+        </p>
+
+        <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 mb-10 shadow-sm">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-[#f8fafc] dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+              <tr>
+                <th className="px-6 py-4 font-bold border-b border-slate-200 dark:border-slate-700">Yếu Tố Ảnh Hưởng</th>
+                <th className="px-6 py-4 font-bold border-b border-slate-200 dark:border-slate-700">Redux Component</th>
+                <th className="px-6 py-4 font-bold border-b border-slate-200 dark:border-slate-700">React Context (FORTISMail)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+              <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <td className="px-6 py-4 font-semibold">Tầm soát khả năng hiển thị</td>
+                <td className="px-6 py-4 text-slate-600 dark:text-slate-300">Tọa lạc tại vùng nhớ dễ truy cập (Có thể debug được).</td>
+                <td className="px-6 py-4 text-slate-600 dark:text-slate-300">Bị cô lập hoàn toàn, bị che khuất theo DOM closure vòng đời.</td>
+              </tr>
+              <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <td className="px-6 py-4 font-semibold">Rủi ro bị đánh cắp Private Key</td>
+                <td className="px-6 py-4 text-slate-600 dark:text-slate-300 text-rose-500 font-bold">CỰC CAO (Extension chỉ cần gọi object Window).</td>
+                <td className="px-6 py-4 text-slate-600 dark:text-slate-300 text-[#43cc25] font-bold">THẤP (Khóa vật lý RAM bay hơi khi tắt trình duyệt).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-12 mb-4">
+          2. Vòng đời khoá gốc (Revocation Nullification)
+        </h3>
+        
+        <div className="mb-12">
+          <Callout type="warning" title="Thu hồi tính năng Reset (Quên Mật khẩu)">
+             Người dùng quên mật khẩu thì hoàn toàn <strong>KHÔNG CÓ CƠ CHẾ GỠ LỖI NÀO</strong>. Do máy chủ không sở hữu hàm giải mã gốc, việc xóa mật khẩu buộc cơ chế PBKDF2 sinh mã đạo hàm không chuẩn, dẫn đến chuỗi khoá cũ không khớp. Toàn bộ thông tin từ trong quá khứ trở thành phế phẩm. Đây không phải là một lỗi của phần mềm mà chính là quy luật tự nhiên khắc nghiệt của Zero-Knowledge Model.
+          </Callout>
         </div>
 
       </div>
@@ -118,92 +120,109 @@ export default function AuthenticationSection() {
   // EN
   return (
     <div id="authentication" className="scroll-mt-24">
-      <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#43cc25]/10 dark:bg-[#43cc25]/20 text-[#226214] dark:text-[#43cc25] text-sm font-semibold border border-[#43cc25]/20">
-        <DatabaseZap className="w-4 h-4" /> Core State Machinery
-      </div>
-      <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#226214] to-[#43cc25] dark:from-[#43cc25] dark:to-[#8ff277] mb-6">
-        Storage Mechanics
-      </h1>
-      
-      <h2 className="text-2xl font-bold mt-12 mb-8 text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
-        1. Base Database Configurations
+      <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-12 mb-6 border-t border-slate-200 dark:border-slate-800 pt-10">
+        Data Storage Design
       </h2>
-      <p className="text-lg text-slate-700 dark:text-slate-300 mb-6">
-        Flattened to perfection. Three robust collections stripped explicitly lacking <strong>intricate JOIN nodes</strong> structurally isolating potential cross-contamination attacks guaranteeing maximum fetch thresholds.
-      </p>
       
-      {/* DB Schema Cards */}
-      <div className="grid lg:grid-cols-3 gap-4 mb-12">
-        <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-[#09090b]">
-           <div className="bg-slate-50 dark:bg-slate-900 py-3 px-5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#43cc25] shadow-[0_0_8px_rgba(67,204,37,0.5)]"></div>
-              <h4 className="font-bold text-slate-900 dark:text-white font-mono text-sm">/users/{`{uid}`}</h4>
-           </div>
-           <div className="p-5 font-mono text-sm leading-loose">
-             <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">alias:</span> string</div>
-             <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">publicKey:</span> crypto-jwk</div>
-             <div className="text-slate-600 dark:text-slate-400"><span className="text-[#43cc25] font-bold">pinHash:</span> sha-string</div>
-           </div>
-        </div>
-        
-        <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-[#09090b]">
-           <div className="bg-slate-50 dark:bg-slate-900 py-3 px-5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#43cc25] shadow-[0_0_8px_rgba(67,204,37,0.5)]"></div>
-              <h4 className="font-bold text-slate-900 dark:text-white font-mono text-sm">/mails/{`{mailId}`}</h4>
-           </div>
-           <div className="p-5 font-mono text-sm leading-loose">
-             <div className="text-slate-600 dark:text-slate-400"><span className="text-teal-500 font-bold">from / to:</span> string_refs</div>
-             <div className="text-slate-600 dark:text-slate-400"><span className="text-teal-500 font-bold">payload:</span> aes_gcm_armor</div>
-             <div className="text-slate-600 dark:text-slate-400"><span className="text-teal-500 font-bold">signature:</span> ecdsa_b64</div>
-           </div>
-        </div>
-        
-        <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm bg-white dark:bg-[#09090b]">
-           <div className="bg-slate-50 dark:bg-slate-900 py-3 px-5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div>
-              <h4 className="font-bold text-slate-900 dark:text-white font-mono text-sm">/drafts/{`{draftId}`}</h4>
-           </div>
-           <div className="p-5 font-mono text-sm leading-loose">
-             <div className="text-slate-600 dark:text-slate-400"><span className="text-amber-500 font-bold">ownerUID:</span> string</div>
-             <div className="text-slate-600 dark:text-slate-400"><span className="text-amber-500 font-bold">content:</span> encrypted_data</div>
-             <div className="text-slate-600 dark:text-slate-400"><span className="text-amber-500 font-bold">lastSaved:</span> temporary_ts</div>
-           </div>
-        </div>
-      </div>
+      <p className="text-slate-700 dark:text-slate-300 mb-8 leading-relaxed text-lg">
+        The base underlying Firestore structure involves operating specifically mapping into three independent partitions. Explicitly establishing layouts absent of <strong>physical JOIN key implementations</strong> prevents lateral routing breaches maximizing strict non-relational fetch thresholds flawlessly.
+      </p>
 
-      <h3 className="text-xl font-bold mt-8 mb-4 text-slate-900 dark:text-slate-100 flex items-center gap-2">
-        1MB Firestore Limit Attachments Evasion
+      <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-10 mb-4">
+        1. Firestore Flattened Schema Definition
       </h3>
-      <p className="text-lg text-slate-700 dark:text-slate-300 mb-6">
-        Attachments rapidly explode maximum packet constraints. Bypassing safely requires splitting routing metrics intelligently.
-      </p>
-      <div className="p-6 bg-slate-50 dark:bg-[#0b1120] border border-slate-200 dark:border-slate-800 rounded-3xl mb-12">
-        <FlowDiagram nodes={flowAttachmentEN} direction="vertical" />
+
+      <div className="mb-8 overflow-hidden rounded-xl bg-[#0f172a]">
+        <CodeBlock language="typescript" code={`Firestore Database Networks
+├── /users/{uid}
+│   ├── alias          (Broadcasting display parameters)
+│   ├── publicKey      (Externally exposed key for incoming encryptions)
+│   └── pinHash        (Never raw format — distinctly transformed outputs)
+│
+├── /mails/{mailId}
+│   ├── to             (Recipient addressing object)
+│   ├── from           (Sender authentication variable)
+│   ├── encryptedPayload  (Core payload explicitly ASCII aligned)
+│   ├── encryptedKey      (AES retrieval instance contained inside ECDH limits)
+│   ├── signature         (Spoof-blocking validation logic point)
+│   └── timestamp
+│
+└── /drafts/{draftId}
+    ├── ownerUID
+    ├── encryptedContent
+    └── lastSaved`} />
       </div>
 
-      <h2 className="text-2xl font-bold mt-16 mb-8 text-slate-900 dark:text-slate-100 tracking-tight border-t border-slate-200 dark:border-slate-800 pt-10">
-        2. Context Implementations 
+      <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-12 mb-4">
+        2. High-Capacity Document Storage Matrix
+      </h3>
+
+      <p className="text-slate-700 dark:text-slate-300 mb-4">
+        Firestore heavily invokes strict 1MB operational file limitations actively preventing bulk attachments integrating standard pipelines. FORTISMail circumvents utilizing multi-layer logical components:
+      </p>
+
+      <div className="mb-10 overflow-hidden rounded-xl bg-[#0f172a]">
+        <CodeBlock language="typescript" code={`EXECUTION LAYER PIPELINE:
+────────────────────────────────────────────────────────
+1. Browser engines automatically generate transient AES variables natively.
+2. Heavy byte clusters process sequentially enclosed entirely by AES formats.
+3. Blind segments transfer up via Cloud Storage nodes returning explicit {URLs}.
+4. Render components synthesize {URL} coordinates alongside extraction properties.
+   └──▶ Appends integrated payloads combining tiny text structures flawlessly.
+5. Standard architectural routines execute core E2EE loops securely protecting paths.
+6. The radically optimized payload distributes reliably across normal Database clusters.
+────────────────────────────────────────────────────────`} />
+      </div>
+
+      <div className="mb-12">
+        <Callout type="info" title="Computational Efficiency Gains">
+          The Cloud Storage domains inherently shoulder large incomprehensible encrypted objects logically while Firestore manages lightning-fast route coordinations solely. Together, components deploy unconstrained cryptographic data flows efficiently.
+        </Callout>
+      </div>
+
+      <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-12 mb-6 border-t border-slate-200 dark:border-slate-800 pt-10">
+        Fundamental Application Policies
       </h2>
 
-      <div className="grid md:grid-cols-2 gap-8 mb-8">
-        <div>
-          <div className="flex items-center gap-3 mb-4 text-indigo-600 dark:text-indigo-400">
-             <Network className="w-6 h-6" />
-             <h3 className="text-xl font-bold text-slate-900 dark:text-white">Redux Abolishment</h3>
-          </div>
-          <p className="text-slate-700 dark:text-slate-300 text-lg leading-relaxed mb-4">
-            Never utilize Redux wrappers for Vault logic arrays. Any loaded plugin or extensions executing <code>window.__REDUX_STORE__</code> scrapes memory mercilessly extracting Vault files. Leveraging local <strong>React Context hooks</strong> shields internal runtime segments.
-          </p>
-        </div>
-        <div>
-          <div className="flex items-center gap-3 mb-4 text-rose-600 dark:text-rose-400">
-             <MonitorOff className="w-6 h-6" />
-             <h3 className="text-xl font-bold text-slate-900 dark:text-white">Permanent Forgetting</h3>
-          </div>
-          <p className="text-slate-700 dark:text-slate-300 text-lg leading-relaxed mb-4">
-            <strong>There strictly avoids "Reset Passwords" requests.</strong> Server admins cannot access recovery modules. Lost master passwords irrevocably brick mathematical decryption arrays dropping all account content straight back to meaningless hashes preventing external recovery spoof attacks.
-          </p>
-        </div>
+      <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-8 mb-4">
+        1. Context Implementations Contrasting Redux
+      </h3>
+      <p className="text-slate-700 dark:text-slate-300 mb-6">
+        Absolute secrecy dependencies define uncompromisable bounds storing valid Private variables within operating memory limits exclusively. <strong>Centralizing states via Redux permanently corrupts the infrastructure natively.</strong>
+      </p>
+
+      <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 mb-10 shadow-sm">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-[#f8fafc] dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+            <tr>
+              <th className="px-6 py-4 font-bold border-b border-slate-200 dark:border-slate-700">Observation Field</th>
+              <th className="px-6 py-4 font-bold border-b border-slate-200 dark:border-slate-700">Redux Management</th>
+              <th className="px-6 py-4 font-bold border-b border-slate-200 dark:border-slate-700">React Hook Closure (Context)</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+            <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+              <td className="px-6 py-4 font-semibold">Visibility Spectrum</td>
+              <td className="px-6 py-4 text-slate-600 dark:text-slate-300">Centralized globally authorizing debug visibility arrays.</td>
+              <td className="px-6 py-4 text-slate-600 dark:text-slate-300">Hard-isolated physically blocking external object variables reliably.</td>
+            </tr>
+            <tr className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+              <td className="px-6 py-4 font-semibold">Key Decoupling Vulnerability</td>
+              <td className="px-6 py-4 text-slate-600 dark:text-slate-300 text-rose-500 font-bold">ELEVATED EXTREME (Extensions blindly access core window metrics).</td>
+              <td className="px-6 py-4 text-slate-600 dark:text-slate-300 text-[#43cc25] font-bold">CONTROLLED (Hardware memory clears upon application tab closures explicitly).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-12 mb-4">
+        2. Absolute Key Revocation Defenses
+      </h3>
+      
+      <div className="mb-12">
+        <Callout type="warning" title="No Server Reset Functionality Supported">
+           <strong>Forgot Password flows do not exist logically nor physically.</strong> Because the master cryptographic entity remains purely derived off user strings mathematically via PBKDF2 configurations, failure replicating fundamental strings means previous extraction arrays cannot align securely. All preceding materials lock forever inherently preserving security metrics by removing potential manipulation checkpoints completely.
+        </Callout>
       </div>
 
     </div>

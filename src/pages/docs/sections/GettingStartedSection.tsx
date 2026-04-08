@@ -1,165 +1,186 @@
 import { useLanguage } from '../../../contexts/LanguageContext';
 import CodeBlock from '../../../components/docs/CodeBlock';
 import Callout from '../../../components/docs/Callout';
-import { Shield, EyeOff, Cpu, KeyRound, Terminal, Key, Rocket } from 'lucide-react';
 
 export default function GettingStartedSection() {
   const { language } = useLanguage();
 
-  const diffsVI = [
-    { icon: <Cpu />, title: 'Mật mã Client-side', desc: 'Toàn bộ tính toán diễn ra tại trình duyệt, chặn rò rỉ.' },
-    { icon: <Shield />, title: 'Data Cá nhân hóa', desc: 'Thư được cá nhân hóa hoàn toàn (Template variables) offline.' },
-    { icon: <EyeOff />, title: 'Máy chủ Mù (Blind)', desc: 'Thư viện backend chỉ định tuyến blobs mã hóa, không đọc data.' },
-    { icon: <KeyRound />, title: 'Native Web Crypto', desc: 'Dùng lõi C++ (window.crypto.subtle), cấm npm crypto libraries.' }
-  ];
-
-  const diffsEN = [
-    { icon: <Cpu />, title: 'Client-side Crypto', desc: 'All cryptography executes strictly within browser RAM bounds.' },
-    { icon: <Shield />, title: 'Content Personalization', desc: 'Dynamic recipient and variable parsing works completely offline.' },
-    { icon: <EyeOff />, title: 'Blind Server', desc: 'Backend intentionally routes opaque blobs and nothing more.' },
-    { icon: <KeyRound />, title: 'Native Web Crypto', desc: 'Built purely on window.crypto.subtle evading npm supply chain.' }
-  ];
-
   if (language === 'vi') {
     return (
       <div id="getting-started" className="scroll-mt-24">
-        {/* Header Ribbon */}
-        <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-semibold border border-blue-100 dark:border-blue-800">
-          <Rocket className="w-4 h-4" /> Bắt Đầu Dự Án V1.0.0
-        </div>
-        
-        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-500 dark:from-white dark:to-slate-400 mb-6">
-          Tổng Quan Dự Án & Setup
-        </h1>
-        
-        <p className="text-xl text-slate-600 dark:text-slate-400 mb-10 leading-relaxed border-l-4 border-slate-300 dark:border-slate-700 pl-4 py-1">
-          FORTISMail là <strong>ứng dụng email web mã hóa đầu cuối (E2EE) Zero-Knowledge</strong>. Khác với các hệ thống email phổ thông, máy chủ FORTISMail (Firebase) chỉ lưu trữ các chuỗi mã hóa vô nghĩa. Thậm chí một vụ rò rỉ dữ liệu (database breach) toàn phần cũng không để lọt nội dung.
-        </p>
-
-        {/* Bento Grid Features */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-16">
-          {diffsVI.map((d, i) => (
-            <div key={i} className="group p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/20 backdrop-blur-md hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all duration-300 hover:shadow-sm">
-              <div className="flex items-center gap-3 mb-3 text-slate-800 dark:text-slate-200">
-                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
-                   {d.icon}
-                </div>
-                <h3 className="font-bold text-lg">{d.title}</h3>
-              </div>
-              <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">{d.desc}</p>
-            </div>
-          ))}
-        </div>
-
-        <h2 className="text-2xl font-bold mt-12 mb-8 text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
-          <Terminal className="w-6 h-6 text-slate-400" /> Bắt Đầu Cài Đặt
+        <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-12 mb-6">
+          Tổng Quan Dự Án (Project Overview)
         </h2>
-        
-        {/* Stepper Guide */}
-        <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 dark:before:via-slate-800 before:to-transparent">
-          
-          <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-            <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-slate-50 dark:border-[#09090b] bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 font-bold z-10">1</div>
-            <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white dark:bg-[#111] p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-              <h4 className="font-bold text-slate-900 dark:text-white mb-2">Yêu Cầu Nền Tảng (Prerequisites)</h4>
-              <CodeBlock language="bash" code={`Node.js >= 18\nnpm >= 9\nA Firebase project with Firestore + Storage enabled`} />
-            </div>
-          </div>
 
-          <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-            <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-slate-50 dark:border-[#09090b] bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 font-bold z-10">2</div>
-            <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white dark:bg-[#111] p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-              <h4 className="font-bold text-slate-900 dark:text-white mb-2">Clone & Khởi Chạy (Install)</h4>
-              <CodeBlock language="bash" code={`# Clone core platform\ngit clone https://github.com/myxxzin/fortis-mail.git\n\n# Node modules provision\ncd fortis-mail\nnpm install\n\n# Local server\nnpm run dev`} />
-            </div>
-          </div>
-
-          <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-            <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-slate-50 dark:border-[#09090b] bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 font-bold z-10"><Key className="w-4 h-4"/></div>
-            <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white dark:bg-[#111] p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-              <h4 className="font-bold text-slate-900 dark:text-white mb-2">File Môi Trường (.env)</h4>
-              <CodeBlock language="env" code={`VITE_FIREBASE_API_KEY=\nVITE_FIREBASE_AUTH_DOMAIN=\nVITE_FIREBASE_PROJECT_ID=\nVITE_FIREBASE_STORAGE_BUCKET=\nVITE_FIREBASE_MESSAGING_SENDER_ID=\nVITE_FIREBASE_APP_ID=`} />
-            </div>
-          </div>
+        <div className="mb-10 text-slate-700 dark:text-slate-300 leading-relaxed text-lg">
+          <p className="mb-4">
+            FORTISMail là một <strong>ứng dụng email mã hóa đầu cuối (E2EE)</strong> được thiết kế theo kiến trúc phi tri thức (Zero-Knowledge). Khác với các hệ thống thư tín thông thường (nơi máy chủ có thể quét nội dung thư), FORTISMail đảm bảo rằng <strong>chỉ có người gửi và người nhận đích thực mới có thể giải mã được nội dung</strong>.
+          </p>
+          <p>
+            Máy chủ lưu trữ phía sau (Firebase) chỉ đóng vai trò lưu giữ ciphertext mờ đục. Kể cả trong trường hợp toàn bộ cơ sở dữ liệu trên máy chủ bị rò rỉ, cơ sở dữ liệu đó hoàn toàn không thể bị khai thác hay giải mã bởi bất cứ ai.
+          </p>
         </div>
 
-        <div className="mt-12">
-          <Callout type="warning" title="Tuyệt đối KHÔNG commit file .env">
-            Lưu ý bảo mật sống còn: Không đẩy file cấu trúc <code>.env</code> lên Git Control. Đối với các kỹ sư nội bộ mới, vui lòng lên tiếng liên hệ trực tiếp đến Tech Lead nhằm cấp phát chùm key thật.
+        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mt-10 mb-4">
+          Điểm khác biệt cốt lõi (Key Differentiators)
+        </h3>
+        
+        <div className="grid md:grid-cols-2 gap-4 mb-12">
+           <div className="bg-white dark:bg-[#09090b] border border-slate-200 dark:border-slate-800 p-5 rounded-xl shadow-sm">
+              <h4 className="font-bold text-[#43cc25] mb-2 dark:text-[#43cc25]">Tính toán 100% tại Client</h4>
+              <p className="text-slate-600 dark:text-slate-400 text-sm">Trình duyệt của bạn đóng vai trò là một máy chủ mã hóa độc lập. Server bên ngoài không thực hiện bất kỳ giao thức tính toán mã hóa nào.</p>
+           </div>
+           <div className="bg-white dark:bg-[#09090b] border border-slate-200 dark:border-slate-800 p-5 rounded-xl shadow-sm">
+              <h4 className="font-bold text-[#43cc25] mb-2 dark:text-[#43cc25]">Sử dụng Native Web Crypto API</h4>
+              <p className="text-slate-600 dark:text-slate-400 text-sm">Mọi thư viện NPM mã hóa đều có rủi ro bị khai thác (Supply Chain Attack). FORTISMail vận hành trực tiếp trên module C++ gốc của trình duyệt (<code>window.crypto.subtle</code>).</p>
+           </div>
+           <div className="bg-white dark:bg-[#09090b] border border-slate-200 dark:border-slate-800 p-5 rounded-xl shadow-sm">
+              <h4 className="font-bold text-[#43cc25] mb-2 dark:text-[#43cc25]">Định tuyến "Mù"</h4>
+              <p className="text-slate-600 dark:text-slate-400 text-sm">Máy chủ Firebase nhận các gói dữ liệu đã bị mã hóa nén thành định dạng ASCII Armor và chỉ thực hiện nhiệm vụ điều hướng mù tới định danh người nhận thích hợp.</p>
+           </div>
+           <div className="bg-white dark:bg-[#09090b] border border-slate-200 dark:border-slate-800 p-5 rounded-xl shadow-sm">
+              <h4 className="font-bold text-[#43cc25] mb-2 dark:text-[#43cc25]">Cá nhân hoá & Hiệu suất</h4>
+              <p className="text-slate-600 dark:text-slate-400 text-sm">Hệ thống hỗ trợ cá nhân hóa thư tín (biến, chèn tên người nhận động) và vận hành với giao diện phi tập trung hoàn chỉnh.</p>
+           </div>
+        </div>
+
+        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mt-10 mb-4">
+          Yêu cầu hệ thống (Prerequisites)
+        </h3>
+        <div className="bg-[#0f172a] p-4 rounded-xl mb-8">
+           <CodeBlock language="typescript" code={`Node.js >= 18
+npm >= 9
+Một dự án Firebase đã kích hoạt: 
+  - Firestore Database
+  - Cloud Storage
+  - Authentication (thiết lập sẵn Authorized Domain)`} />
+        </div>
+
+        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mt-10 mb-4">
+          Cài đặt (Installation)
+        </h3>
+        <div className="mb-8 overflow-hidden rounded-xl bg-[#0f172a]">
+          <CodeBlock language="bash" code={`# Sao chép dự án từ kho lưu trữ
+git clone https://github.com/myxxzin/fortis-mail.git
+
+# Di chuyển cấp thư mục
+cd fortis-mail
+
+# Cài đặt nền tảng
+npm install`} />
+        </div>
+
+        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mt-10 mb-4">
+          Biến môi trường (Environment Config)
+        </h3>
+        <p className="text-slate-700 dark:text-slate-300 mb-4">
+          Tạo tệp <code className="bg-slate-100 dark:bg-slate-800 text-sm px-1.5 py-0.5 rounded text-slate-800 dark:text-slate-300">.env</code> tại thư mục gốc của dự án. Lấy tham số truy cập tại màn hình quản trị của Firebase Console.
+        </p>
+        <div className="mb-6 overflow-hidden rounded-xl bg-[#0f172a]">
+          <CodeBlock language="env" code={`VITE_FIREBASE_API_KEY=********
+VITE_FIREBASE_AUTH_DOMAIN=app.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=fortismail-project
+VITE_FIREBASE_STORAGE_BUCKET=fortismail.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=********
+VITE_FIREBASE_APP_ID=********`} />
+        </div>
+
+        <div className="mb-12">
+          <Callout type="warning" title="THẬN TRỌNG: Không Push file .env">
+            Lưu ý tuyệt đối không commit tệp <code>.env</code> lên hệ thống version control. Đối với các lập trình viên mới gia nhập, vui lòng liên hệ Senior Dev / Tech Lead để nhận bộ keys. Việc khai báo lộ API lên Github Public có lợi cho tin tặc khai thác dữ liệu qua Bot Parser.
           </Callout>
         </div>
+
       </div>
     );
   }
 
-  // English Version
+  // EN
   return (
     <div id="getting-started" className="scroll-mt-24">
-      {/* Header Ribbon */}
-      <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-semibold border border-blue-100 dark:border-blue-800">
-        <Rocket className="w-4 h-4" /> V1.0.0 Dev Onboarding
-      </div>
-      
-      <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-500 dark:from-white dark:to-slate-400 mb-6">
-        Project Overview & Setup
-      </h1>
-      
-      <p className="text-xl text-slate-600 dark:text-slate-400 mb-10 leading-relaxed border-l-4 border-slate-300 dark:border-slate-700 pl-4 py-1">
-        FORTISMail is a <strong>Zero-Knowledge, End-to-End Encrypted (E2EE) web mail application</strong>. Unlike conventional systems where servers scan texts, FORTISMail ensures only authorized peers decrypt. Even complete database infiltrations yield absolute garbage noise.
-      </p>
-
-      {/* Bento Grid Features */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-16">
-        {diffsEN.map((d, i) => (
-          <div key={i} className="group p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/20 backdrop-blur-md hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all duration-300 hover:shadow-sm">
-            <div className="flex items-center gap-3 mb-3 text-slate-800 dark:text-slate-200">
-              <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
-                 {d.icon}
-              </div>
-              <h3 className="font-bold text-lg">{d.title}</h3>
-            </div>
-            <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">{d.desc}</p>
-          </div>
-        ))}
-      </div>
-
-      <h2 className="text-2xl font-bold mt-12 mb-8 text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
-        <Terminal className="w-6 h-6 text-slate-400" /> Getting Started
+      <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-12 mb-6">
+        Project Overview
       </h2>
-      
-      {/* Stepper Guide */}
-      <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 dark:before:via-slate-800 before:to-transparent">
-        
-        <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-          <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-slate-50 dark:border-[#09090b] bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 font-bold z-10">1</div>
-          <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white dark:bg-[#111] p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            <h4 className="font-bold text-slate-900 dark:text-white mb-2">Prerequisites</h4>
-            <CodeBlock language="bash" code={`Node.js >= 18\nnpm >= 9\nA Firebase project with Firestore + Storage enabled`} />
-          </div>
-        </div>
 
-        <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-          <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-slate-50 dark:border-[#09090b] bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 font-bold z-10">2</div>
-          <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white dark:bg-[#111] p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            <h4 className="font-bold text-slate-900 dark:text-white mb-2">Install & Run</h4>
-            <CodeBlock language="bash" code={`# Clone core platform\ngit clone https://github.com/myxxzin/fortis-mail.git\n\n# Bring in tools\ncd fortis-mail\nnpm install\n\n# Ignite server\nnpm run dev`} />
-          </div>
-        </div>
-
-        <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-          <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-slate-50 dark:border-[#09090b] bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 font-bold z-10"><Key className="w-4 h-4"/></div>
-          <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white dark:bg-[#111] p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            <h4 className="font-bold text-slate-900 dark:text-white mb-2">Environment Config</h4>
-            <CodeBlock language="env" code={`VITE_FIREBASE_API_KEY=\nVITE_FIREBASE_AUTH_DOMAIN=\nVITE_FIREBASE_PROJECT_ID=\nVITE_FIREBASE_STORAGE_BUCKET=\nVITE_FIREBASE_MESSAGING_SENDER_ID=\nVITE_FIREBASE_APP_ID=`} />
-          </div>
-        </div>
+      <div className="mb-10 text-slate-700 dark:text-slate-300 leading-relaxed text-lg">
+        <p className="mb-4">
+          FORTISMail is an <strong>End-to-End Encrypted (E2EE) webmail protocol</strong> modeled explicitly via 100% Zero-Knowledge foundations. Instead of legacy servers ingesting unencrypted message structures natively, FORTISMail ensures that <strong>only targeted recipients inherently carry mathematical capabilities to resolve textual payload contents</strong> securely.
+        </p>
+        <p>
+          Backend cloud clusters (Firebase) possess only blinded opaque ciphertexts structurally preventing unauthorized exploitation. Consequently, a comprehensive internal database breach physically produces completely unreadable data caches.
+        </p>
       </div>
 
-      <div className="mt-12">
-        <Callout type="warning" title="CRITICAL: Avoid Env Leaks">
-          Never commit your <code>.env</code> file. For fresh developer onboarding processes, request properly configured infrastructure keys directly from the Tech Lead.
+      <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mt-10 mb-4">
+        Key System Differentiators
+      </h3>
+      
+      <div className="grid md:grid-cols-2 gap-4 mb-12">
+         <div className="bg-white dark:bg-[#09090b] border border-slate-200 dark:border-slate-800 p-5 rounded-xl shadow-sm">
+            <h4 className="font-bold text-[#43cc25] mb-2 dark:text-[#43cc25]">Client-Side Exclusivity</h4>
+            <p className="text-slate-600 dark:text-slate-400 text-sm">Target browsers function as isolated localized cryptographic servers handling heavy processing locally thereby prohibiting external routing computational dependencies entirely.</p>
+         </div>
+         <div className="bg-white dark:bg-[#09090b] border border-slate-200 dark:border-slate-800 p-5 rounded-xl shadow-sm">
+            <h4 className="font-bold text-[#43cc25] mb-2 dark:text-[#43cc25]">Native Web Crypto API Integration</h4>
+            <p className="text-slate-600 dark:text-slate-400 text-sm">Abandoning NPM packages mitigating catastrophic Supply Chain vulnerability potentials. Relying consistently upon browser C++ OS-level binary operations (<code>window.crypto.subtle</code>).</p>
+         </div>
+         <div className="bg-white dark:bg-[#09090b] border border-slate-200 dark:border-slate-800 p-5 rounded-xl shadow-sm">
+            <h4 className="font-bold text-[#43cc25] mb-2 dark:text-[#43cc25]">Blind Network Routing</h4>
+            <p className="text-slate-600 dark:text-slate-400 text-sm">Remote Firebase server points exclusively intercept properly scaled ASCII Armored segments solely indexing identifiers delivering encrypted messages passively.</p>
+         </div>
+         <div className="bg-white dark:bg-[#09090b] border border-slate-200 dark:border-slate-800 p-5 rounded-xl shadow-sm">
+            <h4 className="font-bold text-[#43cc25] mb-2 dark:text-[#43cc25]">Personalized Variables & Efficacy</h4>
+            <p className="text-slate-600 dark:text-slate-400 text-sm">Maintains advanced mail attributes (dynamic identifiers, templates) seamlessly matching modern decentralized rendering interface demands.</p>
+         </div>
+      </div>
+
+      <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mt-10 mb-4">
+        Prerequisites
+      </h3>
+      <div className="bg-[#0f172a] p-4 rounded-xl mb-8">
+         <CodeBlock language="typescript" code={`Node.js >= 18
+npm >= 9
+An active configured Firebase application incorporating: 
+  - Firestore NoSQL Database
+  - Active Cloud Storage Instances
+  - Authentication (Authorized domain validation active)`} />
+      </div>
+
+      <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mt-10 mb-4">
+        Platform Installation
+      </h3>
+      <div className="mb-8 overflow-hidden rounded-xl bg-[#0f172a]">
+        <CodeBlock language="bash" code={`# Retrieve primary project repository
+git clone https://github.com/myxxzin/fortis-mail.git
+
+# Enter application directories
+cd fortis-mail
+
+# Mount dependencies
+npm install`} />
+      </div>
+
+      <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mt-10 mb-4">
+        Environmental Setup Parameters
+      </h3>
+      <p className="text-slate-700 dark:text-slate-300 mb-4">
+        Draft a dedicated <code className="bg-slate-100 dark:bg-slate-800 text-sm px-1.5 py-0.5 rounded text-slate-800 dark:text-slate-300">.env</code> root directory configuration file manually mapping authorized project settings natively retrieved from Firebase administration consoles.
+      </p>
+      <div className="mb-6 overflow-hidden rounded-xl bg-[#0f172a]">
+        <CodeBlock language="env" code={`VITE_FIREBASE_API_KEY=********
+VITE_FIREBASE_AUTH_DOMAIN=app.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=fortismail-project
+VITE_FIREBASE_STORAGE_BUCKET=fortismail.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=********
+VITE_FIREBASE_APP_ID=********`} />
+      </div>
+
+      <div className="mb-12">
+        <Callout type="warning" title="CAUTION: Prevent .ENV Leakages">
+          Do not push variable configuration objects into remote GitHub clusters. New onboarded development members must request production-level internal parameters actively via Tech Leads minimizing automated robotic Git parser exposures significantly.
         </Callout>
       </div>
+
     </div>
   );
 }

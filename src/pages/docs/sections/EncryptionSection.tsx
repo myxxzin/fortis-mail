@@ -1,137 +1,178 @@
 import { useLanguage } from '../../../contexts/LanguageContext';
 import FlowDiagram from '../../../components/docs/FlowDiagram';
-import { Database, Laptop, Combine, LockKeyhole, RefreshCwOff, Zap } from 'lucide-react';
+import { Database, Laptop, LockKeyhole, ShieldCheck, Mail } from 'lucide-react';
+import Callout from '../../../components/docs/Callout';
+import CodeBlock from '../../../components/docs/CodeBlock';
 
 export default function EncryptionSection() {
   const { language } = useLanguage();
 
-  const flowNodesVI = [
-    { id: '1', title: 'React UI & Máy Mã Hóa', description: 'Giao diện bắt dữ liệu & Web Crypto API đảm nhiệm hàm toán học nặng tại RAM nội bộ Browser.', icon: <Laptop /> },
-    { id: '2', title: 'FortisMail Engine', description: 'Hàm lấy khóa ảo (deriveAESKey), xác thực ký số (verifySignature), ráp Payload JSON.', icon: <Zap /> },
-    { id: '3', title: 'Firestore / Mails DB', description: 'Trạm trung chuyển mờ đục. Tiếp nhận duy nhất ASCII Armored Ciphertext định tuyến người dùng UID.', icon: <Database />, isSecondary: true },
-  ];
-  
-  const flowNodesEN = [
-    { id: '1', title: 'React UI & Crypto Context', description: 'Intercepts interactions allocating math intensive Web Crypto API jobs securely resolving inside local RAM.', icon: <Laptop /> },
-    { id: '2', title: 'Encryption Core Engine', description: 'Orchestrating ephemeral derivation (deriveAESKey), signature matching (verifySignature) & JSON wrappers.', icon: <Zap /> },
-    { id: '3', title: 'Firestore Routing Blind', description: 'Database cluster completely oblivious storing exclusively ASCII Armored Ciphertext strings attached to UIDs.', icon: <Database />, isSecondary: true },
+  const flowArchitectureNodes = [
+    { id: '1', title: 'Browser', description: 'React + Context', icon: <Laptop className="w-5 h-5" /> },
+    { id: '2', title: 'Crypto Engine', description: 'AES-256 + ECDH', icon: <LockKeyhole className="w-5 h-5" /> },
+    { id: '3', title: 'Signature', description: 'ECDSA Timestamp', icon: <ShieldCheck className="w-5 h-5" /> },
+    { id: '4', title: 'Firebase', description: 'Payload Routers', icon: <Database className="w-5 h-5" />, isSecondary: true },
+    { id: '5', title: 'Recipient', description: 'Memory Decryption', icon: <Mail className="w-5 h-5" /> }
   ];
 
   if (language === 'vi') {
     return (
       <div id="encryption" className="scroll-mt-24">
-        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#226214] to-[#43cc25] dark:from-[#43cc25] dark:to-[#8ff277] mb-6">
-          Kiến Trúc Mật Mã Học
-        </h1>
-        
-        <h2 className="text-2xl font-bold mt-12 mb-8 text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
-          1. Luồng Hệ Thống (System Architecture)
+        <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-12 mb-6 border-t border-slate-200 dark:border-slate-800 pt-10">
+          Kiến Trúc Mật Mã (Cryptography Core)
         </h2>
         
-        <p className="text-lg text-slate-700 dark:text-slate-300 mb-8 border-l-4 border-[#43cc25] pl-4 py-1 bg-[#43cc25]/10 dark:bg-[#43cc25]/20 rounded-r-lg">
-          <strong>Mô hình hai lớp độc lập:</strong><br/>
-          <strong>Tiền phương (Frontend):</strong> Đóng vai trò máy trạm Mã hóa (Web Crypto C++ Core).<br />
-          <strong>Hậu phương (Backend):</strong> Máy chủ câm chuyển phát ngốc nghếch (Firebase routing).
+        <p className="text-slate-700 dark:text-slate-300 mb-8 leading-relaxed text-lg">
+          Mô hình phân tầng hai lớp (Two-layer model): <strong>Frontend</strong> hoạt động như cỗ máy mã hóa độc lập (Encryption Engine) và <strong>Backend</strong> là tuyến chuyển phát hoàn toàn bị vô hiệu hóa nhận diện nội dung (Blind Courier).
         </p>
 
-        <div className="p-6 bg-white dark:bg-[#0b1120] border border-slate-200 dark:border-slate-800 rounded-3xl mb-12 shadow-sm">
-          <FlowDiagram nodes={flowNodesVI} direction="horizontal" />
+        <div className="mb-12">
+          <FlowDiagram nodes={flowArchitectureNodes} direction="horizontal" />
         </div>
 
-        <h2 className="text-2xl font-bold mt-16 mb-8 text-slate-900 dark:text-slate-100 tracking-tight">2. Lõi Thiết Kế Mật Mã (Crypto Core)</h2>
+        <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-12 mb-4">
+          1. Mô Hình Mật Mã Lai (Hybrid Cryptography)
+        </h3>
+        
+        <p className="text-slate-700 dark:text-slate-300 mb-6">
+          FORTISMail áp dụng phương pháp <strong>Mật mã lai</strong>, kết hợp thế mạnh về tốc độ khi xử lý khối dữ liệu lớn của mã hóa đối xứng (AES-256-GCM) và tính năng giao tiếp khóa diện rộng an toàn tuyệt đối của mã hóa bất đối xứng (ECDH).
+        </p>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 hover:border-cyan-300 dark:hover:border-cyan-800/50 transition-colors">
-            <Combine className="w-8 h-8 text-cyan-600 dark:text-cyan-400 mb-4" />
-            <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-slate-100">Hybrid Cryptography (Lai)</h3>
-            <p className="text-slate-700 dark:text-slate-300 text-md leading-relaxed">
-              Giải quyết bài toán tốc độ. FORTISMail kết hợp <strong>Mã hóa đối xứng (AES-256-GCM)</strong> cho dữ liệu khổng lồ, sau đó bọc chìa khoá AES nội bộ vô lớp vỏ phong bì siêu vững của <strong>Mã hóa bất đối xứng (ECDH)</strong>.
-            </p>
+        <div className="mb-10 overflow-hidden rounded-xl bg-[#0f172a]">
+          <CodeBlock language="typescript" code={`ENCRYPT FLOW:
+──────────────────────────────────────────────────────
+Message Content (large)
+        │
+        ▼
+  AES-256-GCM  ──── generates ────▶  [AES File Key]
+  (fast, bulk)                              │
+        │                                   ▼
+  [Ciphertext]                    ECDH (DH Ephemeral)
+                                  wraps [AES File Key]
+                                          │
+                                          ▼
+                                  [Encrypted Key Blob]
+                                  (safe to transmit)
+──────────────────────────────────────────────────────
+Final payload = Ciphertext + Encrypted Key Blob`} />
+        </div>
+
+        <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-12 mb-4">
+          2. deriveAESKey() — Cơ Chế PBKDF2
+        </h3>
+        <p className="text-slate-700 dark:text-slate-300 mb-4">Tính năng nhận diện tham số chuỗi Mật khẩu của người dùng, liên kết trực tiếp với mã định danh (Salt) để xuất ra chuỗi <strong>Master Key 256-bit</strong>.</p>
+        <ul className="list-inside list-disc space-y-2 text-slate-700 dark:text-slate-300 ml-2 mb-8">
+          <li><strong>Tại sao lại là PBKDF2 (100,000 vòng lặp):</strong> Hệ thống SHA-256 mặc định xử lý quá nhanh, giúp máy trạm đào hash giải toán tỷ lần/giây để Brute-Force tài khoản.</li>
+          <li>Việc thực thi vòng khóa 100,000 lần khiến mọi nỗ lực Brute-Force qua từ điển bị tổn thất sức mạnh tính toán kinh tế hoàn toàn. Mục đích chính của <strong>Master Key</strong> này dùng để bọc lớp an toàn cho khóa Private Key trước khi gán lên máy chủ Firestore.</li>
+        </ul>
+
+        <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-12 mb-4">
+          3. encryptMessageHybrid() — Forward Secrecy
+        </h3>
+        <p className="text-slate-700 dark:text-slate-300 mb-4">Thay vì dùng toàn bộ khoá lâu dài, hàm này khởi tạo cặp khóa tạm thời (ephemeral) dùng một lần duy nhất cho mỗi luồng thư gửi đi.</p>
+        
+        <div className="bg-white dark:bg-[#09090b] border border-slate-200 dark:border-slate-800 p-5 rounded-xl shadow-sm mb-8 space-y-4 text-slate-700 dark:text-slate-300">
+          <div className="border-l-4 border-rose-500 pl-4 py-1">
+             <strong className="text-rose-600 dark:text-rose-400 block mb-1">Thiếu bảo vệ Ephemeral Keys:</strong>
+             Nếu chỉ mã hoá thẳng bằng Private Key cá nhân và Public Key đối tác, khi 10 năm sau tin tặc trộm được Private Key, TOÀN BỘ luồng e-mail cũ bị rò rỉ đồng loạt.
           </div>
-
-          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 hover:border-purple-300 dark:hover:border-purple-800/50 transition-colors">
-            <LockKeyhole className="w-8 h-8 text-purple-600 dark:text-purple-400 mb-4" />
-            <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-slate-100">PBKDF2 Password Hardening</h3>
-            <p className="text-slate-700 dark:text-slate-300 text-md leading-relaxed">
-              Tạo ra Master Key 256-bit từ mật khẩu thô ráp. Việc ép vòng lặp băm tự thân <strong>100,000 rounds</strong> biến việc hack brute-force bằng dàn máy cày ASIC thành một trò đùa phá sản về tài chính đối với tội phạm mạng.
-            </p>
-          </div>
-
-          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 hover:border-green-300 dark:hover:border-green-800/50 transition-colors">
-            <Zap className="w-8 h-8 text-green-600 dark:text-green-400 mb-4" />
-            <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-slate-100">Cơ Chế Forward Secrecy</h3>
-            <p className="text-slate-700 dark:text-slate-300 text-md leading-relaxed">
-              Dùng một lần vứt. Khóa mã hóa session <strong>(Ephemeral ECDH)</strong> sinh ra tạm thời và bị ném vào quên lãng. Tránh rủi ro giải mã hàng loạt nếu Private Key gốc bị lộ sau 10 năm nữa.
-            </p>
-          </div>
-
-          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 hover:border-red-300 dark:hover:border-red-800/50 transition-colors">
-            <RefreshCwOff className="w-8 h-8 text-red-600 dark:text-red-400 mb-4" />
-            <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-slate-100">Chặn Đứng Replay Attack</h3>
-            <p className="text-slate-700 dark:text-slate-300 text-md leading-relaxed">
-              Chữ ký ECDSA kỹ thuật số không chỉ đóng gói nội dung thư mà buộc chết chùm giá trị <strong>Timestamp (Thời gian) vòng RecipientID</strong>. Bất cứ hành động xào trộn tái kích hoạt gửi lậu luồng packet cũ đều lập tức invalid.
-            </p>
+          <div className="border-l-4 border-[#43cc25] pl-4 py-1">
+             <strong className="text-[#43cc25] block mb-1">FORTISMail (Sử dụng Ephemeral Keys):</strong>
+             Khóa thiết lập phiên chỉ dùng đúng 1 lần, sau khi mã hoá xong lập tức tiêu hủy không thể cứu giãn. Do vậy dù Private Key của nạn nhân có bị lộ trong tương lai thì các thư quá khứ vẫn **hoàn toàn vô hình**. Tính năng này được gọi là thiết lập <strong>Forward Secrecy</strong>.
           </div>
         </div>
+
+        <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-12 mb-4">
+          4. verifySignature() — ECDSA Anti-Replay Attack 
+        </h3>
+        <p className="text-slate-700 dark:text-slate-300 mb-6">Mỗi tin nhắn điều hướng ra ngoài phải đính thông số Timestamp. Việc ký chữ ký số <strong>ECDSA</strong> chỉ với nội dung văn bản là không đủ.</p>
+        <div className="mb-12">
+          <Callout type="info" title="Lý luận Phòng vệ (Defense Logic)">
+            Việc gói gọn tham số <code className="bg-white dark:bg-slate-800 px-1 py-0.5 rounded text-sm">timestamp</code> và <code className="bg-white dark:bg-slate-800 px-1 py-0.5 rounded text-sm">recipientUID</code> trực tiếp vào Payload đảm bảo kẻ gian không thể bắt gói tin cũ để gán và chỉnh sửa thời gian nhằm gây nhầm lẫn hệ thống. Nếu một bit bị xoắn sai hoặc lệch thời gian ký quỹ, chốt <code>verification</code> sẽ rớt lập tức.
+          </Callout>
+        </div>
+
       </div>
     );
   }
 
+  // English Version
   return (
     <div id="encryption" className="scroll-mt-24">
-      <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#226214] to-[#43cc25] dark:from-[#43cc25] dark:to-[#8ff277] mb-6">
+      <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-12 mb-6 border-t border-slate-200 dark:border-slate-800 pt-10">
         Cryptography Core
-      </h1>
-      
-      <h2 className="text-2xl font-bold mt-12 mb-8 text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
-        1. Two-Layer Architecture
       </h2>
-
-      <p className="text-lg text-slate-700 dark:text-slate-300 mb-8 border-l-4 border-[#43cc25] pl-4 py-1 bg-[#43cc25]/10 dark:bg-[#43cc25]/20 rounded-r-lg">
-        <strong>Dual Separation Model:</strong><br/>
-        <strong>Frontend:</strong> C++ Web Crypto execution block carrying 100% of the hashing architecture.<br />
-        <strong>Backend:</strong> Dumb Courier. Firebase blindly receiving opaque blobs sorting via UIDs.
+      
+      <p className="text-slate-700 dark:text-slate-300 mb-8 leading-relaxed text-lg">
+        Structural Two-Layer definition logic: The <strong>Frontend React</strong> ecosystem acts natively as a dedicated hardware Encryption Engine whilst the <strong>Firebase Backend</strong> strictly plays the role of a Blind Courier.
       </p>
 
-      <div className="p-6 bg-white dark:bg-[#0b1120] border border-slate-200 dark:border-slate-800 rounded-3xl mb-12 shadow-sm">
-        <FlowDiagram nodes={flowNodesEN} direction="horizontal" />
+      <div className="mb-12">
+        <FlowDiagram nodes={flowArchitectureNodes} direction="horizontal" />
       </div>
 
-      <h2 className="text-2xl font-bold mt-16 mb-8 text-slate-900 dark:text-slate-100 tracking-tight">2. Core Technical Designs</h2>
+      <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-12 mb-4">
+        1. Hybrid Cryptography Matrix
+      </h3>
+      
+      <p className="text-slate-700 dark:text-slate-300 mb-6">
+        FORTISMail combines immense file capacity processing capabilities inherently found within symmetric environments (AES-256-GCM) dynamically merged directly alongside the secure transport validation sequences native to asymmetric exchanges (ECDH paradigms).
+      </p>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 hover:border-cyan-300 dark:hover:border-cyan-800/50 transition-colors">
-          <Combine className="w-8 h-8 text-cyan-600 dark:text-cyan-400 mb-4" />
-          <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-slate-100">Hybrid Cryptography</h3>
-          <p className="text-slate-700 dark:text-slate-300 text-md leading-relaxed">
-            The best of both worlds. <strong>AES-256-GCM symmetric block mapping</strong> shreds mass data at hyper velocity natively before nesting its tiny key internally an uncrackable <strong>ECDH asymmetric</strong> vault box.
-          </p>
+      <div className="mb-10 overflow-hidden rounded-xl bg-[#0f172a]">
+        <CodeBlock language="typescript" code={`ENCRYPT FLOW:
+──────────────────────────────────────────────────────
+Message Content (large)
+        │
+        ▼
+  AES-256-GCM  ──── generates ────▶  [AES File Key]
+  (fast, bulk)                              │
+        │                                   ▼
+  [Ciphertext]                    ECDH (DH Ephemeral)
+                                  wraps [AES File Key]
+                                          │
+                                          ▼
+                                  [Encrypted Key Blob]
+                                  (safe to transmit)
+──────────────────────────────────────────────────────
+Final payload = Ciphertext + Encrypted Key Blob`} />
+      </div>
+
+      <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-12 mb-4">
+        2. deriveAESKey() — PBKDF2 Enforcement
+      </h3>
+      <p className="text-slate-700 dark:text-slate-300 mb-4">Responsible for ingesting human-readable configurations incorporating distinct user identification parameters (salts) driving secure cryptographic <strong>256-bit Master Keys</strong>.</p>
+      <ul className="list-inside list-disc space-y-2 text-slate-700 dark:text-slate-300 ml-2 mb-8">
+        <li><strong>Why implement 100,000 iterations:</strong> Primitive SHA-256 frameworks resolve virtually instantly authorizing ASIC data clusters billions of password validations every passing second.</li>
+        <li>Isolating computations by artificially escalating iteration requirements deliberately guarantees standard authentication processing takes ~0.2s — rendering large-scale brute-force infiltration attempts completely bankrupt logistically. The extracted <strong>Master Key</strong> wraps the primary Private variable shielding Firebase allocations.</li>
+      </ul>
+
+      <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-12 mb-4">
+        3. encryptMessageHybrid() — Forward Secrecy Defense
+      </h3>
+      <p className="text-slate-700 dark:text-slate-300 mb-4">Rather than reusing persistent permanent root keys continually, algorithms generate singular disposable variant key pairings specifically engineered per dispatched element individually.</p>
+      
+      <div className="bg-white dark:bg-[#09090b] border border-slate-200 dark:border-slate-800 p-5 rounded-xl shadow-sm mb-8 space-y-4 text-slate-700 dark:text-slate-300">
+        <div className="border-l-4 border-rose-500 pl-4 py-1">
+           <strong className="text-rose-600 dark:text-rose-400 block mb-1">Exposed Legacy Implementations:</strong>
+           Merging Alice's explicit long-term core properties identically creates exploitable sequences globally. Should a hardware breach compromise Alice years later, ALL historic interactions become readable retroactively enabling destructive exposures.
         </div>
-
-        <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 hover:border-purple-300 dark:hover:border-purple-800/50 transition-colors">
-          <LockKeyhole className="w-8 h-8 text-purple-600 dark:text-purple-400 mb-4" />
-          <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-slate-100">PBKDF2 Bruteforce Block</h3>
-          <p className="text-slate-700 dark:text-slate-300 text-md leading-relaxed">
-            Converting fragile human pins securely into 256-bit Masters. Punishing password entries executing vicious <strong>100,000 salt rounds</strong> making ASIC dictionary attacks financially destructive to intercepting operations.
-          </p>
-        </div>
-
-        <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 hover:border-green-300 dark:hover:border-green-800/50 transition-colors">
-          <Zap className="w-8 h-8 text-green-600 dark:text-green-400 mb-4" />
-          <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-slate-100">Forward Secrecy Ephemerals</h3>
-          <p className="text-slate-700 dark:text-slate-300 text-md leading-relaxed">
-            Generate and Terminate. Ephemeral session keys destruct automatically ensuring that if 10 years later your Core Root Key falls, historical mail iterations forever stay mathematically impossible to back-trace.
-          </p>
-        </div>
-
-        <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 hover:border-red-300 dark:hover:border-red-800/50 transition-colors">
-          <RefreshCwOff className="w-8 h-8 text-red-600 dark:text-red-400 mb-4" />
-          <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-slate-100">Anti-Replay Attack Armor</h3>
-          <p className="text-slate-700 dark:text-slate-300 text-md leading-relaxed">
-            ECDSA Digital Signatures blanket not merely content boundaries. Forging intercept blocks enclosing <strong>Timestamp Arrays + Recipient UID logic</strong> immediately invalidates illegally tampered network relays.
-          </p>
+        <div className="border-l-4 border-[#43cc25] pl-4 py-1">
+           <strong className="text-[#43cc25] block mb-1">FORTISMail's Ephemeral Solutions:</strong>
+           Session authorizations strictly vaporize completely shortly following encryption termination phases permanently. This absolute defense infrastructure explicitly designates <strong>Forward Secrecy</strong> — confirming that past intercepted interactions perpetually retain uncrackable attributes universally regardless of future breaches.
         </div>
       </div>
+
+      <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-12 mb-4">
+        4. verifySignature() — Nullifying Replay Arrays
+      </h3>
+      <p className="text-slate-700 dark:text-slate-300 mb-6">Every independent transmission embeds rigorous temporal variables manually. Securing solely standard readable block text provides hostile interceptors dangerous reconfiguration possibilities.</p>
+      <div className="mb-12">
+        <Callout type="info" title="Defense Logic Explanation">
+          By injecting exact <code className="bg-white dark:bg-slate-800 px-1 py-0.5 rounded text-sm">timestamp</code> nodes dynamically inside signed payloads, any interception manipulation attempt attempting delivery resends triggers profound mathematical contradictions instantly. ECDSA layers structurally disconnect failed packages successfully blocking Replay Attack potentials immediately.
+        </Callout>
+      </div>
+
     </div>
   );
 }

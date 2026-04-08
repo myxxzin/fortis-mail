@@ -6,7 +6,7 @@ export const en = {
   'common.usernamePlaceholder': 'Username',
   'common.passwordPlaceholder': 'Master Password',
   'common.continue': 'Continue',
-  
+
   // Validation
   'validation.fourChars': '4+ chars',
   'validation.eightChars': '8+ chars',
@@ -29,7 +29,7 @@ export const en = {
   'register.identitySecured': 'Identity Secured',
   'register.redirecting': 'Your cryptographic keys are safely derived. Redirecting to Login...',
   'register.errorExists': 'Identity already exists. Choose a different alias.',
-  
+
   // Sidebar
   'sidebar.compose': 'Compose',
   'sidebar.folders': 'Folders',
@@ -210,7 +210,7 @@ export const en = {
   'settings.newPin': 'New PIN (6 digits)',
   'settings.confirmPin': 'Confirm PIN',
   'settings.pinNotMatch': 'PIN does not match',
-  
+
   'settings.replayTourTitle': 'Product Tour',
   'settings.replayTour': 'Replay Tour',
   'settings.replayTourDesc': 'Relaunch the Product Tour to quickly review the core features of the system.',
@@ -254,62 +254,99 @@ export const en = {
   // Landing Page Redesign
   'landing.nav.login': 'Login',
   'landing.nav.register': 'Get Started',
-  
+  'landing.nav.demo': 'Demo',
+  'landing.nav.features': 'Features',
+  'landing.nav.how': 'How it works',
+  'landing.nav.limitations': 'Limitations',
+  'landing.nav.workflow': 'Workflow',
+  'landing.nav.team': 'Team',
+  'landing.nav.docs': 'Docs',
+
   'landing.hero.badge': 'Ultimate Security Solution',
-  'landing.hero.title': 'Absolute\nEmail Security.',
+  'landing.hero.title': 'FORTISMail:\nUncompromised Privacy',
   'landing.hero.subtitle': 'FORTISMail is designed with a "Zero-Knowledge" philosophy. A communication platform that collects no data, automatically applying End-to-End Encryption right on your device.',
   'landing.hero.cta': 'Access Mailbox',
   'landing.hero.explore': 'Learn More',
-  
-  'landing.what.title': 'What is FORTISMail?',
-  'landing.what.desc': "Traditional email services maintain deep access to your inbox, routinely scanning contents for advertising or data mining. FORTISMail completely eliminates this vulnerability through client-side encryption. We don't just secure your data in transit; we mathematically guarantee that you and your recipient hold the exclusive keys to your communication. By the time your message leaves your browser, it is entirely indecipherable ciphertext. We couldn't read your emails even if we tried.",
-  
-  'landing.tech.title': "Inside FORTISMail Core",
-  'landing.tech.desc': "A transparent look at the cryptographic architecture and privacy protocols that power our Zero-Knowledge ecosystem.",
-  
-  'landing.tech.e2e.title': "True End-to-End Encryption",
-  'landing.tech.e2e.desc': "Messages are encrypted locally on your device before transmission. The server never sees your plaintext content—only scrambled data that requires the recipient's exact private key to unlock.",
-  
-  'landing.tech.zeroKnowledge.title': "Zero-Knowledge Server",
-  'landing.tech.zeroKnowledge.desc': "Our database stores zero plaintext metadata about your password or private key. We cannot access, recover, or reset your cryptographic identity. You are in absolute control.",
-  
-  'landing.tech.eccAes.title': "ECC & AES-GCM Protocol",
-  'landing.tech.eccAes.desc': "FORTISMail utilizes an ultra-fast AES-GCM symmetric key to encrypt payloads, then secures the communication channel using Ephemeral Elliptic-Curve Diffie-Hellman (ECDH P-256) and authenticates with ECDSA signatures.",
-  
-  'landing.tech.pbkdf2.title': "PBKDF2 Key Derivation",
-  'landing.tech.pbkdf2.desc': "Your Master Password is mathematically stretched using PBKDF2 with thousands of iterations. This exhaustive process effectively fortifies your local keys against brute-force infiltration.",
-  
-  'landing.tech.architecture.title': "Client-Side Processing",
-  'landing.tech.architecture.desc': "Unlike traditional webmail, most of our application's critical processing—from hashing to key generation and decryption—happens entirely within your browser environment.",
-  
-  'landing.tech.pin.title': "Local PIN Protection",
-  'landing.tech.pin.desc': "Your private key is locally encrypted within your browser session using a fast, 6-digit PIN. This grants you rapid, secure access to your inbox without re-typing complex passwords.",
-  
-  'landing.guide.title': 'Ridiculously Simple',
-  'landing.guide.step1Title': '1. Anonymous Identity',
-  'landing.guide.step1Desc': 'No phone number or personal email needed. Provide a Username and Master Password. The system automatically derives ECC cryptographic key pairs for you.',
-  'landing.guide.step2Title': '2. Key Exchange',
-  'landing.guide.step2Desc': 'Request your friend\'s "Public Key" and add it to your Address Book. This gives you the ephemeral ECDH components to secure your envelopes.',
-  'landing.guide.step3Title': '3. Top Secret Messaging',
-  'landing.guide.step3Desc': 'Upon hitting Send, your letter is immediately scrambled locally. Even hackers or FORTISMail engineers are completely powerless to decipher it.',
 
-  'landing.team.title': 'Our Development Team',
-  'landing.team.desc': 'Researched and built by a group of Data Science engineers with a burning desire to safeguard absolute data privacy for internet users.',
-  'landing.team.member1': 'Võ Thành Đạt',
-  'landing.team.role1': 'Manager & Data Scientist',
-  'landing.team.member2': 'Đặng Quốc Huy',
-  'landing.team.role2': 'Cryptography Engineer',
-  'landing.team.member3': 'Phạm Xuân Minh Quân',
-  'landing.team.role3': 'Frontend & AI Integrations',
-  'landing.team.member4': 'Huỳnh Phú Quý',
-  'landing.team.role4': 'Backend & Architect',
+  'landing.features.title': 'Why is FORTISMail so secure?',
+  'landing.features.f1.title': 'Only you and the recipient can read',
+  'landing.features.f1.desc': 'Your email is locked tight directly on your computer before being sent across the Internet.',
+  'landing.features.f2.title': 'Invulnerable design',
+  'landing.features.f2.desc': 'Even we – the people who built this software – cannot read your mailbox even if we wanted to.',
+  'landing.features.f3.title': 'No ads, no tracking',
+  'landing.features.f3.desc': 'We do not know who you are or who you talk to. Therefore, your emails will never be scanned by AI for advertising.',
+
+  'landing.how.title': 'Send secret emails in 3 ridiculously simple steps',
+  'landing.how.s1.title': '1. Create an account',
+  'landing.how.s1.desc': 'Just type a Name and Password. Your computer will automatically forge a unique set of cryptographic "Locks" and "Keys".',
+  'landing.how.s2.title': '2. Add friends',
+  'landing.how.s2.desc': 'Share your "Lock" with friends (or get theirs) and save it in the Address Book.',
+  'landing.how.s3.title': '3. Message securely',
+  'landing.how.s3.desc': 'Write your letter and hit Send. The system will use the other person\'s Lock to seal the letter. Only the person holding the Key can open it.',
+
+  'landing.limitations.subheader': 'TRANSPARENCY',
+  'landing.limitations.title': 'Known Limitations',
+  'landing.limitations.desc': 'No system is absolutely secure. Here is what FORTISMail cannot protect against.',
+  'landing.limitations.l1.title': 'XSS attacks can access localStorage',
+  'landing.limitations.l1.desc': 'Because encryption keys are stored in the browser, XSS attacks could steal them. Mitigation: Strict Content Security Policy headers.',
+  'landing.limitations.l2.title': 'Cannot prevent replay attacks',
+  'landing.limitations.l2.desc': 'Intercepted encrypted emails can be resent. The recipient cannot detect duplicates without timestamp/nonce verification.',
+  'landing.limitations.l3.title': 'Physical access = compromised keys',
+  'landing.limitations.l3.desc': 'Anyone with direct access to the user\'s browser can extract keys from localStorage. Multi-layer protection is required.',
+  'landing.limitations.l4.title': 'No digital signatures (sender verification)',
+  'landing.limitations.l4.desc': 'FORTISMail does not verify who sent the email. A third party with the recipient\'s public info could spoof encrypted messages.',
+  'landing.limitations.l5.title': 'Dependent on Gmail over carrier',
+  'landing.limitations.l5.desc': 'Gmail can delete emails or deny access. FORTISMail encrypts content but does not guarantee delivery or permanent storage.',
+  'landing.limitations.l6.title': 'Frontend-only architecture',
+  'landing.limitations.l6.desc': 'No backend means no server-side key escrow, no brute-force rate limiting, and no centralized audit logging.',
+  'landing.limitations.botdesc': 'These limitations are inherent to client-side encryption architectures. Production systems will add backends for key escrow, CSP headers, digital signatures, and replay protection.',
+
+  'landing.workflow.subheader': 'INSIDE THE SYSTEM',
+  'landing.workflow.title': 'Encryption Architecture',
+  'landing.workflow.desc': 'How FORTISMail protects your messages at every step.',
+  'landing.workflow.flowtitle': 'Encryption Process',
+  'landing.workflow.step1': 'Password',
+  'landing.workflow.step2': 'PBKDF2 (100K)',
+  'landing.workflow.step3': 'Derived Key',
+  'landing.workflow.step4': 'AES-KW Wrap',
+  'landing.workflow.step5': 'AES-256-GCM',
+  'landing.workflow.step6': 'Ciphertext',
+  'landing.workflow.tech': 'BUILT WITH',
+
+  'landing.docs.title': 'For those who want to inspect every line of code',
+  'landing.docs.desc': 'Are you a tech-savvy individual, a cybersecurity expert, or simply curious about algorithms (like AES-GCM, ECC, PBKDF2)? Click the button below to read the project\'s highly in-depth Architecture Whitepaper.',
+  'landing.docs.btn': 'Read Technical Whitepaper',
+
+  'landing.team.subheader': 'OUR TEAM',
+  'landing.team.title': 'FORTISMail',
+  'landing.team.dept': 'Department of Data Science — Ho Chi Minh City University of Banking',
+  'landing.team.instructor_label': 'INSTRUCTOR',
+  'landing.team.instructor_name': 'Nguyễn Hoài Đức',
+  'landing.team.instructor_desc': 'Ho Chi Minh City University of Banking',
+
+  'landing.team.member1': 'Nguyễn Thị Mỹ Viên',
+  'landing.team.role1': 'Project Manager & System Architect',
+  'landing.team.member2': 'Lê Thị Bích Trà',
+  'landing.team.role2': 'Security & Cryptography Engineer',
+  'landing.team.member3': 'Văn Thị Tuyết Nga',
+  'landing.team.role3': 'Backend & Database Engineer',
+  'landing.team.member4': 'Nguyễn Thị Diễm Quỳnh',
+  'landing.team.role4': 'UI/UX Engineer',
+  'landing.team.member5': 'Võ Hiếu Nghĩa',
+  'landing.team.role5': 'Core Frontend Developer',
+  'landing.team.member6': 'Võ Quang Huy',
+  'landing.team.role6': 'QA Engineer & Technical Writer',
+
+  'landing.cta.title': 'Ready to send secure emails?',
+  'landing.cta.desc': 'No installation required. Create your secure account in seconds.',
+  'landing.cta.btn': 'Launch FORTISMail',
 
   // Footer Link Headers
   'landing.footer.about': 'About FORTISMail',
   'landing.footer.features': 'Core Features',
   'landing.footer.privacy': 'Privacy & Support',
   'landing.footer.contact': 'Contact Us',
-  
+
   // Footer Links
   'landing.footer.intro': 'Introduction',
   'landing.footer.team': 'Our Development Team',

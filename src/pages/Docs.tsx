@@ -17,22 +17,21 @@ const NAVIGATION_GROUPS = {
     {
       title: 'TỔNG QUAN',
       items: [
-        { id: 'getting-started', label: 'Bắt đầu nhanh' },
+        { id: 'getting-started', label: 'Tổng Quan Dự Án' },
       ]
     },
     {
       title: 'CỐT LÕI',
       items: [
-        { id: 'encryption', label: 'Mã hóa (Encryption)' },
-        { id: 'authentication', label: 'Xác thực (Auth)' },
+        { id: 'encryption', label: 'Kiến Trúc Mật Mã' },
+        { id: 'authentication', label: 'Thiết Kế Cơ Sở Lưu Trữ' },
       ]
     },
-
     {
       title: 'HỆ THỐNG',
       items: [
-        { id: 'security', label: 'Bảo mật (Security)' },
-        { id: 'reference', label: 'Tham khảo API' },
+        { id: 'security', label: 'Chính Sách Bảo Mật' },
+        { id: 'reference', label: 'Cấu Trúc & Phân Bổ' },
       ]
     }
   ],
@@ -40,22 +39,21 @@ const NAVIGATION_GROUPS = {
     {
       title: 'OVERVIEW',
       items: [
-        { id: 'getting-started', label: 'Getting Started' },
+        { id: 'getting-started', label: 'Project Overview' },
       ]
     },
     {
       title: 'CORE PLATFORM',
       items: [
-        { id: 'encryption', label: 'Encryption' },
-        { id: 'authentication', label: 'Authentication' },
+        { id: 'encryption', label: 'Cryptography Core' },
+        { id: 'authentication', label: 'Data Storage Design' },
       ]
     },
-
     {
       title: 'SYSTEM',
       items: [
-        { id: 'security', label: 'Security' },
-        { id: 'reference', label: 'Reference' },
+        { id: 'security', label: 'Security Operations' },
+        { id: 'reference', label: 'Reference Schematics' },
       ]
     }
   ]
@@ -68,6 +66,11 @@ export default function Docs() {
   const { theme } = useTheme();
 
   const groups = NAVIGATION_GROUPS[language];
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Flatten items for scroll spy
   const navItems = groups.flatMap(g => g.items);
@@ -97,7 +100,7 @@ export default function Docs() {
     const element = document.getElementById(id);
     if (element) {
       window.scrollTo({
-        top: element.offsetTop - 80, 
+        top: element.offsetTop - 80,
         behavior: 'smooth'
       });
     }
@@ -109,11 +112,10 @@ export default function Docs() {
     return (
       <button
         onClick={() => scrollToSection(id)}
-        className={`w-full text-left px-4 py-2 flex items-center rounded-xl text-sm font-bold transition-all duration-200 ${
-          isActive 
-            ? 'bg-white dark:bg-white/10 text-[#43cc25] dark:text-[#43cc25] shadow-sm border border-black/5 dark:border-white/10'  
+        className={`w-full text-left px-4 py-2 flex items-center rounded-xl text-sm font-bold transition-all duration-200 ${isActive
+            ? 'bg-white dark:bg-white/10 text-[#43cc25] dark:text-[#43cc25] shadow-sm border border-black/5 dark:border-white/10'
             : 'text-corporate-600 dark:text-corporate-400 hover:bg-white/50 dark:hover:bg-white/5 hover:text-corporate-900 dark:hover:text-white border border-transparent'
-        }`}
+          }`}
       >
         {isActive && <div className="w-1.5 h-1.5 rounded-full bg-[#43cc25] mr-2"></div>}
         {label}
@@ -131,12 +133,12 @@ export default function Docs() {
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
             <Link to="/" className="flex items-center space-x-3">
-               <img src={theme === 'dark' ? "/ten.light.png" : "/ten.lightmode.png"} alt="FORTISMail" className="h-[22px] object-contain" />
+              <img src={theme === 'dark' ? "/ten.light.png" : "/ten.lightmode.png"} alt="FORTISMail" className="h-[22px] object-contain" />
             </Link>
             <span className="hidden lg:flex items-center ml-6 bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 text-corporate-600 dark:text-corporate-300 text-xs px-2.5 py-1 rounded-md font-bold tracking-wide">
               DOCS
             </span>
-            
+
             {/* Quick Search Mockup */}
             <div className="hidden md:flex ml-8 items-center bg-white/60 dark:bg-white/5 border border-black/5 dark:border-white/10 text-corporate-500 dark:text-corporate-400 px-3 py-1.5 rounded-lg text-sm w-64 cursor-text">
               <Search className="w-4 h-4 mr-2 opacity-70" />
@@ -147,26 +149,26 @@ export default function Docs() {
               </span>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-6">
-            <button 
+            <button
               onClick={() => setLanguage(language === 'en' ? 'vi' : 'en')}
               className="flex items-center space-x-1.5 text-xs font-bold tracking-wider text-corporate-600 dark:text-corporate-400 hover:text-[#43cc25] dark:hover:text-[#43cc25] transition-colors"
             >
               <Globe className="w-4 h-4" />
               <span className="hidden sm:inline block uppercase">{language}</span>
             </button>
-            
+
             <Link to="/" className="text-sm font-bold text-corporate-600 dark:text-corporate-400 flex items-center hover:text-[#43cc25] dark:hover:text-[#43cc25] transition-colors">
-               <ArrowLeft className="w-4 h-4 mr-1.5" /> <span className="hidden sm:inline">{language === 'vi' ? 'Trang chủ' : 'Frontpage'}</span>
+              <ArrowLeft className="w-4 h-4 mr-1.5" /> <span className="hidden sm:inline">{language === 'vi' ? 'Trang trước' : 'Previous Page'}</span>
             </Link>
-            
+
             <div className="w-px h-5 bg-black/10 dark:bg-white/10 hidden sm:block"></div>
-            
-            <a href="https://github.com/myxxzin/secure-webmail" target="_blank" rel="noreferrer" className="hidden sm:flex items-center text-sm font-bold text-corporate-600 dark:text-corporate-400 hover:text-corporate-900 dark:hover:text-white transition-colors">
-               <Github className="w-4 h-4 mr-1.5" /> GitHub
+
+            <a href="https://github.com/myxxzin/fortis-mail" target="_blank" rel="noreferrer" className="hidden sm:flex items-center text-sm font-bold text-corporate-600 dark:text-corporate-400 hover:text-corporate-900 dark:hover:text-white transition-colors">
+              <Github className="w-4 h-4 mr-1.5" /> GitHub
             </a>
-            
+
             <Link to="/login" className="bg-[linear-gradient(360deg,#226214,#43cc25)] hover:brightness-110 text-white text-sm font-bold py-2 px-5 rounded-xl shadow-md transition-all hidden sm:block">
               {language === 'vi' ? 'Mở ứng dụng' : 'Launch App'}
             </Link>
@@ -176,7 +178,7 @@ export default function Docs() {
 
       {/* Layout Area */}
       <div className="flex flex-1 w-full max-w-[90rem] mx-auto pt-16 relative">
-        
+
         {/* Left Sidebar */}
         <aside className={`
           fixed lg:sticky top-16 left-0 h-[calc(100vh-4rem)] bg-[#eef2f7]/50 dark:bg-[#020617]/50 w-72 border-r border-black/5 dark:border-white/10 py-8 px-6 overflow-y-auto transform transition-transform duration-300 z-40
