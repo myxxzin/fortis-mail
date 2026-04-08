@@ -213,8 +213,8 @@ export default function Landing() {
                </div>
                
                {/* Embedded Encryption Architecture relative to How It Works */}
-               <div className="max-w-[1300px] mx-auto mt-20 w-full relative">
-                  <div className="bg-white/80 dark:bg-white/5 border border-black/5 dark:border-white/10 backdrop-blur-xl rounded-[2.5rem] p-8 md:px-16 md:py-20 shadow-xl overflow-hidden relative">
+               <div className="max-w-[1400px] xl:max-w-[1500px] mx-auto mt-20 w-full px-2 lg:px-8 relative">
+                  <div className="bg-white/80 dark:bg-white/5 border border-black/5 dark:border-white/10 backdrop-blur-xl rounded-[2.5rem] p-6 lg:p-12 shadow-xl overflow-hidden relative">
                      
                      <div className="text-center mb-16 relative z-10">
                         <p className="text-sm font-bold text-[#43cc25] uppercase tracking-widest mb-3">{t('landing.workflow.subheader')}</p>
@@ -226,22 +226,22 @@ export default function Landing() {
                         </p>
                      </div>
                      
-                     <div className="w-full relative z-10 mb-20">
-                        <div className="bg-white dark:bg-[#020617] rounded-3xl py-10 px-6 md:py-14 md:px-10 border border-corporate-200 dark:border-white/5 shadow-inner overflow-x-auto">
+                     <div className="w-full relative z-10 mb-20 md:mb-12">
+                        <div className="bg-white dark:bg-[#020617] rounded-3xl py-10 px-4 md:py-12 md:px-8 border border-corporate-200 dark:border-white/5 shadow-inner overflow-x-auto overflow-y-hidden hide-scrollbar">
                            <div className="flex items-center gap-3 mb-8 min-w-max">
                               <KeyRound className="text-[#43cc25] w-6 h-6 shrink-0" />
                               <h3 className="text-corporate-900 dark:text-white font-bold text-xl">{t('landing.workflow.flowtitle')}</h3>
                            </div>
                            
-                           <div className="flex flex-nowrap items-center justify-between gap-3 md:gap-4 min-w-max pb-2">
+                           <div className="flex flex-nowrap items-center justify-between gap-2 md:gap-4 min-w-max pb-2">
                               {['step1', 'step2', 'step3', 'step4', 'step5', 'step6'].map((step, idx) => (
-                                 <div key={step} className="flex items-center gap-2 md:gap-4 shrink-0">
+                                 <div key={step} className="flex items-center gap-1 md:gap-3 shrink-0">
                                     {idx > 0 && (
-                                       <div className="text-corporate-400 dark:text-slate-500 px-1">
+                                       <div className="text-corporate-400 dark:text-slate-500 px-0.5 md:px-1">
                                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                                        </div>
                                     )}
-                                    <div className="bg-corporate-50 dark:bg-[#1e293b] border border-corporate-200 dark:border-white/10 px-5 py-3.5 rounded-xl text-corporate-900 dark:text-white text-sm font-bold whitespace-nowrap shadow-sm shrink-0">
+                                    <div className="bg-corporate-50 dark:bg-[#1e293b] border border-corporate-200 dark:border-white/10 px-4 py-2.5 md:px-5 md:py-3.5 rounded-xl text-corporate-900 dark:text-white text-[13px] md:text-sm font-bold whitespace-nowrap shadow-sm shrink-1 md:shrink-0">
                                        {t(`landing.workflow.${step}`)}
                                     </div>
                                  </div>
@@ -412,7 +412,7 @@ export default function Landing() {
          </main>
 
          {/* 8. Global CTA */}
-         <div className="w-full bg-[#111827] dark:bg-[#020617] pt-24 pb-24 border-b-[12px] border-[#43cc25] text-center relative overflow-hidden">
+         <div className="w-full bg-[#111827] dark:bg-[#020617] pt-24 pb-20 text-center relative overflow-hidden">
              <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(67,204,37,0.05),transparent)] mix-blend-overlay"></div>
              <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-5 relative z-10 px-4">
                 {t('landing.cta.title')}
@@ -423,6 +423,13 @@ export default function Landing() {
              <Link to="/login" className="inline-block bg-[linear-gradient(360deg,#226214,#43cc25)] hover:brightness-110 text-white px-10 py-5 rounded-2xl font-bold transition-all shadow-[0_0_40px_rgba(67,204,37,0.4)] text-[17px] relative z-10 hover:scale-105 active:scale-95">
                 {t('landing.cta.btn')}
              </Link>
+         </div>
+
+         {/* 9. Minimal Footer */}
+         <div className="w-full bg-white dark:bg-black py-4 px-6 md:px-12 flex justify-end items-center border-t border-slate-200 dark:border-white/5">
+            <a href="mailto:fortismail.contact@gmail.com" className="text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-[#43cc25] dark:hover:text-[#43cc25] transition-colors flex items-center gap-2">
+               Contact: fortismail.contact@gmail.com <Mail className="w-4 h-4 ml-1" />
+            </a>
          </div>
 
       </div>
