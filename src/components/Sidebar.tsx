@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Inbox, Send, FileEdit, Settings, ShieldAlert, Users, Info } from 'lucide-react';
+import { Inbox, Send, FileEdit, Settings, ShieldAlert, Users } from 'lucide-react';
 import { useMail } from '../context/MailContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -33,7 +33,6 @@ export default function Sidebar({ onOpenSettings, onMobileClose }: { onOpenSetti
           { icon: Send, label: t('sidebar.sent'), path: '/sent' },
           { icon: FileEdit, label: t('sidebar.drafts'), path: '/drafts' },
           { icon: Users, label: t('sidebar.contacts'), path: '/contacts' },
-          { icon: Info, label: t('sidebar.aboutUs'), path: '/about' },
         ].map((item) => (
           <Link
             key={item.label}

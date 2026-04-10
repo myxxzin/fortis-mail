@@ -1,13 +1,85 @@
+import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
-import { ShieldCheck, Globe, Lock, Cpu, KeyRound, Mail, Send, Sun, Moon, AlertTriangle, GraduationCap } from 'lucide-react';
+import { ShieldCheck, Globe, Lock, Cpu, KeyRound, Mail, Send, Sun, Moon, AlertTriangle, GraduationCap, Eye, Facebook, Linkedin, X } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 
 export default function Landing() {
    const { t, language, setLanguage } = useLanguage();
    const { theme, toggleTheme } = useTheme();
+   const [selectedMember, setSelectedMember] = useState<any>(null);
+
+   const teamMembers = [
+     { 
+       name: t('landing.team.member1'), 
+       role: t('landing.team.role1'), 
+       img: '/dat.jpg', 
+       initial: 'VĐ',
+       mssv: '030239230291',
+       contact: {
+         linkedin: 'https://www.linkedin.com/in/nguyenthimyvien/',
+         email: 'mailto:nguyenvien.work@gmail.com'
+       }
+     },
+     { 
+       name: t('landing.team.member2'), 
+       role: t('landing.team.role2'), 
+       img: '/huy.jpg', 
+       initial: 'ĐH',
+       mssv: '030239230249',
+       contact: {
+         linkedin: 'https://www.linkedin.com/in/tr%C3%A0-l%C3%AA-108568332/',
+         email: 'mailto:bichtrapy20@gmail.com'
+       }
+     },
+     { 
+       name: t('landing.team.member3'), 
+       role: t('landing.team.role3'), 
+       img: '/quan.jpg', 
+       initial: 'PQ',
+       mssv: '030239230133',
+       contact: {
+         linkedin: 'https://www.linkedin.com/in/nga-van-b84675315/',
+         email: 'mailto:ngavan2208@gmail.com'
+       }
+     },
+     { 
+       name: t('landing.team.member4'), 
+       role: t('landing.team.role4'), 
+       img: '/quy.jpg', 
+       initial: 'HQ',
+       mssv: '030239230204',
+       contact: {
+         linkedin: 'https://www.linkedin.com/in/quynh-nguyen-thi-diem-8989963b9',
+         email: 'mailto:quynhnguyen.06042000@gmail.com'
+       }
+     },
+     { 
+       name: t('landing.team.member5'), 
+       role: t('landing.team.role5'), 
+       img: '/member5.jpg', 
+       initial: 'M5',
+       mssv: '030239230146',
+       contact: {
+         linkedin: 'https://www.linkedin.com/in/harrison1502/',
+         email: 'mailto:vohieunghia1502@gmail.com'
+       }
+     },
+     { 
+       name: t('landing.team.member6'), 
+       role: t('landing.team.role6'), 
+       img: '/member6.jpg', 
+       initial: 'M6',
+       mssv: '030239230075',
+       contact: {
+         linkedin: 'https://www.linkedin.com/in/voquanghuy/',
+         email: 'mailto:huyvo.300605@gmail.com'
+       }
+     },
+   ];
 
    const containerVariant: Variants = {
       hidden: { opacity: 0 },
@@ -328,83 +400,31 @@ export default function Landing() {
                </div>
 
                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {/* Member 1 */}
-                  <div className="bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-3xl p-8 flex flex-col items-center text-center transition-all hover:shadow-xl group">
-                     <div className="w-20 h-20 bg-corporate-100 dark:bg-slate-800 text-corporate-400 dark:text-slate-500 rounded-full flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-md overflow-hidden relative">
-                        <img src="/dat.jpg" alt="Member 1" className="absolute inset-0 w-full h-full object-cover z-10" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                        <span className="text-2xl font-bold relative z-0">VĐ</span>
-                     </div>
-                     <h3 className="font-bold text-lg mb-1 dark:text-white">{t('landing.team.member1')}</h3>
-                     <p className="text-xs font-medium text-slate-400 mb-5">MSSV: 030239230291</p>
-                     <div className="bg-corporate-50 dark:bg-slate-800 text-corporate-600 dark:text-slate-300 text-[11px] font-bold px-3.5 py-1.5 rounded-full border border-corporate-200/50 dark:border-white/5">
-                        {t('landing.team.role1')}
-                     </div>
-                  </div>
-                  
-                  {/* Member 2 */}
-                  <div className="bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-3xl p-8 flex flex-col items-center text-center transition-all hover:shadow-xl group">
-                     <div className="w-20 h-20 bg-corporate-100 dark:bg-slate-800 text-corporate-400 dark:text-slate-500 rounded-full flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-md overflow-hidden relative">
-                        <img src="/huy.jpg" alt="Member 2" className="absolute inset-0 w-full h-full object-cover z-10" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                        <span className="text-2xl font-bold relative z-0">ĐH</span>
-                     </div>
-                     <h3 className="font-bold text-lg mb-1 dark:text-white">{t('landing.team.member2')}</h3>
-                     <p className="text-xs font-medium text-slate-400 mb-5">MSSV: 030239230249</p>
-                     <div className="bg-corporate-50 dark:bg-slate-800 text-corporate-600 dark:text-slate-300 text-[11px] font-bold px-3.5 py-1.5 rounded-full border border-corporate-200/50 dark:border-white/5">
-                        {t('landing.team.role2')}
-                     </div>
-                  </div>
+                  {teamMembers.map((member, index) => (
+                    <div key={index} className="relative bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-3xl p-8 flex flex-col items-center text-center transition-all hover:shadow-xl group">
+                      <div className="w-20 h-20 bg-corporate-100 dark:bg-slate-800 text-corporate-400 dark:text-slate-500 rounded-full flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-md overflow-hidden relative">
+                         <img src={member.img} alt={member.name} className="absolute inset-0 w-full h-full object-cover z-10" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                         <span className="text-2xl font-bold relative z-0">{member.initial}</span>
+                      </div>
+                      <h3 className="font-bold text-lg mb-1 dark:text-white">{member.name}</h3>
+                      <p className="text-xs font-medium text-slate-400 mb-5">MSSV: {member.mssv}</p>
+                      <div className="bg-corporate-50 dark:bg-slate-800 text-corporate-600 dark:text-slate-300 text-[11px] font-bold px-3.5 py-1.5 rounded-full border border-corporate-200/50 dark:border-white/5">
+                         {member.role}
+                      </div>
 
-                  {/* Member 3 */}
-                  <div className="bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-3xl p-8 flex flex-col items-center text-center transition-all hover:shadow-xl group">
-                     <div className="w-20 h-20 bg-corporate-100 dark:bg-slate-800 text-corporate-400 dark:text-slate-500 rounded-full flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-md overflow-hidden relative">
-                        <img src="/quan.jpg" alt="Member 3" className="absolute inset-0 w-full h-full object-cover z-10" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                        <span className="text-2xl font-bold relative z-0">PQ</span>
-                     </div>
-                     <h3 className="font-bold text-lg mb-1 dark:text-white">{t('landing.team.member3')}</h3>
-                     <p className="text-xs font-medium text-slate-400 mb-5">MSSV: 030239230133</p>
-                     <div className="bg-corporate-50 dark:bg-slate-800 text-corporate-600 dark:text-slate-300 text-[11px] font-bold px-3.5 py-1.5 rounded-full border border-corporate-200/50 dark:border-white/5">
-                        {t('landing.team.role3')}
-                     </div>
-                  </div>
-
-                  {/* Member 4 */}
-                  <div className="bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-3xl p-8 flex flex-col items-center text-center transition-all hover:shadow-xl group">
-                     <div className="w-20 h-20 bg-corporate-100 dark:bg-slate-800 text-corporate-400 dark:text-slate-500 rounded-full flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-md overflow-hidden relative">
-                        <img src="/quy.jpg" alt="Member 4" className="absolute inset-0 w-full h-full object-cover z-10" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                        <span className="text-2xl font-bold relative z-0">HQ</span>
-                     </div>
-                     <h3 className="font-bold text-lg mb-1 dark:text-white">{t('landing.team.member4')}</h3>
-                     <p className="text-xs font-medium text-slate-400 mb-5">MSSV: 030239230204</p>
-                     <div className="bg-corporate-50 dark:bg-slate-800 text-corporate-600 dark:text-slate-300 text-[11px] font-bold px-3.5 py-1.5 rounded-full border border-corporate-200/50 dark:border-white/5">
-                        {t('landing.team.role4')}
-                     </div>
-                  </div>
-
-                  {/* Member 5 */}
-                  <div className="bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-3xl p-8 flex flex-col items-center text-center transition-all hover:shadow-xl group">
-                     <div className="w-20 h-20 bg-corporate-100 dark:bg-slate-800 text-corporate-400 dark:text-slate-500 rounded-full flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-md overflow-hidden relative">
-                        <img src="/member5.jpg" alt="Member 5" className="absolute inset-0 w-full h-full object-cover z-10" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                        <span className="text-2xl font-bold relative z-0">M5</span>
-                     </div>
-                     <h3 className="font-bold text-lg mb-1 dark:text-white">{t('landing.team.member5')}</h3>
-                     <p className="text-xs font-medium text-slate-400 mb-5">MSSV: 030239230146</p>
-                     <div className="bg-corporate-50 dark:bg-slate-800 text-corporate-600 dark:text-slate-300 text-[11px] font-bold px-3.5 py-1.5 rounded-full border border-corporate-200/50 dark:border-white/5">
-                        {t('landing.team.role5')}
-                     </div>
-                  </div>
-
-                  {/* Member 6 */}
-                  <div className="bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-3xl p-8 flex flex-col items-center text-center transition-all hover:shadow-xl group">
-                     <div className="w-20 h-20 bg-corporate-100 dark:bg-slate-800 text-corporate-400 dark:text-slate-500 rounded-full flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-md overflow-hidden relative">
-                        <img src="/member6.jpg" alt="Member 6" className="absolute inset-0 w-full h-full object-cover z-10" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                        <span className="text-2xl font-bold relative z-0">M6</span>
-                     </div>
-                     <h3 className="font-bold text-lg mb-1 dark:text-white">{t('landing.team.member6')}</h3>
-                     <p className="text-xs font-medium text-slate-400 mb-5">MSSV: 030239230075</p>
-                     <div className="bg-corporate-50 dark:bg-slate-800 text-corporate-600 dark:text-slate-300 text-[11px] font-bold px-3.5 py-1.5 rounded-full border border-corporate-200/50 dark:border-white/5">
-                        {t('landing.team.role6')}
-                     </div>
-                  </div>
+                      {/* View Profile Hover Button */}
+                      <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-auto bg-white/40 dark:bg-slate-900/60 backdrop-blur-[2px]">
+                          <button 
+                            onClick={() => setSelectedMember(member)}
+                            className="flex items-center gap-1.5 bg-white dark:bg-slate-800 text-corporate-900 dark:text-white px-4 py-2 rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.12)] border border-corporate-100 dark:border-slate-700 font-bold text-[13px] whitespace-nowrap hover:scale-105 transition-transform"
+                          >
+                            <Eye size={15} className="text-corporate-500 dark:text-corporate-400" /> View profile
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                </div>
             </div>
 
@@ -431,6 +451,71 @@ export default function Landing() {
                Contact: fortismail.contact@gmail.com <Mail className="w-4 h-4 ml-1" />
             </a>
          </div>
+
+         {/* Profile Modal */}
+         {selectedMember && createPortal(
+           <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+             <div className="absolute inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm transition-opacity" onClick={() => setSelectedMember(null)}></div>
+             
+             <div className="relative bg-white dark:bg-slate-900 border border-corporate-200 dark:border-slate-700 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+               {/* Close Button */}
+               <button 
+                 onClick={() => setSelectedMember(null)}
+                 className="absolute top-4 right-4 text-corporate-400 hover:text-corporate-900 dark:hover:text-white bg-transparent hover:bg-corporate-50 dark:hover:bg-slate-800 p-1.5 rounded-full transition-colors z-10"
+               >
+                 <X size={20} />
+               </button>
+               
+               <div className="p-8">
+                 <div className="flex items-center gap-5 mb-8">
+                   <div className="w-[84px] h-[84px] rounded-full bg-corporate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
+                     {selectedMember.img ? (
+                       <img src={selectedMember.img} alt={selectedMember.name} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                     ) : (
+                       <span className="text-corporate-500 dark:text-corporate-300 font-bold text-3xl">{selectedMember.initial}</span>
+                     )}
+                   </div>
+                   <div>
+                     <h3 className="text-xl font-bold text-corporate-900 dark:text-white mb-1 leading-tight">{selectedMember.name}</h3>
+                     <p className="text-sm font-medium text-corporate-500 dark:text-corporate-400">{selectedMember.role}</p>
+                   </div>
+                 </div>
+                 
+                 <hr className="border-corporate-100 dark:border-slate-800 mb-6" />
+                 
+                 <div>
+                   <h4 className="text-[15px] font-bold text-corporate-900 dark:text-white mb-4">Contact</h4>
+                   <div className="flex items-center gap-3">
+                     {/* Facebook */}
+                     {selectedMember.contact?.facebook && (
+                       <a href={selectedMember.contact.facebook} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-[#1877F2]/10 text-[#1877F2] hover:bg-[#1877F2] hover:text-white flex items-center justify-center transition-colors">
+                         <Facebook size={20} className="fill-current" />
+                       </a>
+                     )}
+                     {/* LinkedIn */}
+                     {selectedMember.contact?.linkedin && (
+                       <a href={selectedMember.contact.linkedin} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-[#0A66C2]/10 text-[#0A66C2] hover:bg-[#0A66C2] hover:text-white flex items-center justify-center transition-colors">
+                         <Linkedin size={20} className="fill-current" />
+                       </a>
+                     )}
+                     {/* Gmail */}
+                     {selectedMember.contact?.email && (
+                       <a href={selectedMember.contact.email} className="w-10 h-10 rounded-xl bg-[#EA4335]/10 text-[#EA4335] hover:bg-[#EA4335] hover:text-white flex items-center justify-center transition-colors">
+                         <Mail size={20} />
+                       </a>
+                     )}
+                     
+                     {/* Fallback pattern */}
+                     {!selectedMember.contact && (
+                       <span className="text-sm italic text-corporate-500">Contact information processing...</span>
+                     )}
+                   </div>
+                 </div>
+               </div>
+             </div>
+           </div>,
+           document.body
+         )}
 
       </div>
    );

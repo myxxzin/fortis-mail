@@ -8,7 +8,6 @@ import Drafts from './pages/Drafts';
 import Compose from './pages/Compose';
 import DecryptMsg from './pages/DecryptMsg';
 import Contacts from './pages/Contacts';
-import AboutUs from './pages/AboutUs';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Landing from './pages/Landing';
@@ -39,7 +38,6 @@ function App() {
                 <Route path="/drafts" element={<Drafts />} />
                 <Route path="/compose" element={<Compose />} />
                 <Route path="/contacts" element={<Contacts />} />
-                <Route path="/about" element={<AboutUs />} />
                 <Route path="/mail/:id" element={<DecryptMsg />} />
               </Route>
             </Routes>
